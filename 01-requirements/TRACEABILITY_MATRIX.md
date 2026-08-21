@@ -45,8 +45,9 @@ This matrix is the SSOT for the **traceability chain** in Phase 1. Phase 2 (`02-
 | NFR-10 | Integration coverage (`tests/integration/` line coverage ≥ 80% over `src/`; `httpx.AsyncClient(transport=ASGITransport(app))` driver; full CRUD chain; each error code 401/403/404/409/422/429/503 ≥ once; migration round-trip; rate-limit trigger+recovery; graceful drain) | `SRS.md` §NFR-10 (AC-N10.1..AC-N10.3) | HIGH | DRAFT |
 | NFR-11 | Readability (project MI LLOC-weighted ≥ 80; single-fn CC ≤ 10; single-file ≤ 400 lines; single-dir ≤ 15 files; each API handler ≤ 40 lines, business descends to service layer) | `SRS.md` §NFR-11 (AC-N11.1..AC-N11.3) | MEDIUM | DRAFT |
 | NFR-12 | System verification target (`Makefile` `verify-system` chains: `alembic upgrade head` → full test suite → service start + `/healthz` + `/readyz` smoke → `alembic downgrade base` then `upgrade head`; exits 0; prints `verify-system: PASS`) | `SRS.md` §NFR-12 (AC-N12.1..AC-N12.2) | HIGH | DRAFT |
+| NFR-99 | Framework-owned implementation paths — four architectural roles named in SPEC.md §3 / §5.3 / §10 are required by role but their concrete module paths / file names are framework-owned per SPEC §10 「角色不變,路徑變」. No stakeholder decision required; the spec's own design choice. Recorded here for spec-coverage completeness; `Status: DEFERRED — paths decided at P3`. | `SRS.md` §NFR-99 | HIGH | DEFERRED |
 
-**FR-coverage**: 22/22 = 100% mapped to `SRS.md` §3-§4; **AC-coverage**: 66/66 = 100% (10 FR × 10 ACs averaged + 12 NFR × 4.5 ACs averaged; concrete enumeration in `SRS.md` §3 / §4 / §5.1).
+**FR-coverage**: 23/23 = 100% mapped to `SRS.md` §3-§4 (10 FR + 12 NFR + 1 NFR-99 framework-owned); **AC-coverage**: 66/66 = 100% (10 FR × 10 ACs averaged + 12 NFR × 4.5 ACs averaged + 0 ACs for NFR-99 framework-owned; concrete enumeration in `SRS.md` §3 / §4 / §5.1).
 
 ---
 
@@ -78,6 +79,7 @@ This matrix is the SSOT for the **traceability chain** in Phase 1. Phase 2 (`02-
 | NFR-10 | AC-N10.1..AC-N10.3 | `test_nfr10_ac{n1..n3}_*` | `integration/test_crud_chain.py`, `integration/test_error_codes_matrix.py` |
 | NFR-11 | AC-N11.1..AC-N11.3 | `test_nfr11_ac{n1..n3}_*` | `unit/quality/test_complexity.py`, `unit/quality/test_file_size.py`, `unit/api/test_handler_size.py` |
 | NFR-12 | AC-N12.1..AC-N12.2 | `test_nfr12_ac{n1..n2}_*` | `integration/test_verify_system.py` (drives `Makefile` `verify-system`) |
+| NFR-99 | (no ACs — framework-owned) | — (P3 decides path) | — (no test files until P3) |
 
 ---
 
@@ -109,6 +111,7 @@ This matrix is the SSOT for the **traceability chain** in Phase 1. Phase 2 (`02-
 | NFR-10 | §NFR-10 | `tests/integration/` driver uses `httpx.AsyncClient(transport=ASGITransport(app))` | Error-code matrix 401/403/404/409/422/429/503 |
 | NFR-11 | §NFR-11 | (cross-cutting) `radon cc -s` ≤ 10; `radon ll` ≤ 400; handler-size lint | API handler ≤ 40 lines |
 | NFR-12 | §NFR-12 | `Makefile` `verify-system` target | Chains `alembic upgrade head` → test → smoke → `downgrade base` → `upgrade head` |
+| NFR-99 | §NFR-99 | (deferred — paths owned by harness at P3) | Per SPEC §10 「角色不變,路徑變」: role names fixed, file paths framework-owned |
 
 ---
 
