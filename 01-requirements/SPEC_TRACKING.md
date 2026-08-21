@@ -1,11 +1,15 @@
-# Specification Tracking Matrix — {Project Name}
+# Specification Tracking Matrix — taskq-api
 
-> On-demand Lazy Load template.
+> Human-readable tracking view for SPEC.md v1.0.0 (10 FR / 12 NFR) transcribed in `SRS.md`.
+> This file is a **view**, not the SSOT. Score authority lives in `quality_manifest.json`; Status is
+> machine-refreshed by `advance-phase` from `build_traceability`'s live code/test scan.
 
 ## Project Info
-- Project Name: {name}
-- Version: v1.0.0
-- Created: {date}
+- Project Name: taskq-api
+- Canonical Spec: `SPEC.md` (project root, v1.0.0, 2026-07-30)
+- SRS Source: `01-requirements/SRS.md` (APPROVED by Agent B on 2026-08-22)
+- Phase: 1 — Requirements
+- Framework: harness-methodology
 
 ## Specification Status
 
@@ -16,12 +20,49 @@
 > semantic columns (Spec Description / Intent Class / Decision Framework / Notes);
 > leave Status to refresh itself (a hand-edit is overwritten on the next advance).
 
-| FR ID | Spec Description | Intent Class | Decision Framework | Status | Notes |
-|-------|-----------------|--------------|-------------------|--------|-------|
-| FR-01 | {description} | {class} | {framework} | DRAFT | |
+| FR ID | Spec Description | Intent Class | Decision Framework | Status | Owner | Source | Notes |
+|-------|------------------|--------------|--------------------|--------|-------|--------|-------|
+| FR-01 | Task resource CRUD API — POST/GET single/LIST/DELETE under `/v1/tasks`; cursor pagination (default `limit=50`, max 200); 422/404/409 problem+json; DELETE cascades results in same transaction. | Functional | `01-requirements/SRS.md` §FR-01 (AC-1.1..AC-1.10); `SPEC.md` §3 FR-01 | DRAFT | Agent C (P3) | SPEC.md | AC-1.9/1.10 also depend on FR-04 (403 non-leak) and FR-06 (transactional DELETE). |
+| FR-02 | Task execution — `POST /v1/tasks/{id}/run` → 202 + `run_id`; `asyncio.create_subprocess_exec(*shlex.split(command))` (`shell=True` forbidden); state machine `pending → running → done \| failed \| timeout`; results persisted to `task_results`; `GET /v1/tasks/{id}/runs` newest-first. | Functional | `01-requirements/SRS.md` §FR-02 (AC-2.1..AC-2.5); `SPEC.md` §3 FR-02 | DRAFT | Agent C (P3) | SPEC.md | v3 schema (`task_results`) lives in FR-07; cancellation safety lives in FR-08. |
+| FR-03 | API Key authentication — `X-API-Key` header on all `/v1/*`; SHA-256 hash stored in `api_keys.key_hash` (64 hex); `hmac.compare_digest` constant-time compare; plaintext printed exactly once on `key create`; `revoked_at` invalidates; `/healthz`,`/readyz` exempt. | Functional / Security | `01-requirements/SRS.md` §FR-03 (AC-3.1..AC-3.6); `SPEC.md` §3 FR-03, §8 #18 | DRAFT | Agent C (P3) | SPEC.md | Plaintext-once rule also tested under NFR-04 (AC-N4.3). |
+| FR-04 | Scope authorization — `read < write < admin`; insufficient scope → 403 + problem+json (body MUST NOT leak resource existence); enforced by a single FastAPI dependency (test asserts every `/v1` route uses it). | Functional / Security | `01-requirements/SRS.md` §FR-04 (AC-4.1..AC-4.3); `SPEC.md` §3 FR-04, §8 #6 | DRAFT | Agent C (P3) | SPEC.md | AC-1.9 (DELETE 403) and AC-9.3 (metrics admin scope) hang off this. |
+| FR-05 | Rate limiting — per-token token bucket (`TASKQ_RATE_BURST` / `TASKQ_RATE_PER_SEC`); over-limit → 429 + problem+json + `Retry-After` (seconds); bucket state in DB with row-level lock; `/healthz`,`/readyz` exempt. | Functional / Non-functional | `01-requirements/SRS.md` §FR-05 (AC-5.1..AC-5.4); `SPEC.md` §3 FR-05, §8 #9 | DRAFT | Agent C (P3) | SPEC.md | DB-backed state must use repository layer (NFR-06); metrics export in FR-09. |
+| FR-06 | Persistence + transaction boundaries — all data access via repository layer; business layer MUST NOT hold `Session`; one Session per request, context manager (commit/rollback); no string-concatenated SQL; explicit `selectinload`/`joinedload` (N+1 forbidden); `pool_size=TASKQ_DB_POOL_SIZE`, `pool_pre_ping=True`. | Functional / Architecture | `01-requirements/SRS.md` §FR-06 (AC-6.1..AC-6.5); `SPEC.md` §3 FR-06, NFR-06, §8 #14, #17 | DRAFT | Agent C (P3) | SPEC.md | Layer contract enforcement lives in NFR-06 (`.importlinter`). |
+| FR-07 | Schema migration — Alembic v1 (base tables) → v2 (`tags`, `task_tags` + unique index on `tasks.name`) → v3 (split `tasks.result_json` → `task_results` with real data migration); every step reversible; round-trip column-byte-identical; no destructive shortcuts. | Functional / Migration | `01-requirements/SRS.md` §FR-07 (AC-7.1..AC-7.7); `SPEC.md` §3 FR-07, §8 #12, #13 | DRAFT | Agent C (P3) | SPEC.md | Tested against real SQLite file per NFR-09 (AC-N9.5). |
+| FR-08 | Async executor — `asyncio.TaskGroup` background; `TASKQ_MAX_CONCURRENT` cap; graceful drain up to `TASKQ_DRAIN_TIMEOUT` (overrun → `interrupted`); timeout via `asyncio.wait_for` + `process.kill()` + `await wait()` (no orphan); `CancelledError` MUST propagate (never swallowed by `except Exception`). | Functional / Async | `01-requirements/SRS.md` §FR-08 (AC-8.1..AC-8.4); `SPEC.md` §3 FR-08, §8 #25 | DRAFT | Agent C (P3) | SPEC.md | `CancelledError` rule also covered by NFR-03 (AC-N3.3). |
+| FR-09 | Health checks + observability — `/healthz` (no auth, 200 + `{"status":"ok"}`); `/readyz` (no auth, 200 iff DB reachable AND `alembic current` == head, else 503 with detail); `/v1/metrics` (admin, per-status counts + latency percentiles + rate-limit rejections). | Functional / Observability | `01-requirements/SRS.md` §FR-09 (AC-9.1..AC-9.3); `SPEC.md` §3 FR-09, §8 #10, #11 | DRAFT | Agent C (P3) | SPEC.md | Fail-closed migration lag is a top deployment-risk (R9). |
+| FR-10 | Error contract (RFC 7807) — every non-2xx has `Content-Type: application/problem+json`; body fields `type`/`title`/`status`/`detail`/`instance`/`correlation_id`; `detail` MUST NOT include SQL/stack/path/schema; `correlation_id` mirrored in `X-Correlation-Id` header and server logs; status map per `SPEC.md` §7. | Functional / Error-handling | `01-requirements/SRS.md` §FR-10 (AC-10.1..AC-10.5); `SPEC.md` §3 FR-10, §7, §8 #19 | DRAFT | Agent C (P3) | SPEC.md | 500 body-leak test is also §8 #19. |
+| NFR-01 | Performance + query efficiency — `GET /v1/tasks/{id}` p95 < 30ms @ 10k rows; `GET /v1/tasks?limit=50` p95 < 80ms @ 10k rows; list endpoint SQL statement count constant ≤ 4 across {1, 100, 1000, 10000} (variance 0); `pytest-benchmark` measurement. | Non-functional (performance) | `01-requirements/SRS.md` §NFR-01 (AC-N1.1..AC-N1.4); `SPEC.md` §4 NFR-01, §11 | DRAFT | Agent C (P3) | SPEC.md | N+1 condition is also FR-06 / §8 #14. |
+| NFR-02 | HTTP + data-layer security — no `shell=True`/`eval(`/`exec(` in `src/`; no string-concatenated SQL; hashed API keys + `hmac.compare_digest`; 403 no-existence-leak; error body no stack/SQL/path; CORS deny-by-default + `TASKQ_CORS_ORIGINS` allowlist; `bandit -r src/` = 0 HIGH / 0 MEDIUM. | Non-functional (security) | `01-requirements/SRS.md` §NFR-02 (AC-N2.1..AC-N2.7); `SPEC.md` §4 NFR-02, §8 #16, #17, #18, #19, #23 | DRAFT | Agent C (P3) | SPEC.md | Many clauses duplicate FR-level requirements — test allocation decided by Phase 3 plan. |
+| NFR-03 | Error handling, transactions, async correctness — explicit per-request transaction boundary (commit/rollback via context manager); no bare `except:` / `except Exception: pass`; `asyncio.CancelledError` MUST re-raise; DB failure → `/readyz` 503 with detail (no silent retry); task timeout kills subprocess (no orphan); migration failure rolls back to previous revision. | Non-functional (reliability) | `01-requirements/SRS.md` §NFR-03 (AC-N3.1..AC-N3.6); `SPEC.md` §4 NFR-03 | DRAFT | Agent C (P3) | SPEC.md | `type:` = reliability per SAB NFR vocabulary; §4 `dimension:` = error_handling. |
+| NFR-04 | Sensitive data redaction — pattern `(sk-[A-Za-z0-9_-]{8,}\|token=\S+\|Bearer\s+\S+\|postgres(ql)?://[^\s]+)` lines replaced in full with `[REDACTED]` before write/emit in `stdout_tail`/`stderr_tail`/logs/error bodies; DB connection string (incl. password) absent from logs/errors/metrics; API key plaintext printed exactly once on `key create`. | Non-functional (security) | `01-requirements/SRS.md` §NFR-04 (AC-N4.1..AC-N4.3); `SPEC.md` §4 NFR-04, §8 #20 | DRAFT | Agent C (P3) | SPEC.md | `type:` = security; §4 `dimension:` = security. |
+| NFR-05 | Documentation coverage — every public function/class has a docstring referencing `[FR-XX]` or `[NFR-XX]`; public-API docstring coverage 100%; every API endpoint has `summary` + `description` in OpenAPI schema (asserted via `/openapi.json`). | Non-functional (documentation) | `01-requirements/SRS.md` §NFR-05 (AC-N5.1..AC-N5.2); `SPEC.md` §4 NFR-05 | DRAFT | Agent C (P3) | SPEC.md | `type:` = documentation; §4 `dimension:` = documentation. |
+| NFR-06 | Architecture layer contract — `.importlinter` declares `api > service > repository > models` (upper may import lower, lower may not import upper); `config` + `errors` are independence modules; forbidden contract bans `sqlalchemy` imports outside `repository`; `lint-imports` exit 0; no contract downgrade / `ignore_imports` wildcard to pass. | Non-functional (architecture_constraints) | `01-requirements/SRS.md` §NFR-06 (AC-N6.1..AC-N6.4); `SPEC.md` §4 NFR-06, §8 #21 | DRAFT | Agent C (P3) | SPEC.md | `type:` = layering; §4 `dimension:` = architecture_constraints. `crg_cohesion_healthy` floor must NOT be lowered. |
+| NFR-07 | Dependency + license compliance — `requirements.txt` `==`-pinned; `requirements.lock` fully pins transitives; allowed licenses MIT / BSD-2-Clause / BSD-3-Clause / Apache-2.0 / PSF (others forbidden); full-tree scan via `pip-licenses --format=json --with-system`; SBOM artifact with `name`/`version`/`license`/`direct\|transitive`. | Non-functional (license_compliance) | `01-requirements/SRS.md` §NFR-07 (AC-N7.1..AC-N7.4); `SPEC.md` §4 NFR-07, §8 #22 | DRAFT | Agent C (P3) | SPEC.md | `type:` = licensing; §4 `dimension:` = license_compliance. |
+| NFR-08 | Mutation testing — `.methodology/harness_config.json` sets `features.mutation_testing: true`; mutation score ≥ 70 over services + repositories layers (NFR-06 roles); scope-restriction rationale recorded in `harness_config.json` (runtime budget). | Non-functional (mutation_testing) | `01-requirements/SRS.md` §NFR-08 (AC-N8.1..AC-N8.3); `SPEC.md` §4 NFR-08, §8 #24 | DRAFT | Agent C (P3) | SPEC.md | `type:` = mutation; §4 `dimension:` = mutation_testing. Scope limited to two NFR-06 layers. |
+| NFR-09 | Verification honesty (zero-skip) — no `pytest.skip` / `skipif` / `xfail` / assertion-free stub on any FR/NFR test; `pytest tests -q` `skipped = 0`; every test ≥ 1 `assert` (`zero_assert == 0`); no `--ignore` / `-k` / `--deselect` / `collect_ignore` / testpath removal; FR-07 migration tested against real SQLite file (not in-memory mock); no skip-on-difficulty; `TRACEABILITY_MATRIX.md` `VERIFIED` only after test runs and passes. | Non-functional (test_assertion_quality) | `01-requirements/SRS.md` §NFR-09 (AC-N9.1..AC-N9.7); `SPEC.md` §4 NFR-09, §8 #1 | DRAFT | Agent C (P3) | SPEC.md | `type:` = testability; §4 `dimension:` = test_assertion_quality. Zero-skip rule is the round-2/v3 top priority. |
+| NFR-10 | Integration coverage — `tests/integration/` line coverage ≥ 80% over `src/`; integration tests driven via `httpx.AsyncClient(transport=ASGITransport(app))` (no direct handler calls); scope covers full CRUD chain, each error code 401/403/404/409/422/429/503 ≥ once, migration round-trip, rate-limit trigger+recovery, graceful drain. | Non-functional (integration_coverage) | `01-requirements/SRS.md` §NFR-10 (AC-N10.1..AC-N10.3); `SPEC.md` §4 NFR-10, §8 #3 | DRAFT | Agent C (P3) | SPEC.md | `type:` = integration; §4 `dimension:` = integration_coverage. 500 not mandated every round. |
+| NFR-11 | Readability — project MI (LLOC-weighted) ≥ 80; single function CC ≤ 10; single file ≤ 400 lines; single directory ≤ 15 files; each API handler ≤ 40 lines (business logic descends to service layer). | Non-functional (readability) | `01-requirements/SRS.md` §NFR-11 (AC-N11.1..AC-N11.3); `SPEC.md` §4 NFR-11 | DRAFT | Agent C (P3) | SPEC.md | `type:` = maintainability; §4 `dimension:` = readability. |
+| NFR-12 | System verification target — `Makefile` `verify-system` chains (1) `alembic upgrade head`, (2) full test suite, (3) service start + `/healthz` / `/readyz` smoke, (4) `alembic downgrade base` then `upgrade head`; exits 0 and prints `verify-system: PASS` to stdout. | Non-functional (execute_verification_target) | `01-requirements/SRS.md` §NFR-12 (AC-N12.1..AC-N12.2); `SPEC.md` §4 NFR-12, §8 #27 | DRAFT | Agent C (P3) | SPEC.md | `type:` = verifiability; §4 `dimension:` = execute_verification_target. |
+
+## Completeness Verification
+
+| Check | Target | Actual | Status |
+|-------|--------|--------|--------|
+| FR coverage (10 FR) | 100% mapped to SRS.md §3 | 10/10 (FR-01..FR-10) | OK |
+| NFR coverage (12 NFR) | 100% mapped to SRS.md §4 | 12/12 (NFR-01..NFR-12) | OK |
+| AC coverage | Every FR/NFR has at least one AC block in SRS.md | 22/22 sections have AC-* subsections | OK |
+| Source citation | Every row references `SPEC.md` (root) | 22/22 rows | OK |
+
+## Downstream Phase References
+
+- Phase 2 (Architecture) — consumes FR/NFR list from rows above; produces `02-architecture/ADR.md`, `02-architecture/SAD.md`, `02-architecture/TEST_SPEC.md`.
+- Phase 4 (Testing) — produces `04-testing/TEST_PLAN.md` and `04-testing/TEST_RESULTS.md`; AC IDs above (AC-x.y, AC-Nx.y) are the test-naming root.
+- Phase 5 (Verification) — produces `05-verification/BASELINE.md` and `05-verification/VERIFICATION_REPORT.md`; rows marked VERIFIED here will be re-derived from `quality_manifest.json` at `advance-phase`.
+- Phase 6 (Quality) — produces `06-quality/FINAL_SIGN_OFF.md`, `06-quality/QUALITY_REPORT.md`, `06-quality/RELEASE_NOTES.md`; final sign-off references the same FR/NFR IDs.
 
 ## Update log
 
 | Date | Change | By |
 |------|--------|----|
-| {date} | Initial creation | Agent A |
+| 2026-08-22 | Initial authoring — replaced placeholder template with full 10 FR / 12 NFR matrix transcribed from `SRS.md` (APPROVED) and `SPEC.md` v1.0.0 | Agent A (Requirements Engineer) |
