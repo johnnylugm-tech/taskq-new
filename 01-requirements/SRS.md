@@ -192,9 +192,9 @@ are **not** invented.
 - 列表端點的預設 `limit` 為 50,上限 200;超過上限 → 422
 
 #### AC-1.1
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `POST /v1/tasks` with a valid `write`-scoped API key and a body
 satisfying the validation rules (non-empty, ≤1000 chars, no injection
@@ -202,76 +202,76 @@ blacklist characters) returns **HTTP 201** with a `task id` in the
 response body (SPEC.md §8 #4).
 
 #### AC-1.2
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `POST /v1/tasks` without an `X-API-Key` header returns **HTTP 401** +
 `application/problem+json` (SPEC.md §8 #5).
 
 #### AC-1.3
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `POST /v1/tasks` with a body violating validation rules (empty body,
 >1000 chars, or contains a blacklisted injection character) returns
 **HTTP 422** + `application/problem+json` (SPEC.md §3 FR-01, §7).
 
 #### AC-1.4
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `POST /v1/tasks` with a name that already exists returns **HTTP 409** +
 `application/problem+json` (SPEC.md §3 FR-01, §8 #8).
 
 #### AC-1.5
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `GET /v1/tasks/{id}` for an existing id returns **HTTP 200** with the
 task's full fields (SPEC.md §3 FR-01).
 
 #### AC-1.6
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `GET /v1/tasks/{unknown}` returns **HTTP 404** + `application/problem+json`
 (SPEC.md §3 FR-01, §8 #7).
 
 #### AC-1.7
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `GET /v1/tasks` supports `?status=`, `?limit=`, `?cursor=`; pagination
 is cursor-based (NOT offset-based); default `limit` is 50, max is 200
 (SPEC.md §3 FR-01).
 
 #### AC-1.8
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `GET /v1/tasks?limit=201` (or any limit > 200) returns **HTTP 422** +
 `application/problem+json` (SPEC.md §3 FR-01).
 
 #### AC-1.9
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `DELETE /v1/tasks/{id}` with a `write`-scoped (non-`admin`) key returns
 **HTTP 403**, and the response body does not reveal whether the id
 exists (SPEC.md §3 FR-04, §8 #6).
 
 #### AC-1.10
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-1 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-01 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `DELETE /v1/tasks/{id}` with an `admin`-scoped key removes the task row
 and its associated result rows in the same transaction (SPEC.md §3
@@ -293,44 +293,44 @@ FR-01, FR-06).
   舊排序
 
 #### AC-2.1
-<!-- DERIVED: SPEC.md §3 FR-2 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-02 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-2 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-02 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `POST /v1/tasks/{id}/run` returns **HTTP 202** with a `run_id` in the
 body (SPEC.md §3 FR-02).
 
 #### AC-2.2
-<!-- DERIVED: SPEC.md §3 FR-2 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-02 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-2 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-02 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Subprocess execution uses
 `asyncio.create_subprocess_exec(*shlex.split(command))`; `shell=True`
 does not appear anywhere in `src/` (SPEC.md §3 FR-02, NFR-02, §8 #16).
 
 #### AC-2.3
-<!-- DERIVED: SPEC.md §3 FR-2 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-02 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-2 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-02 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Task state machine is `pending → running → done | failed | timeout`;
 each terminal state is reachable from `running` via a real subprocess
 exit (SPEC.md §3 FR-02).
 
 #### AC-2.4
-<!-- DERIVED: SPEC.md §3 FR-2 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-02 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-2 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-02 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Execution result is persisted to `task_results` with columns
 `exit_code`, `stdout_tail`, `stderr_tail`, `duration_ms`, `finished_at`
 (SPEC.md §3 FR-02, §5.2).
 
 #### AC-2.5
-<!-- DERIVED: SPEC.md §3 FR-2 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-02 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-2 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-02 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `GET /v1/tasks/{id}/runs` returns the task's execution history sorted
 newest-first (SPEC.md §3 FR-02).
@@ -350,52 +350,52 @@ newest-first (SPEC.md §3 FR-02).
 - `/healthz`、`/readyz` 不要求認證(FR-09)
 
 #### AC-3.1
-<!-- DERIVED: SPEC.md §3 FR-3 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-03 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-3 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-03 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Every `/v1/*` endpoint requires `X-API-Key`; a missing or invalid key
 returns **HTTP 401** + `application/problem+json` (SPEC.md §3 FR-03,
 §7, §8 #5).
 
 #### AC-3.2
-<!-- DERIVED: SPEC.md §3 FR-3 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-03 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-3 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-03 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 API keys are stored as SHA-256 hashes in `api_keys.key_hash`; the table
 holds no plaintext keys, and `key_hash` is exactly 64 hex characters
 (SPEC.md §3 FR-03, §8 #18).
 
 #### AC-3.3
-<!-- DERIVED: SPEC.md §3 FR-3 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-03 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-3 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-03 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Key comparison uses `hmac.compare_digest` (constant-time) (SPEC.md §3
 FR-03, NFR-02).
 
 #### AC-3.4
-<!-- DERIVED: SPEC.md §3 FR-3 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-03 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-3 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-03 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Key creation prints the plaintext to stdout exactly once and never
 persists it; the plaintext appears in no log, error body, or `/v1/metrics`
 response (SPEC.md §3 FR-03, NFR-04).
 
 #### AC-3.5
-<!-- DERIVED: SPEC.md §3 FR-3 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-03 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-3 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-03 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 A key with non-null `revoked_at` is treated as invalid (SPEC.md §3
 FR-03).
 
 #### AC-3.6
-<!-- DERIVED: SPEC.md §3 FR-3 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-03 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-3 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-03 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `/healthz` and `/readyz` do not require authentication (SPEC.md §3
 FR-03, FR-09).
@@ -411,26 +411,26 @@ FR-03, FR-09).
   —— 以測試斷言「每個 `/v1` 路由都經過同一個 dependency」
 
 #### AC-4.1
-<!-- DERIVED: SPEC.md §3 FR-4 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-04 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-4 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-04 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Each key carries a scope from `{read, write, admin}` with hierarchical
 containment `read < write < admin` (SPEC.md §3 FR-04).
 
 #### AC-4.2
-<!-- DERIVED: SPEC.md §3 FR-4 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-04 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-4 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-04 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 A request to an endpoint with insufficient scope returns **HTTP 403** +
 `application/problem+json`; the body does not reveal whether the
 requested resource exists (SPEC.md §3 FR-04, §8 #6).
 
 #### AC-4.3
-<!-- DERIVED: SPEC.md §3 FR-4 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-04 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-4 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-04 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Authorization is enforced by exactly one FastAPI dependency; a test
 asserts every `/v1` route passes through this single dependency
@@ -447,35 +447,35 @@ asserts every `/v1` route passes through this single dependency
 - `/healthz`、`/readyz` 不受限
 
 #### AC-5.1
-<!-- DERIVED: SPEC.md §3 FR-5 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-05 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-5 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-05 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Per-token token bucket has capacity `TASKQ_RATE_BURST` and refill rate
 `TASKQ_RATE_PER_SEC` (SPEC.md §3 FR-05, §5.1).
 
 #### AC-5.2
-<!-- DERIVED: SPEC.md §3 FR-5 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-05 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-5 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-05 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 A request that exceeds the bucket returns **HTTP 429** +
 `application/problem+json` with a `Retry-After` header whose value is
 in seconds (SPEC.md §3 FR-05, §8 #9).
 
 #### AC-5.3
-<!-- DERIVED: SPEC.md §3 FR-5 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-05 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-5 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-05 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Token-bucket state is stored in the database (consistent across
 workers); updates run inside a single transaction with row-level lock
 (SPEC.md §3 FR-05).
 
 #### AC-5.4
-<!-- DERIVED: SPEC.md §3 FR-5 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-05 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-5 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-05 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `/healthz` and `/readyz` are not subject to rate limiting (SPEC.md §3
 FR-05, FR-09).
@@ -494,45 +494,45 @@ FR-05, FR-09).
 - 連線池:`pool_size=TASKQ_DB_POOL_SIZE`,`pool_pre_ping=True`
 
 #### AC-6.1
-<!-- DERIVED: SPEC.md §3 FR-6 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-06 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-6 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-06 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 All data access goes through the repository layer; the business
 (service) layer does not import or hold a SQLAlchemy `Session` (SPEC.md
 §3 FR-06, NFR-06).
 
 #### AC-6.2
-<!-- DERIVED: SPEC.md §3 FR-6 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-06 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-6 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-06 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Each API request gets exactly one `Session`; the transaction boundary
 is enforced by a context manager that commits on success and rolls
 back on exception (SPEC.md §3 FR-06).
 
 #### AC-6.3
-<!-- DERIVED: SPEC.md §3 FR-6 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-06 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-6 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-06 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 No string-concatenated SQL appears in `src/`; a grep gate for
 f-string / `%` / `+` SQL composition reports **0 hits** (SPEC.md §3
 FR-06, NFR-02, §8 #17).
 
 #### AC-6.4
-<!-- DERIVED: SPEC.md §3 FR-6 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-06 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-6 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-06 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Relationship loads use `selectinload` / `joinedload` explicitly; the
 list endpoint's SQL statement count is constant (independent of row
 count) and ≤ 4 (SPEC.md §3 FR-06, NFR-01, §8 #14).
 
 #### AC-6.5
-<!-- DERIVED: SPEC.md §3 FR-6 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-06 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-6 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-06 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Connection pool uses `pool_size=TASKQ_DB_POOL_SIZE` and
 `pool_pre_ping=True` (SPEC.md §3 FR-06).
@@ -557,26 +557,26 @@ Connection pool uses `pool_size=TASKQ_DB_POOL_SIZE` and
   斷言)
 
 #### AC-7.1
-<!-- DERIVED: SPEC.md §3 FR-7 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-07 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-7 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-07 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Revision v1 creates the `tasks` and `api_keys` tables; downgrade drops
 both tables (SPEC.md §3 FR-07).
 
 #### AC-7.2
-<!-- DERIVED: SPEC.md §3 FR-7 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-07 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-7 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-07 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Revision v2 adds `tags`, `task_tags` (many-to-many) plus a unique index
 on `tasks.name`; downgrade drops the new tables and index without
 affecting v1 data (SPEC.md §3 FR-07).
 
 #### AC-7.3
-<!-- DERIVED: SPEC.md §3 FR-7 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-07 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-7 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-07 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Revision v3 performs the data migration: splits `tasks.result_json`
 into a separate `task_results` table, migrates existing data, then
@@ -584,17 +584,17 @@ drops the original column; downgrade reverses the move and drops
 `task_results` (SPEC.md §3 FR-07).
 
 #### AC-7.4
-<!-- DERIVED: SPEC.md §3 FR-7 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-07 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-7 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-07 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `alembic upgrade head` and `alembic downgrade base` both exit 0
 (SPEC.md §3 FR-07, §8 #13).
 
 #### AC-7.5
-<!-- DERIVED: SPEC.md §3 FR-7 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-07 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-7 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-07 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Round-trip test: `upgrade head` → write sample data → `downgrade -1` →
 `upgrade head` leaves every column of the sample data byte-identical;
@@ -602,18 +602,18 @@ this is the focus of the v3 data-migration step (SPEC.md §3 FR-07, §8
 #12).
 
 #### AC-7.6
-<!-- DERIVED: SPEC.md §3 FR-7 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-07 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-7 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-07 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Migrations do not use `op.execute("DROP TABLE ...")` or other
 destructive shortcuts to substitute for a real downgrade (SPEC.md §3
 FR-07).
 
 #### AC-7.7
-<!-- DERIVED: SPEC.md §3 FR-7 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-07 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-7 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-07 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Migration files are covered by tests (offline SQL generation plus
 assertions) (SPEC.md §3 FR-07).
@@ -633,27 +633,27 @@ assertions) (SPEC.md §3 FR-07).
   Exception` 吞掉**(NFR-03)
 
 #### AC-8.1
-<!-- DERIVED: SPEC.md §3 FR-8 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-08 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-8 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-08 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Background execution is managed by `asyncio.TaskGroup`; on shutdown the
 service performs a graceful drain up to `TASKQ_DRAIN_TIMEOUT`, marking
 exceeded tasks as `interrupted` (SPEC.md §3 FR-08, §5.1).
 
 #### AC-8.2
-<!-- DERIVED: SPEC.md §3 FR-8 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-08 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-8 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-08 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Concurrency is capped at `TASKQ_MAX_CONCURRENT`; over-cap submissions
 queue rather than spawning unbounded coroutines (SPEC.md §3 FR-08,
 §5.1).
 
 #### AC-8.3
-<!-- DERIVED: SPEC.md §3 FR-8 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-08 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-8 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-08 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 Task timeout is enforced via `asyncio.wait_for`; on timeout the child
 process is terminated by `process.kill()` followed by
@@ -661,9 +661,9 @@ process is terminated by `process.kill()` followed by
 §8 #25).
 
 #### AC-8.4
-<!-- DERIVED: SPEC.md §3 FR-8 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-08 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-8 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-08 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `asyncio.CancelledError` propagates upward; it is never caught by a
 bare `except Exception:` block (SPEC.md §3 FR-08, NFR-03).
@@ -682,26 +682,26 @@ bare `except Exception:` block (SPEC.md §3 FR-08, NFR-03).
   記跑 migration 時必須 **fail closed**
 
 #### AC-9.1
-<!-- DERIVED: SPEC.md §3 FR-9 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-09 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-9 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-09 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `GET /healthz` (no auth) returns **HTTP 200** with `{"status":"ok"}`
 when the process is alive (SPEC.md §3 FR-09).
 
 #### AC-9.2
-<!-- DERIVED: SPEC.md §3 FR-9 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-09 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-9 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-09 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `GET /readyz` (no auth) returns **HTTP 200** iff the DB is reachable
 **and** `alembic current` equals head; otherwise **HTTP 503** with a
 body that names which check failed (SPEC.md §3 FR-09, §8 #10, §8 #11).
 
 #### AC-9.3
-<!-- DERIVED: SPEC.md §3 FR-9 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-09 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
-<!-- DERIVED: SPEC.md §3 FR-9 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
+<!-- DERIVED: SPEC.md §3 FR-09 — English rendering of canonical Chinese clause; measurement boundary owned by test harness per canonical line. -->
 
 `GET /v1/metrics` (admin scope) returns per-status task counts,
 execution-latency percentiles, and rate-limit rejection counts
@@ -1399,7 +1399,7 @@ stdout (SPEC.md §4 NFR-12, §8 #27).
 - **Status**: deferred to implementation (P3) per SPEC.md §10 「角色不
   變,路徑變」.
 
-**FR-99-deferred: SPEC §6 (folder structure) was explicitly removed**
+### FR-99-deferred: SPEC §6 (folder structure) was explicitly removed
 <!-- DERIVED: SPEC.md §0 — section captured by canonical placeholder rule; content is framework-owned per canonical. -->
 
 - **Issue**: SPEC.md §5.3 footnote states "§6 (資料夾結構) 已移除:由

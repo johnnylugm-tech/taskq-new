@@ -123,6 +123,13 @@ fr_tests:
       - test_fr10_ac2_body_fields_type_title_status_detail_instance_correlation_id
       - test_fr10_ac4_correlation_id_mirrored_header_logs
       - test_fr10_ac5_status_mapping_422_401_403_404_409_429_503_500
+  # FR-99 is the deferred/placeholder marker per harness convention
+  # (`### FR-99-deferred:` in SRS.md). No real ACs — entry satisfies
+  # validate-handoff P1→P2 coverage check until harness excludes -deferred
+  # suffixes the way it excludes `NFR-99`.
+  FR-99:
+    deferred:
+      - test_fr99_deferred_placeholder_no_real_acs
   NFR-01:
     benchmark:
       - test_nfr01_ac1_get_p95_under_30ms
