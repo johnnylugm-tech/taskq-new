@@ -1,33 +1,26 @@
 {
   "fr": "SPEC_TRACKING.md",
   "review_status": "APPROVE",
-  "reason": "Holistic cross-deliverable review of all 4 P1 artefacts (SRS.md v1.0.0, SPEC_TRACKING.md, TRACEABILITY_MATRIX.md, TEST_INVENTORY.yaml) confirms full bidirectional traceability chain (SPEC.md → SRS.md §3-§4 → 22 FR/NFR rows → 100 ACs → 100 test-name roots). All 4 sub-task approvals stand (SRS.md APPROVE 2026-08-22; SPEC_TRACKING.md APPROVE; TRACEABILITY_MATRIX.md APPROVE; TEST_INVENTORY.yaml APPROVE). Per-FR/NFR AC ranges in TRACEABILITY_MATRIX §3 (FR-01:10, FR-02:5, FR-03:6, FR-04:3, FR-05:4, FR-06:5, FR-07:7, FR-08:4, FR-09:3, FR-10:5; NFR-01:4, NFR-02:7, NFR-03:6, NFR-04:3, NFR-05:2, NFR-06:4, NFR-07:4, NFR-08:3, NFR-09:7, NFR-10:3, NFR-11:3, NFR-12:2; sum=100) match TEST_INVENTORY.yaml by_fr (sum=100) and by_layer (unit=42+integration=48+mutation=1+benchmark=2+lint=7=100) arithmetic inv",
+  "reason": "All 22 FRs/NFRs (10 FR + 12 NFR) covered 1:1 across SRS.md §3-§4, TRACEABILITY_MATRIX.md §2 (22-row FR↔AC↔Test table), SPEC_TRACKING.md (22-row tracking table), and TEST_INVENTORY.yaml (by_fr_total=by_layer_total=total_test_cases=100 arithmetic check passes). Terminology consistent across docs (asyncio.TaskGroup, CancelledError, ASGITransport, RFC 7807, hmac.compare_digest, problem+json, alembic three-step). Each AC is machine-citable with a stable test-name root test_frNN_acK_* / test_nfrNN_acK_*. All forward rows (coverage %, mutation score, skipped=0, verify-system PASS) correctly marked as FORWARD — Phase 3/4 gates with no invented metrics. Placeholder template replaced by full bidirectional matrix (ASPICE SWE.3 + ISO 26262-6:2018 §6.4.4 traceability rows). One low-severity methodology",
   "citations": [
-    "SRS.md:194-278",
-    "SRS.md:295-336",
-    "SRS.md:352-401",
-    "SRS.md:777",
-    "SRS.md:1115-1157",
-    "SRS.md:1462",
-    "SPEC_TRACKING.md:25-46",
-    "SPEC_TRACKING.md:54",
-    "TRACEABILITY_MATRIX.md:18",
-    "TRACEABILITY_MATRIX.md:49",
-    "TRACEABILITY_MATRIX.md:59-80",
-    "TRACEABILITY_MATRIX.md:152",
-    "TRACEABILITY_MATRIX.md:193",
-    "TEST_INVENTORY.yaml:45-205",
-    "TEST_INVENTORY.yaml:1116",
-    "TEST_INVENTORY.yaml:1183-1184",
-    "TEST_INVENTORY.yaml:1186-1196",
-    "TEST_INVENTORY.yaml:1198-1204"
+    "01-requirements/SRS.md:466",
+    "01-requirements/SRS.md:792",
+    "01-requirements/SRS.md:1204",
+    "01-requirements/SPEC_TRACKING.md:24",
+    "01-requirements/SPEC_TRACKING.md:25",
+    "01-requirements/TRACEABILITY_MATRIX.md:18",
+    "01-requirements/TRACEABILITY_MATRIX.md:49",
+    "01-requirements/TRACEABILITY_MATRIX.md:151",
+    "01-requirements/TRACEABILITY_MATRIX.md:152",
+    "TEST_INVENTORY.yaml:1199",
+    "TEST_INVENTORY.yaml:1200",
+    "TEST_INVENTORY.yaml:1204"
   ],
   "docs_embedded": [
     "SRS.md",
     "SPEC_TRACKING.md",
     "TRACEABILITY_MATRIX.md",
-    "TEST_INVENTORY.yaml",
-    "SPEC.md"
+    "TEST_INVENTORY.yaml"
   ],
   "confidence": 0.9
 }
