@@ -2,7 +2,7 @@
 
 **Checkpoint**: `P1-exit-20260821`  
 **Phase**: P1 — Spec & Discovery  
-**Generated**: 2026-08-21T19:51:18Z
+**Generated**: 2026-08-21T19:51:23Z
 
 > ⚠️  **開始下一個工作階段前，請先執行 `/compact` 壓縮上下文**，再從「接下來的工作」繼續。
 
@@ -95,13 +95,13 @@ P1 phase completed — pushed for record.
   - ? / push-1: **complete**
 
 **Recently Committed Files:**
+  - `.methodology/state.json`
+  - `HANDOVER.md`
   - `.github/workflows/harness_quality_gate.yml`
   - `.methodology/agent_b_approvals/SPEC_TRACKING.md.json`
   - `.methodology/agent_b_approvals/SRS.md.json`
   - `.methodology/agent_b_approvals/TEST_INVENTORY.yaml.json`
   - `.methodology/agent_b_approvals/TRACEABILITY_MATRIX.md.json`
-  - `.methodology/state.json`
-  - `HANDOVER.md`
   - `.methodology/.state.lock`
   - `01-requirements/SPEC_TRACKING.md`
   - `01-requirements/SRS.md`
