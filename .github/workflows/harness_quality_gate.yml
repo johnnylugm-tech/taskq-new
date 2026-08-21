@@ -93,8 +93,13 @@ jobs:
         # Gate score evaluation requires an interactive Claude session — always local.
         # Gate 4 (P6 exit) — Hermes APPROVE removed in v2.4; CI-friendly.
         # G-02 fix: P6 no longer skipped — run-phase --phase 6 is safe in CI (no interactive gate eval).
+        # GH_TOKEN: required by submodule_pin_ci preflight, which shells out
+        # to `gh run list` to verify the pinned harness commit's CI is green.
+        # Without it, gh exits rc=4 ("set the GH_TOKEN environment variable")
+        # and the verdict comes back unavailable, which blocks the run.
         env:
           PHASE: ${{ steps.phase.outputs.PHASE }}
+          GH_TOKEN: ${{ github.token }}
         run: python harness/harness_cli.py run-phase --phase $PHASE --project .
 
 
