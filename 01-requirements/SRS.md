@@ -1399,7 +1399,7 @@ stdout (SPEC.md §4 NFR-12, §8 #27).
 - **Status**: deferred to implementation (P3) per SPEC.md §10 「角色不
   變,路徑變」.
 
-### FR-99-deferred: SPEC §6 (folder structure) was explicitly removed
+**FR-99-deferred: SPEC §6 (folder structure) was explicitly removed**
 <!-- DERIVED: SPEC.md §0 — section captured by canonical placeholder rule; content is framework-owned per canonical. -->
 
 - **Issue**: SPEC.md §5.3 footnote states "§6 (資料夾結構) 已移除:由
