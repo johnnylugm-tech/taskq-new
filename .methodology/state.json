@@ -10,5 +10,6 @@
       "sha": "b82a039707c5b8b4664b9983c01f7f29ed7e07be",
       "timestamp": "2026-08-21T19:52:06.324694+00:00"
     }
-  }
+  },
+  "test_inventory_checksum": "25bc603be0c794eec0a08940fc85d17b9d7997bd16518d7a5a67c5559f59aa45"
 }
