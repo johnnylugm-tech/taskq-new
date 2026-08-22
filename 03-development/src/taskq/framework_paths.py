@@ -11,9 +11,10 @@ the framework is free to choose at Phase 3:
 
 The keys of ``FRAMEWORK_OWNED_ROLES`` are EXACTLY these four role
 names (frozen contract); the values are the fully-qualified dotted
-module paths the framework selected at P3. Each value MUST be
-importable so downstream role coverage (FR-04 / FR-06 / FR-07 /
-FR-08) can resolve the same module path the framework picked.
+module paths the framework selected at P3. Each value is eagerly
+validated via ``importlib.import_module`` at module load (see
+below) so a typo in the path string fails loudly at import time
+instead of silently breaking downstream role coverage.
 
 This module exists solely to satisfy the FR-99 sentinel test
 (``03-development/tests/test_fr99.py``); the four architectural
@@ -25,16 +26,26 @@ TRACEABILITY_MATRIX.md §5 row 82.
 """
 from __future__ import annotations
 
+import importlib
+
 # Framework-owned path registry: role-name (FR-99 contract, frozen) ->
-# dotted module path (framework's choice at Phase 3). Each value is
-# validated at test time via ``importlib.import_module`` so a typo
-# in the path string fails loudly instead of silently breaking
-# downstream role coverage.
+# dotted module path (framework's choice at Phase 3). The test asserts
+# ``isinstance(FRAMEWORK_OWNED_ROLES, dict)`` so the concrete type is
+# fixed; values are validated below at module-load time.
 FRAMEWORK_OWNED_ROLES: dict[str, str] = {
     "auth_authz_layer": "taskq.service.auth",
     "tx_boundary_context_manager": "taskq.repository.units_of_work",
     "v3_data_migration_revision": "taskq.migrations.versions.v3_split_result_json_to_task_results",
     "async_subprocess_runner": "taskq.service.runner",
 }
+
+# Eager path validation: importing each registered dotted module here
+# catches a typo in the path string at process start, before any
+# downstream FR-04 / FR-06 / FR-07 / FR-08 code tries to resolve the
+# same module path. The sentinel test re-validates the same paths, so
+# this is a strict superset of its check.
+for _role_name, _module_path in FRAMEWORK_OWNED_ROLES.items():
+    importlib.import_module(_module_path)
+del _role_name, _module_path
 
 __all__ = ["FRAMEWORK_OWNED_ROLES"]
