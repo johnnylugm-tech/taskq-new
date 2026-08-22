@@ -4,7 +4,7 @@
 
 {
   "errors": [],
-  "generated_at": "2026-08-22T23:11:42Z",
+  "generated_at": "2026-08-22T23:22:02Z",
   "metrics": {
     "/Users/johnny/projects/taskq-new/03-development/src/taskq/__init__.py": {
       "CONFIDENCE.HIGH": 0,
@@ -72,17 +72,17 @@
       "skipped_tests": 0
     },
     "/Users/johnny/projects/taskq-new/03-development/src/taskq/api/middleware.py": {
-      "CONFIDENCE.HIGH": 1,
+      "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 1,
+      "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
       "loc": 235,
       "nosec": 0,
-      "skipped_tests": 0
+      "skipped_tests": 1
     },
     "/Users/johnny/projects/taskq-new/03-development/src/taskq/api/problem.py": {
       "CONFIDENCE.HIGH": 0,
@@ -462,17 +462,17 @@
       "skipped_tests": 0
     },
     "/Users/johnny/projects/taskq-new/03-development/src/taskq/repository/units_of_work.py": {
-      "CONFIDENCE.HIGH": 2,
+      "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 2,
+      "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
       "loc": 48,
       "nosec": 0,
-      "skipped_tests": 0
+      "skipped_tests": 2
     },
     "/Users/johnny/projects/taskq-new/03-development/src/taskq/service/__init__.py": {
       "CONFIDENCE.HIGH": 0,
@@ -527,17 +527,17 @@
       "skipped_tests": 0
     },
     "/Users/johnny/projects/taskq-new/03-development/src/taskq/service/runner.py": {
-      "CONFIDENCE.HIGH": 1,
+      "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 1,
+      "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
       "loc": 391,
       "nosec": 0,
-      "skipped_tests": 0
+      "skipped_tests": 1
     },
     "/Users/johnny/projects/taskq-new/03-development/src/taskq/service/tasks.py": {
       "CONFIDENCE.HIGH": 0,
@@ -553,109 +553,18 @@
       "skipped_tests": 0
     },
     "_totals": {
-      "CONFIDENCE.HIGH": 4,
+      "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 4,
+      "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
       "loc": 3383,
       "nosec": 0,
-      "skipped_tests": 0
+      "skipped_tests": 4
     }
   },
-  "results": [
-    {
-      "code": "304             record_rate_limit_rejection()\n305         except Exception:  # defensive on hot path  # pragma: no cover\n306             pass  # pragma: no cover\n307         cid = getattr(request.state, \"correlation_id\", None)\n",
-      "col_offset": 8,
-      "end_col_offset": 16,
-      "filename": "/Users/johnny/projects/taskq-new/03-development/src/taskq/api/middleware.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 305,
-      "line_range": [
-        305,
-        306
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
-    {
-      "code": "52             session.rollback()\n53         except Exception:\n54             # Rollback itself failed \u2014 preserve the original exception\n55             # so the caller sees the real failure, not the rollback\n56             # noise.\n57             pass\n58         raise\n",
-      "col_offset": 8,
-      "end_col_offset": 16,
-      "filename": "/Users/johnny/projects/taskq-new/03-development/src/taskq/repository/units_of_work.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 53,
-      "line_range": [
-        53,
-        54,
-        55,
-        56,
-        57
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
-    {
-      "code": "61             session.close()\n62         except Exception:\n63             pass\n64 \n",
-      "col_offset": 8,
-      "end_col_offset": 16,
-      "filename": "/Users/johnny/projects/taskq-new/03-development/src/taskq/repository/units_of_work.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 62,
-      "line_range": [
-        62,
-        63
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
-    {
-      "code": "127         await proc.wait()\n128     except Exception:\n129         pass\n130 \n",
-      "col_offset": 4,
-      "end_col_offset": 12,
-      "filename": "/Users/johnny/projects/taskq-new/03-development/src/taskq/service/runner.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 128,
-      "line_range": [
-        128,
-        129
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    }
-  ]
-}[main]	INFO	profile include tests: None
-[main]	INFO	profile exclude tests: None
-[main]	INFO	cli include tests: None
-[main]	INFO	cli exclude tests: None
+  "results": []
+}
