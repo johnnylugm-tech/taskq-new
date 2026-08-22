@@ -162,7 +162,8 @@
         "taskq.migrations.versions",
         "taskq.migrations.versions.v1_initial_tasks_api_keys",
         "taskq.migrations.versions.v2_add_tags_task_tags_unique",
-        "taskq.migrations.versions.v3_split_result_json_to_task_results"
+        "taskq.migrations.versions.v3_split_result_json_to_task_results",
+        "taskq.framework_paths"
       ],
       "allowed_dependencies": [
         "service",
