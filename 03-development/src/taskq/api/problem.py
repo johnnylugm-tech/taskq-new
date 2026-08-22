@@ -2,8 +2,17 @@
 
 [FR-01] Every non-2xx response surfaces as application/problem+json
 without leaking stack / SQL / path / schema. The body is a strict
-whitelist of fields. Citations: SPEC.md §3 FR-01, §8 #4-#8, §10 FR-10;
-RFC 7807.
+whitelist of fields.
+
+[FR-10] The body MUST additionally carry ``instance`` (the request
+path that triggered the error) and ``correlation_id`` (mirrored from
+the ``X-Correlation-Id`` request header when present, otherwise
+minted at the api layer). The six top-level fields per AC-10.2 are:
+``type``, ``title``, ``status``, ``detail``, ``instance``,
+``correlation_id``.
+
+Citations: SPEC.md §3 FR-01, §3 FR-10, §8 #19; RFC 7807 §3.1;
+SAD.md §4 api/problem.
 
 This module lives in the api layer (NOT taskq.errors) to honour the
 NFR-06 architecture constraint that ``taskq.api`` and ``taskq.errors``
@@ -19,11 +28,13 @@ class Problem(Exception):
     """RFC 7807 problem document raised from anywhere in the api stack.
 
     Fields:
-        type     — URI reference identifying the problem type
-        title    — short, human-readable summary
-        status   — HTTP status code (must match response status)
-        detail   — human-readable explanation (no stack/SQL/path/schema)
-        instance — optional URI reference for this occurrence
+        type           — URI reference identifying the problem type
+        title          — short, human-readable summary
+        status         — HTTP status code (must match response status)
+        detail         — human-readable explanation (no stack/SQL/path/schema)
+        instance       — URI reference for this occurrence (request path)
+        correlation_id — operator-supplied or minted request id; mirrored
+                         to the X-Correlation-Id response header (AC-10.4)
     """
 
     def __init__(
@@ -33,6 +44,7 @@ class Problem(Exception):
         detail: str = "",
         type: str = "about:blank",
         instance: Optional[str] = None,
+        correlation_id: Optional[str] = None,
         extra: Optional[Dict[str, Any]] = None,
     ) -> None:
         self.status = status
@@ -40,6 +52,7 @@ class Problem(Exception):
         self.detail = detail
         self.type = type
         self.instance = instance
+        self.correlation_id = correlation_id
         self.extra = extra or {}
         super().__init__(f"{status} {title}: {detail}")
 
@@ -53,6 +66,8 @@ class Problem(Exception):
             out["detail"] = self.detail
         if self.instance:
             out["instance"] = self.instance
+        if self.correlation_id:
+            out["correlation_id"] = self.correlation_id
         for key, value in self.extra.items():
             if key not in out:
                 out[key] = value

@@ -30,13 +30,21 @@ touch the bucket. The middleware short-circuits with HTTP 429 +
 ``Retry-After`` + ``application/problem+json`` when the bucket is
 empty (SPEC.md §3 FR-05, §8 #9).
 
+[FR-10] Installs ``taskq.api.middleware.CorrelationIdMiddleware``
+as the OUTERMOST wrapper (registered LAST — Starlette wraps in
+reverse order) so the correlation id is minted BEFORE the rate
+limiter / exception handlers run and the response header is set
+AFTER the handlers serialize the problem+json body. This way a
+Problem raised from the validation handler still surfaces a
+correlation_id to the operator (AC-10.4 / NFR-09).
+
 The test fixture calls ``create_app()`` per test to get a fresh ASGI
 app, while the underlying in-memory DB is reset between tests by the
 conftest fixture (see 03-development/conftest.py).
 
 Citations: SPEC.md §3 FR-01, §3 FR-02, §3 FR-03 (AC-3.6), §3 FR-04,
-§3 FR-05, FR-09; NFR-10 (integration coverage via ASGITransport);
-SAD.md §4 api/app.
+§3 FR-05, §3 FR-10; NFR-09 (correlation_id mirrored in logs);
+NFR-10 (integration coverage via ASGITransport); SAD.md §4 api/app.
 """
 from __future__ import annotations
 
@@ -46,7 +54,7 @@ from fastapi import Depends, FastAPI
 
 from taskq.api.deps import require_scope
 from taskq.api.handlers import register_exception_handlers
-from taskq.api.middleware import RateLimitMiddleware
+from taskq.api.middleware import CorrelationIdMiddleware, RateLimitMiddleware
 from taskq.api.routes.health import healthz, readyz
 from taskq.api.routes.metrics import metrics
 from taskq.api.routes.runs import list_runs, trigger_run
@@ -106,6 +114,14 @@ def create_app() -> FastAPI:
             per_sec=float(DEFAULT_PER_SEC),
         ),
     )
+
+    # ---- FR-10: correlation-id middleware (registered LAST → OUTERMOST) ----
+    # Starlette wraps in reverse registration order so this
+    # CorrelationIdMiddleware runs first on the way IN and last on
+    # the way OUT. That keeps the correlation id available to the
+    # rate limiter's 429 short-circuit and to every exception handler
+    # before the response is serialized (AC-10.4 / NFR-09).
+    app.add_middleware(CorrelationIdMiddleware)
 
     register_exception_handlers(app)
 
