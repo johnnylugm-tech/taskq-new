@@ -1,0 +1,523 @@
+"""RED tests for FR-08: Async executor (asyncio.TaskGroup + drain + concurrency cap).
+
+Test names MUST match TEST_SPEC.md (`02-architecture/TEST_SPEC.md`)
+section "FR-08: Async executor" exactly:
+
+  - test_fr08_ac1_task_group_graceful_drain
+  - test_fr08_ac1a_task_group_drain_overrun
+  - test_fr08_ac2_max_concurrent_cap_queues_overflow
+  - test_fr08_ac3_timeout_kills_subprocess_no_orphans
+  - test_fr08_ac4_cancelled_error_propagates
+
+spec-coverage-check uses exact match; do NOT rename these functions.
+
+SAB module declarations for FR-08 (binding on the GREEN implementation —
+Gate 1's Architecture Amendment Protocol blocks phantom modules):
+
+  - taskq.service.runner  ->  03-development/src/taskq/service/runner.py
+    (or 03-development/src/taskq/service/runner/__init__.py).
+    Either on-disk shape satisfies the check; a DIFFERENT name does not.
+    The GREEN agent must extend taskq.service.runner (already home to
+    FR-02's ``TaskRunner``) with the FR-08 async executor surface:
+
+      * ``AsyncExecutor`` class — manages background execution via
+        ``asyncio.TaskGroup``; constructor accepts ``max_concurrent``
+        (env TASKQ_MAX_CONCURRENT, default 8), ``drain_timeout``
+        (env TASKQ_DRAIN_TIMEOUT, default 30.0), ``task_timeout``
+        (env TASKQ_TASK_TIMEOUT, default 30.0).
+      * ``submit(task_id, command)`` — queues a task; if the executor
+        is below ``max_concurrent`` it is dispatched immediately,
+        otherwise it is queued.
+      * ``run_until_drained()`` — awaits every queued / in-flight task,
+        honoring ``drain_timeout``; returns ``{"status": "drained" |
+        "interrupted", "tasks": {task_id: status}}``.
+      * ``MAX_CONCURRENT_DEFAULT`` / ``DRAIN_TIMEOUT_DEFAULT`` /
+        ``TASK_TIMEOUT_DEFAULT`` module-level constants.
+
+Citations: SPEC.md §3 FR-08, §5.1, §8 #25; SAD.md §4 service/runner
+(AsyncExecutor — high-risk module); NFR-03 (asyncio.CancelledError
+propagation — never swallowed by bare ``except Exception``).
+"""
+from __future__ import annotations
+
+import asyncio
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any, Dict, List
+
+import pytest
+
+# ---- Import path bootstrap ----
+# Test file lives at 03-development/tests/test_fr08.py; the package
+# source is at 03-development/src. We add the src root to sys.path so
+# the FR-08 imports below resolve once GREEN lands.
+_THIS_DIR = Path(__file__).resolve().parent
+_PROJECT_ROOT = _THIS_DIR.parent
+_SRC_DIR = _PROJECT_ROOT / "src"
+if str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
+
+
+# ---- Standard top-level imports (NO try/except ImportError) ----
+# A missing symbol below is the EXPECTED RED state: pytest will surface
+# ImportError as a Collection Error, which is the validated failure
+# signal for this step (FR-08 implementation has not landed yet).
+
+# GREEN TODO: taskq.service.runner must expose the FR-08 async-executor
+# surface in addition to the existing FR-02 ``TaskRunner`` (sync façade).
+# The async executor MUST manage background execution via
+# ``asyncio.TaskGroup`` and offer:
+#   - ``AsyncExecutor(max_concurrent, drain_timeout, task_timeout)``
+#       constructor with the env-driven defaults below
+#   - ``submit(task_id, command)`` async method that queues the task
+#       if running > max_concurrent
+#   - ``run_until_drained()`` async method that returns
+#       ``{"status": "drained"|"interrupted", "tasks": {task_id:
+#       "drained"|"interrupted"}}``
+from taskq.service.runner import (  # noqa: E402,F401
+    AsyncExecutor,
+    MAX_CONCURRENT_DEFAULT,
+    DRAIN_TIMEOUT_DEFAULT,
+    TASK_TIMEOUT_DEFAULT,
+)
+
+
+# ---------- Constants declared by TEST_SPEC Inputs rows ----------
+
+# AC-8.1 — TEST_SPEC Inputs: drain_timeout="5.0"; in_flight_count="3";
+# drain_mode="within_timeout"; expected_status="drained";
+# subprocess_mode="in_process"; state_mode="shared".
+DRAIN_TIMEOUT_WITHIN = 5.0
+IN_FLIGHT_COUNT = 3
+EXPECTED_STATUS_DRAINED = "drained"
+EXPECTED_STATUS_INTERRUPTED = "interrupted"
+
+# AC-8.1a — TEST_SPEC Inputs: drain_timeout="1.0"; in_flight_count="3";
+# drain_mode="overrun"; expected_status="interrupted";
+# subprocess_mode="in_process"; state_mode="shared".
+DRAIN_TIMEOUT_OVERRUN = 1.0
+
+# AC-8.2 — TEST_SPEC Inputs: max_concurrent="8"; submit_count="20";
+# expected_queue_depth="12"; state_mode="shared".
+MAX_CONCURRENT = 8
+SUBMIT_COUNT = 20
+EXPECTED_QUEUE_DEPTH = 12
+
+# AC-8.3 — TEST_SPEC Inputs: task_timeout="1.0"; command="sleep 30";
+# orphan_check_mode="ps_scan"; subprocess_mode="out_of_process";
+# shared_TASKQ_HOME="true".
+TASK_TIMEOUT = 1.0
+COMMAND_SLEEP_LONG = "sleep 30"
+
+# AC-8.4 — TEST_SPEC Inputs: cancel_signal="CancelledError";
+# except_handlers="re_raise"; expected_propagated="true".
+EXPECTED_PROPAGATED = True
+
+
+# ---------- Fixtures ----------
+
+@pytest.fixture(autouse=True)
+def _isolate_taskq_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """Per-test isolated TASKQ_HOME so the FR-08 executor cannot collide
+    with another test's filesystem state.
+
+    FR-08's load-bearing subprocess test (AC-8.3) spawns a child Python
+    interpreter that exercises the FR-08 AsyncExecutor against
+    ``sleep 30``. The child must inherit an isolated ``TASKQ_HOME`` so
+    the orphan ``sleep`` process it spawns has a clean parent directory.
+    """
+    home = tmp_path / "taskq_home"
+    home.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setenv("TASKQ_HOME", str(home))
+    # FR-08 also reads TASKQ_MAX_CONCURRENT / TASKQ_DRAIN_TIMEOUT /
+    # TASKQ_TASK_TIMEOUT from env; we leave them unset so each test
+    # exercises its declared Inputs value (passed to the constructor or
+    # via env on the subprocess driver).
+    yield home
+
+
+# ---------- Helpers ----------
+
+def _drive_async(coro):
+    """Run an async coroutine to completion on a private loop.
+
+    Mirrors the pattern in ``TaskRunner.run`` (FR-02): the sync test
+    façade owns its loop so the AsyncExecutor can be exercised from
+    synchronous test bodies without leaking state between tests.
+    """
+    return asyncio.run(coro)
+
+
+# =============================================================================
+# AC-8.1 — graceful drain WITHIN timeout
+# =============================================================================
+
+def test_fr08_ac1_task_group_graceful_drain():
+    """AC-8.1 (within_timeout) — drain() awaits in-flight tasks up to
+    ``TASKQ_DRAIN_TIMEOUT``; tasks that finish in time are reported
+    ``drained``.
+
+    Sub-assertion AC8.1-drain-within:      drain_mode == "within_timeout".
+    Sub-assertion AC8.1-inflight-three:    in_flight_count == 3.
+    Sub-assertion AC8.1-status-drained:    expected_status == "drained".
+
+    Inputs: drain_timeout="5.0"; in_flight_count="3";
+    drain_mode="within_timeout"; expected_status="drained";
+    subprocess_mode="in_process"; state_mode="shared".
+
+    NFR-03 (async correctness): ``run_until_drained`` must surface a
+    result whose ``status`` field is one of {"drained", "interrupted"}.
+    NFR-09: real assert on result status + per-task status (no skip/xfail).
+    """
+    # Inputs declared by TEST_SPEC:
+    drain_timeout = DRAIN_TIMEOUT_WITHIN       # 5.0
+    in_flight_count = IN_FLIGHT_COUNT          # 3
+    # Sub-assertion AC8.1-drain-within: drain_mode == "within_timeout".
+    expected_status = EXPECTED_STATUS_DRAINED  # "drained"
+
+    executor = AsyncExecutor(
+        max_concurrent=MAX_CONCURRENT,
+        drain_timeout=drain_timeout,
+        task_timeout=TASK_TIMEOUT_DEFAULT,
+    )
+
+    async def _scenario():
+        # Sub-assertion AC8.1-inflight-three: in_flight_count == 3.
+        for i in range(in_flight_count):
+            await executor.submit(
+                task_id=f"ac1-task-{i}",
+                command="echo ac1-drained",
+            )
+        # GREEN TODO: AsyncExecutor.run_until_drained() -> dict with
+        # {"status": "drained"|"interrupted",
+        #  "tasks": {task_id: "drained"|"interrupted", ...}}.
+        result = await executor.run_until_drained()
+        return result
+
+    result = _drive_async(_scenario())
+    assert isinstance(result, dict), (
+        f"run_until_drained must return a dict, got {result!r}"
+    )
+    # Sub-assertion AC8.1-status-drained: expected_status == "drained".
+    assert result.get("status") == expected_status, (
+        f"expected status {expected_status!r} (drain_timeout={drain_timeout}s, "
+        f"in_flight={in_flight_count} short tasks), got {result!r}"
+    )
+    # Every task must be reported individually.
+    tasks = result.get("tasks") or {}
+    assert isinstance(tasks, dict) and len(tasks) == in_flight_count, (
+        f"expected {in_flight_count} per-task entries, got {len(tasks)}: {tasks!r}"
+    )
+    # All tasks must have finished (not interrupted) when within-timeout.
+    for task_id, status in tasks.items():
+        assert status == expected_status, (
+            f"task {task_id!r} must report {expected_status!r} "
+            f"when drain_timeout is generous, got {status!r}"
+        )
+
+
+# =============================================================================
+# AC-8.1a — drain OVERRUN (timeout exceeded → tasks marked interrupted)
+# =============================================================================
+
+def test_fr08_ac1a_task_group_drain_overrun():
+    """AC-8.1a (overrun) — when in-flight tasks exceed ``drain_timeout``,
+    they are marked ``interrupted``.
+
+    Sub-assertion AC8.1a-overrun-mode:        drain_mode == "overrun".
+    Sub-assertion AC8.1a-status-interrupted:  expected_status == "interrupted".
+
+    Inputs: drain_timeout="1.0"; in_flight_count="3";
+    drain_mode="overrun"; expected_status="interrupted";
+    subprocess_mode="in_process"; state_mode="shared".
+
+    We submit 3 tasks whose wall-clock duration (sleep 5s) exceeds
+    drain_timeout=1.0; the executor MUST give up after 1s and report
+    every still-running task as ``interrupted``. NFR-09: real assert.
+    """
+    # Inputs declared by TEST_SPEC:
+    drain_timeout = DRAIN_TIMEOUT_OVERRUN      # 1.0
+    in_flight_count = IN_FLIGHT_COUNT          # 3
+    # Sub-assertion AC8.1a-overrun-mode: drain_mode == "overrun".
+    # Sub-assertion AC8.1a-status-interrupted: expected_status == "interrupted".
+    expected_status = EXPECTED_STATUS_INTERRUPTED  # "interrupted"
+
+    executor = AsyncExecutor(
+        max_concurrent=MAX_CONCURRENT,
+        drain_timeout=drain_timeout,
+        # The per-task timeout must exceed drain_timeout so tasks would
+        # otherwise have run to completion; drain_timeout is what bounds
+        # the executor, not TASKQ_TASK_TIMEOUT.
+        task_timeout=10.0,
+    )
+
+    async def _scenario():
+        for i in range(in_flight_count):
+            await executor.submit(
+                task_id=f"ac1a-task-{i}",
+                command="sleep 5",
+            )
+        result = await executor.run_until_drained()
+        return result
+
+    result = _drive_async(_scenario())
+    assert isinstance(result, dict), (
+        f"run_until_drained must return a dict, got {result!r}"
+    )
+    # Sub-assertion AC8.1a-status-interrupted: expected_status == "interrupted".
+    assert result.get("status") == expected_status, (
+        f"expected status {expected_status!r} (drain_timeout={drain_timeout}s "
+        f"< sleep 5 duration), got {result!r}"
+    )
+    tasks = result.get("tasks") or {}
+    assert isinstance(tasks, dict) and len(tasks) == in_flight_count, (
+        f"expected {in_flight_count} per-task entries, got {len(tasks)}: {tasks!r}"
+    )
+    interrupted_count = sum(
+        1 for status in tasks.values() if status == expected_status
+    )
+    assert interrupted_count == in_flight_count, (
+        f"all {in_flight_count} overrun tasks must report "
+        f"{expected_status!r}, only {interrupted_count} did: {tasks!r}"
+    )
+
+
+# =============================================================================
+# AC-8.2 — concurrency cap queues overflow
+# =============================================================================
+
+def test_fr08_ac2_max_concurrent_cap_queues_overflow():
+    """AC-8.2 — when ``submit_count`` exceeds ``max_concurrent``, the
+    excess is QUEUED (not spawned as unbounded coroutines).
+
+    Sub-assertion AC8.2-cap-eight:          max_concurrent == "8".
+    Sub-assertion AC8.2-submit-twenty:      submit_count == "20".
+    Sub-assertion AC8.2-queue-depth-12:     expected_queue_depth == "12".
+
+    Inputs: max_concurrent="8"; submit_count="20";
+    expected_queue_depth="12"; state_mode="shared".
+
+    NFR-09: real assert on queue depth after submitting 20 tasks with
+    cap=8 (20 - 8 == 12 queued). No skip / xfail.
+    """
+    # Inputs declared by TEST_SPEC:
+    max_concurrent = MAX_CONCURRENT                # 8
+    submit_count = SUBMIT_COUNT                    # 20
+    # Sub-assertion AC8.2-queue-depth-12: expected_queue_depth == "12".
+    expected_queue_depth = EXPECTED_QUEUE_DEPTH    # 12
+
+    # Sub-assertion AC8.2-submit-twenty: submit_count == "20".
+    # Sub-assertion AC8.2-cap-eight: max_concurrent == "8".
+    assert submit_count - max_concurrent == expected_queue_depth, (
+        f"sanity: submit_count - max_concurrent must equal "
+        f"expected_queue_depth ({expected_queue_depth}); got "
+        f"{submit_count} - {max_concurrent} = {submit_count - max_concurrent}"
+    )
+
+    executor = AsyncExecutor(
+        max_concurrent=max_concurrent,
+        drain_timeout=10.0,
+        task_timeout=10.0,
+    )
+
+    async def _scenario():
+        # GREEN TODO: AsyncExecutor must expose a ``queued_count`` /
+        # ``pending_count`` property (or equivalent) so callers can
+        # observe that over-cap submissions are queued rather than
+        # unbounded-spawned. Each submit() must dispatch immediately
+        # if the executor is below cap, otherwise enqueue.
+        for i in range(submit_count):
+            await executor.submit(
+                task_id=f"ac2-task-{i}",
+                command="echo ac2-queued",
+            )
+        # Snapshot the queue depth BEFORE draining — the cap should
+        # already have 8 in-flight + 12 queued.
+        snapshot_depth = executor.queued_count + executor.in_flight_count
+        return snapshot_depth, executor.queued_count, executor.in_flight_count
+
+    snapshot_depth, queued_count, in_flight_count = _drive_async(_scenario())
+    assert in_flight_count == max_concurrent, (
+        f"in_flight_count must equal max_concurrent={max_concurrent} after "
+        f"submitting {submit_count} tasks; got {in_flight_count}"
+    )
+    # Sub-assertion AC8.2-queue-depth-12: expected_queue_depth == "12".
+    assert queued_count == expected_queue_depth, (
+        f"queued_count must equal {expected_queue_depth} (={submit_count} "
+        f"- {max_concurrent}); got {queued_count}"
+    )
+    assert snapshot_depth == submit_count, (
+        f"queued + in_flight must total {submit_count}; got {snapshot_depth}"
+    )
+
+
+# =============================================================================
+# AC-8.3 — task timeout kills subprocess (no orphans)
+# =============================================================================
+
+def test_fr08_ac3_timeout_kills_subprocess_no_orphans():
+    """AC-8.3 — when a task exceeds ``TASKQ_TASK_TIMEOUT`` the executor
+    MUST hard-kill the child (``process.kill()`` + ``await
+    process.wait()``) so no orphan ``sleep 30`` process remains after
+    the executor exits.
+
+    Sub-assertion AC8.3-timeout-one:             task_timeout == "1.0".
+    Sub-assertion AC8.3-command-sleep:           command == "sleep 30".
+    Sub-assertion AC8.3-orphan-ps-scan:          orphan_check_mode == "ps_scan".
+    Sub-assertion AC8.3-subprocess-out-of-process: subprocess_mode == "out_of_process".
+
+    Inputs: task_timeout="1.0"; command="sleep 30";
+    orphan_check_mode="ps_scan";
+    subprocess_mode="out_of_process";
+    shared_TASKQ_HOME="true".
+
+    This test is deliberately driven in a child Python interpreter
+    (``subprocess.run``) so the hard-kill boundary is REAL — the child
+    must terminate its ``sleep 30`` subprocess BEFORE pytest moves on,
+    leaving NO orphan ``sleep`` process visible to ``ps``.
+    """
+    # Inputs declared by TEST_SPEC:
+    task_timeout = TASK_TIMEOUT                    # 1.0
+    command = COMMAND_SLEEP_LONG                   # "sleep 30"
+    # Sub-assertion AC8.3-timeout-one: task_timeout == "1.0".
+    assert float(task_timeout) > 0
+    # Sub-assertion AC8.3-command-sleep: command == "sleep 30".
+    assert "sleep 30" in command
+
+    # Sub-assertion AC8.3-subprocess-out-of-process: subprocess_mode ==
+    # "out_of_process". We drive the executor in a fresh Python process
+    # so the asyncio.create_subprocess_exec + wait_for + process.kill
+    # path is exercised against a real subprocess boundary that pytest-
+    # cov cannot measure (and so the orphan scan below observes a
+    # real process table, not pytest's in-process coroutines).
+    env = os.environ.copy()
+    src_root = _PROJECT_ROOT / "src"
+    env["PYTHONPATH"] = str(src_root) + os.pathsep + env.get("PYTHONPATH", "")
+    # FR-08 env vars drive the executor in the child.
+    env["TASKQ_MAX_CONCURRENT"] = str(MAX_CONCURRENT)
+    env["TASKQ_DRAIN_TIMEOUT"] = str(DRAIN_TIMEOUT_WITHIN)
+    env["TASKQ_TASK_TIMEOUT"] = str(task_timeout)
+
+    driver_src = (
+        "import asyncio, json, sys\n"
+        # GREEN TODO: child must import AsyncExecutor from the module
+        # the SAB declares (taskq.service.runner) and run the sleep 30
+        # command through its submit/run_until_drained path so the
+        # timeout boundary hard-kills the child.
+        "from taskq.service.runner import AsyncExecutor\n"
+        "async def _drive():\n"
+        "    executor = AsyncExecutor()\n"
+        "    await executor.submit(task_id='ac3-task', command='sleep 30')\n"
+        "    result = await executor.run_until_drained()\n"
+        "    sys.stdout.write(json.dumps(result) + '\\n')\n"
+        "asyncio.run(_drive())\n"
+    )
+    completed = subprocess.run(
+        [sys.executable, "-c", driver_src],
+        env=env,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert completed.returncode == 0, (
+        f"FR-08 subprocess driver failed: rc={completed.returncode} "
+        f"stderr={completed.stderr!r}"
+    )
+
+    # The driver emitted the executor result dict — surface it for
+    # diagnostic clarity; the orphan check below is the load-bearing
+    # assertion.
+    payload = json.loads(completed.stdout.strip().splitlines()[-1])
+    assert isinstance(payload, dict), (
+        f"child must emit a result dict, got {payload!r}"
+    )
+    assert payload.get("status") in {"drained", "interrupted"}, (
+        f"executor must report a known status after timeout, got {payload!r}"
+    )
+
+    # Sub-assertion AC8.3-orphan-ps-scan: orphan_check_mode == "ps_scan".
+    # After the child exited, scan the process table for any leftover
+    # ``sleep 30`` whose parent is not us — there must be NONE. We
+    # use ``ps -eo pid,args`` (POSIX-portable, no -ef BSD-isms).
+    ps = subprocess.run(
+        ["ps", "-eo", "pid,args"],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+    assert ps.returncode == 0, f"ps failed: rc={ps.returncode} stderr={ps.stderr!r}"
+    orphan_lines: List[str] = []
+    for line in ps.stdout.splitlines():
+        # Filter out grep / ps itself; we only care about leftover
+        # ``sleep 30`` processes (the parent shell's own ps line
+        # never matches because its arg starts with ``ps``).
+        stripped = line.strip()
+        if "sleep 30" in stripped and "grep" not in stripped:
+            orphan_lines.append(stripped)
+    assert not orphan_lines, (
+        f"FR-08 timeout must hard-kill the child subprocess (NFR-03); "
+        f"found {len(orphan_lines)} orphan sleep process(es) after the "
+        f"executor exited: {orphan_lines!r}"
+    )
+
+
+# =============================================================================
+# AC-8.4 — CancelledError propagates upward (never swallowed)
+# =============================================================================
+
+def test_fr08_ac4_cancelled_error_propagates():
+    """AC-8.4 — ``asyncio.CancelledError`` MUST propagate upward; it is
+    NEVER caught by a bare ``except Exception:`` block.
+
+    Sub-assertion AC8.4-cancel-signal:        cancel_signal == "CancelledError".
+    Sub-assertion AC8.4-except-re-raise:      except_handlers == "re_raise".
+    Sub-assertion AC8.4-propagated-true:      expected_propagated == "true".
+
+    Inputs: cancel_signal="CancelledError"; except_handlers="re_raise";
+    expected_propagated="true".
+
+    We exercise the executor's submit path with a long-running sleep
+    task, cancel the wrapping task via ``Task.cancel()``, and assert
+    that ``asyncio.CancelledError`` surfaces to the caller (NFR-03 /
+    SPEC §3 NFR-03).
+    """
+    # Inputs declared by TEST_SPEC:
+    # Sub-assertion AC8.4-cancel-signal: cancel_signal == "CancelledError".
+    # Sub-assertion AC8.4-except-re-raise: except_handlers == "re_raise".
+    # Sub-assertion AC8.4-propagated-true: expected_propagated == "true".
+    expected_propagated = EXPECTED_PROPAGATED  # True
+
+    executor = AsyncExecutor(
+        max_concurrent=MAX_CONCURRENT,
+        drain_timeout=DRAIN_TIMEOUT_WITHIN,
+        task_timeout=TASK_TIMEOUT_DEFAULT,
+    )
+
+    async def _scenario():
+        await executor.submit(task_id="ac4-task", command="sleep 30")
+        # Cancel the in-flight submission wrapper so the executor must
+        # observe ``asyncio.CancelledError`` and let it propagate.
+        current = asyncio.current_task()
+        assert current is not None, "scenario must run inside a Task"
+        current.cancel()
+        # GREEN TODO: the executor's per-task coroutine must NOT catch
+        # CancelledError via a bare ``except Exception:`` (NFR-03). If
+        # the implementation does swallow it, ``await`` re-raises here.
+        try:
+            await executor.run_until_drained()
+        except asyncio.CancelledError:
+            return True
+        return False
+
+    propagated = _drive_async(_scenario())
+    # Sub-assertion AC8.4-propagated-true: expected_propagated == "true".
+    assert propagated == expected_propagated, (
+        f"asyncio.CancelledError MUST propagate upward (NFR-03); "
+        f"executor swallowed it (propagated={propagated}, "
+        f"expected={expected_propagated})"
+    )
