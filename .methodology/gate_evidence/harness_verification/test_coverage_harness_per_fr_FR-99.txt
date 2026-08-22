@@ -1,0 +1,15 @@
+============================= test session starts ==============================
+collecting ... collected 2 items
+
+03-development/tests/test_fr99.py::test_fr99_placeholder_framework_owned_role_registry PASSED [ 50%]
+03-development/tests/test_fr99.py::test_fr99_placeholder_no_extra_own_assertions PASSED [100%]
+
+================================ tests coverage ================================
+______________ coverage: platform darwin, python 3.11.15-final-0 _______________
+
+Name                                          Stmts   Miss  Cover   Missing
+---------------------------------------------------------------------------
+03-development/src/taskq/framework_paths.py       8      0   100%
+---------------------------------------------------------------------------
+TOTAL                                             8      0   100%
+============================== 2 passed in 0.06s ===============================

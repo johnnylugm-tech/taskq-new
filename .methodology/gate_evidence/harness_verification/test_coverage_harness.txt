@@ -3,8 +3,8 @@
 # agent_score: 100.0 | threshold: 80.0
 
 ........................................................................ [ 41%]
-........................................................................ [ 83%]
-............................                                             [100%]
+........................................................................ [ 82%]
+..............................                                           [100%]
 ================================ tests coverage ================================
 ______________ coverage: platform darwin, python 3.11.15-final-0 _______________
 
@@ -27,8 +27,9 @@ Name                                                                            
 03-development/src/taskq/config/__init__.py                                                0      0   100%
 03-development/src/taskq/config/settings.py                                               24      0   100%
 03-development/src/taskq/errors/__init__.py                                                0      0   100%
+03-development/src/taskq/framework_paths.py                                                8      0   100%
 03-development/src/taskq/migrations/__init__.py                                            1      0   100%
-03-development/src/taskq/migrations/env.py                                                40      9    78%   35-40, 91-100, 127
+03-development/src/taskq/migrations/env.py                                                29      0   100%
 03-development/src/taskq/migrations/versions/__init__.py                                   6      0   100%
 03-development/src/taskq/migrations/versions/v1_initial_tasks_api_keys.py                 16      0   100%
 03-development/src/taskq/migrations/versions/v2_add_tags_task_tags_unique.py              18      0   100%
@@ -52,5 +53,5 @@ Name                                                                            
 03-development/src/taskq/service/runner.py                                               174      0   100%
 03-development/src/taskq/service/tasks.py                                                 36      0   100%
 --------------------------------------------------------------------------------------------------------------------
-TOTAL                                                                                   1255      9    99%
-172 passed in 10.39s
+TOTAL                                                                                   1252      0   100%
+174 passed in 10.30s

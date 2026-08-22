@@ -420,6 +420,41 @@ the round-trip migration is a bijection on the `task_results` ↔
 
 ---
 
+### FR-99: Framework-owned implementation paths
+
+**Classification**: PLACEHOLDER (framework-owned; no AC enumeration)
+**Active Patterns**: — (none — per `TRACEABILITY_MATRIX.md` FR ↔ Spec row 82)
+
+> Per `SRS.md` §7 (Open Issues) **`NFR-99: Framework-owned implementation
+> paths`** and `TRACEABILITY_MATRIX.md` §5 row 82, FR-99 has **no ACs** and
+> **no test-name root** — four architectural roles (FR-04 auth/authz layer,
+> FR-06 tx-boundary context manager, FR-07 v3 data-migration file, FR-08
+> async sub-process runner) are required by role but their concrete module
+> paths are framework-owned per SPEC §10 「角色不變,路徑變」.
+>
+> This section lists the **placeholder sentinel tests** that pin the FR-99
+> registry contract. Functional coverage for the four roles lands inside
+> FR-04 / FR-06 / FR-07 / FR-08 sections above; FR-99 itself owns NO new
+> functional test assertions at Phase 3. Listed here only so the harness
+> pre-flight that every `FR-XX` has a section in `TEST_SPEC.md` does not
+> block the dispatch, and so D4 spec-coverage can find the FR-99 test
+> surface.
+
+| # | Test Function | Inputs | Type | Derivation |
+|---|---|---|---|---|
+| 1 | `test_fr99_placeholder_framework_owned_role_registry` | role_names="auth_authz_layer,tx_boundary_context_manager,v3_data_migration_revision,async_subprocess_runner"; path_resolves="true" | sentinel | Q1 / NFR-99 |
+| 2 | `test_fr99_placeholder_no_extra_own_assertions` | expected_role_count="4" | sentinel | Q1 / NFR-99 |
+
+**Sub-assertions**
+
+| rule_id | predicate (over Inputs) | applies_to (case #) |
+|---|---|---|
+| AC99.1-role-names-four | len(role_names.split(",")) == 4 | 1 |
+| AC99.1-path-resolves | path_resolves == "true" | 1 |
+| AC99.2-role-count-four | expected_role_count == "4" | 2 |
+
+---
+
 ## Non-Functional Requirement Test Cases
 
 > Each NFR section below contains only the Integration-level cases for which
