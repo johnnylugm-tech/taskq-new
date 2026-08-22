@@ -1,61 +1,32 @@
-"""FR-01 routes — POST/GET/list/DELETE on /v1/tasks.
+"""FR-01 handlers — POST/GET/list/DELETE on /v1/tasks.
 
-[FR-01] Four endpoints under /v1/tasks. Auth scope per endpoint
-(write/read/admin). All non-2xx responses are surfaced as
-application/problem+json via the registered handlers. Citations:
-SPEC.md §3 FR-01, §8 #4-#8; SAD.md §4 api/routes.
+[FR-01] Four handlers covering /v1/tasks. Each handler is a plain
+function; registration on the FastAPI app happens in
+``taskq.api.app.create_app`` so the routes appear directly in
+``app.routes`` (FastAPI 0.141 wraps ``include_router`` calls in an
+``_IncludedRouter`` that hides the prefixed paths from ``app.routes``,
+which the FR-04 AC-4.3 audit walks).
+
+[FR-04] Every handler uses the SINGLE canonical
+``taskq.api.deps.require_scope`` dependency (AC-4.3). The scope
+hierarchy ``read < write < admin`` is enforced inside
+``taskq.service.auth.verify_api_key`` (AC-4.1); insufficient scope
+maps to HTTP 403 + generic body via the shared dependency (AC-4.2,
+NFR-02 / SPEC §8 #6).
+
+Citations: SPEC.md §3 FR-01, §3 FR-04, §8 #4-#8; SAD.md §4 api/routes.
 """
 from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, Depends, Header, Query, Request, status
+from fastapi import Depends, Query, Request
 
+from taskq.api.deps import require_scope
 from taskq.api.problem import Problem
 from taskq.api.schemas import TaskCreate
 from taskq.repository.tasks import DuplicateTaskName, TaskNotFound
-from taskq.service.auth import (
-    InsufficientScope,
-    InvalidAPIKey,
-    verify_api_key,
-)
 from taskq.service.tasks import DEFAULT_LIMIT, MAX_LIMIT, TaskService
-
-router = APIRouter()
-
-
-# ---------- Auth dependency ----------
-
-
-def _require_scope(scope: str):
-    """Build a FastAPI dependency that enforces an API-key scope.
-
-    - Missing / invalid key  -> 401 + problem+json (SPEC §8 #5)
-    - Valid key, wrong scope -> 403 + generic body, no resource leak (SPEC §8 #6)
-    - Valid + correct scope  -> returns the resolved auth context dict
-    """
-
-    def _dep(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key")) -> Dict[str, str]:
-        try:
-            return verify_api_key(x_api_key, scope_required=scope)
-        except InvalidAPIKey as exc:
-            raise Problem(
-                status=401,
-                title="Unauthorized",
-                detail="Invalid or missing API key.",
-                type="about:blank",
-            ) from exc
-        except InsufficientScope as exc:
-            # NFR-02: body must not reveal whether the target exists.
-            # We use a generic 403 with no resource identifier.
-            raise Problem(
-                status=403,
-                title="Forbidden",
-                detail="Operation not permitted.",
-                type="about:blank",
-            ) from exc
-
-    return _dep
 
 
 # ---------- Service accessor (per-request) ----------
@@ -74,13 +45,12 @@ def _get_service(request: Request) -> TaskService:
     return svc
 
 
-# ---------- Endpoints ----------
+# ---------- Handlers ----------
 
 
-@router.post("", status_code=status.HTTP_201_CREATED)
 def create_task(
     body: TaskCreate,
-    _auth: Dict[str, str] = Depends(_require_scope("write")),
+    _auth: Dict[str, str] = Depends(require_scope("write")),
     service: TaskService = Depends(_get_service),
 ) -> Dict[str, Any]:
     """AC-1.1 / AC-1.4: create a task; 409 on name collision."""
@@ -96,10 +66,9 @@ def create_task(
     return created
 
 
-@router.get("/{task_id}")
 def get_task(
     task_id: str,
-    _auth: Dict[str, str] = Depends(_require_scope("read")),
+    _auth: Dict[str, str] = Depends(require_scope("read")),
     service: TaskService = Depends(_get_service),
 ) -> Dict[str, Any]:
     """AC-1.5 / AC-1.6: get a single task; 404 if unknown."""
@@ -114,12 +83,11 @@ def get_task(
         ) from exc
 
 
-@router.get("")
 def list_tasks(
     limit: int = Query(default=DEFAULT_LIMIT, ge=1),
     cursor: Optional[str] = Query(default=None),
     status_filter: Optional[str] = Query(default=None, alias="status"),
-    _auth: Dict[str, str] = Depends(_require_scope("read")),
+    _auth: Dict[str, str] = Depends(require_scope("read")),
     service: TaskService = Depends(_get_service),
 ) -> Dict[str, Any]:
     """AC-1.7 / AC-1.8: cursor-paginated list; 422 when limit > 200."""
@@ -133,10 +101,9 @@ def list_tasks(
     return service.list_tasks(limit=limit, cursor=cursor, status=status_filter)
 
 
-@router.delete("/{task_id}", status_code=status.HTTP_200_OK)
 def delete_task(
     task_id: str,
-    _auth: Dict[str, str] = Depends(_require_scope("admin")),
+    _auth: Dict[str, str] = Depends(require_scope("admin")),
     service: TaskService = Depends(_get_service),
 ) -> Dict[str, Any]:
     """AC-1.9 / AC-1.10: admin-only delete with cascade in one transaction."""
@@ -152,4 +119,10 @@ def delete_task(
     return {"deleted": True, "id": task_id}
 
 
-__all__ = ["router"]
+__all__ = [
+    "create_task",
+    "get_task",
+    "list_tasks",
+    "delete_task",
+    "_get_service",
+]

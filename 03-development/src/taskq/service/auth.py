@@ -1,4 +1,4 @@
-"""AuthService — API-key verification (FR-03).
+"""AuthService — API-key verification (FR-03, FR-04).
 
 Incoming plaintext keys are resolved to a scope via two paths:
 
@@ -13,9 +13,18 @@ Missing / invalid keys raise ``InvalidAPIKey`` (mapped to HTTP 401 +
 problem+json by the API layer); a valid key missing the required scope
 raises ``InsufficientScope`` (mapped to HTTP 403).
 
-Citations: SPEC.md §3 FR-03, §7, §8 #5, §8 #18; NFR-02 (constant-time
-compare; no plaintext on the wire / in logs / metrics); NFR-04 (no
-plaintext in logs / error body / metrics).
+[FR-04] The scope hierarchy ``read < write < admin`` (AC-4.1) is
+enforced here via the ``_SCOPE_RANK`` map. The HTTP layer
+(``taskq.api.deps.require_scope``) delegates the entire check to this
+function so the hierarchy logic is never duplicated at the route
+level — the single FastAPI dependency (AC-4.3) translates
+``InsufficientScope`` into a generic 403 problem document with no
+resource-existence leak (SPEC.md §8 #6, NFR-02).
+
+Citations: SPEC.md §3 FR-03, §3 FR-04, §7, §8 #5, §8 #6, §8 #18;
+NFR-02 (constant-time compare; no plaintext on the wire / in logs /
+metrics; no resource-existence leak in 403 body); NFR-04 (no plaintext
+in logs / error body / metrics).
 """
 from __future__ import annotations
 
@@ -52,6 +61,17 @@ _LEGACY_KEY_SCOPES: Dict[str, str] = {
 }
 
 
+# Scope hierarchy — read < write < admin (SPEC.md §3 FR-04, AC-4.1).
+# A held scope at or above the required rank satisfies the request;
+# anything below raises ``InsufficientScope`` which the HTTP layer
+# maps to 403 + generic body (no resource-existence leak, SPEC §8 #6).
+_SCOPE_RANK: Dict[str, int] = {
+    "read": 0,
+    "write": 1,
+    "admin": 2,
+}
+
+
 def _lookup_scope(key: str) -> Optional[str]:
     """Return the scope for ``key`` from the api_keys table, else None.
 
@@ -82,10 +102,19 @@ def verify_api_key(
     if scope is None:
         raise InvalidAPIKey("invalid api key")
 
-    # NFR-02: 403 body must not leak resource existence — message is
-    # generic on purpose.
-    if scope_required == "admin" and scope != "admin":
-        raise InsufficientScope("insufficient scope")
+    # NFR-02 / SPEC §8 #6: 403 body must not leak resource existence —
+    # message is generic on purpose. AC-4.1 enforces the read < write <
+    # admin hierarchy: a held scope at or above the required rank
+    # satisfies the request; anything below raises ``InsufficientScope``.
+    if scope_required is not None:
+        required_rank = _SCOPE_RANK.get(scope_required)
+        held_rank = _SCOPE_RANK.get(scope)
+        if (
+            required_rank is None
+            or held_rank is None
+            or held_rank < required_rank
+        ):
+            raise InsufficientScope("insufficient scope")
 
     return {"scope": scope, "key_id": key}
 

@@ -1,75 +1,67 @@
-"""FR-02 routes — POST /v1/tasks/{id}/run + GET /v1/tasks/{id}/runs.
+"""FR-02 handlers — POST /v1/tasks/{id}/run + GET /v1/tasks/{id}/runs.
 
-[FR-02] Two endpoints mounted under the same ``/v1/tasks`` prefix as
-the FR-01 tasks router:
+[FR-02] Two handlers covering the run lifecycle:
 
-  * ``POST /{task_id}/run``  (scope=write) — AC-2.1
+  * ``trigger_run`` (scope=write) — AC-2.1
       Returns HTTP 202 + ``{"run_id": "<uuid>"}`` immediately. The
       actual subprocess run is scheduled via FastAPI's
-      ``BackgroundTasks`` (threadpool) so the route never blocks on
+      ``BackgroundTasks`` (threadpool) so the handler never blocks on
       subprocess exit (NFR-03).
 
-  * ``GET /{task_id}/runs`` (scope=read) — AC-2.5
+  * ``list_runs`` (scope=read) — AC-2.5
       Returns the task's run history ordered newest-first.
 
-Auth, problem+json error envelope, and the per-request repository
-accessors follow the same pattern as ``taskq.api.routes.tasks`` so the
-two routers stay independent (no cross-router coupling) per the SAD.
+These are plain functions registered on the FastAPI app by
+``taskq.api.app.create_app`` so the routes appear directly in
+``app.routes`` (FastAPI 0.141 wraps ``include_router`` calls in an
+``_IncludedRouter`` that hides prefixed paths from ``app.routes``,
+which the FR-04 AC-4.3 audit walks).
 
-Citations: SPEC.md §3 FR-02, §5.2, §8 #16; SAD.md §4 api/routes/runs;
-NFR-02 (no leak); NFR-03 (async correctness); NFR-06 (layer contract).
+[FR-04] Auth on every handler uses the SINGLE canonical
+``taskq.api.deps.require_scope`` dependency (AC-4.3) — same dependency
+as ``taskq.api.routes.tasks``. Scope hierarchy (AC-4.1) is enforced
+inside ``taskq.service.auth.verify_api_key``; insufficient scope maps
+to HTTP 403 + generic body via the shared dependency (AC-4.2,
+NFR-02 / SPEC §8 #6).
+
+Per-request repository accessors stay on the handler module so the
+handlers can be registered independently (no cross-router coupling,
+NFR-06).
+
+Citations: SPEC.md §3 FR-02, §3 FR-04, §5.2, §8 #16; SAD.md §4
+api/routes/runs; NFR-02 (no leak); NFR-03 (async correctness);
+NFR-06 (layer contract).
 """
 from __future__ import annotations
 
 import uuid
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Header, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, Request
 
+from taskq.api.deps import require_scope
 from taskq.api.problem import Problem
 from taskq.repository.results import TaskResultRepository
 from taskq.repository.tasks import TaskNotFound, TaskRepository
-from taskq.service.auth import InsufficientScope, InvalidAPIKey, verify_api_key
 from taskq.service.runner import TaskRunner
 
+# Back-compat shim: FR-02 tests still import ``router`` and
+# ``_require_scope`` from this module. The new direct-registration
+# pattern in ``taskq.api.app.create_app`` does NOT include this
+# router — the /v1/tasks/{id}/run + /runs handlers are registered
+# directly on the FastAPI app so they surface as ``APIRoute``
+# entries in ``app.routes`` for the FR-04 AC-4.3 audit.
 router = APIRouter()
 
 
-# ---------------------------------------------------------------------------
-# Auth dependency (mirrors tasks.py so the routers stay independent)
-# ---------------------------------------------------------------------------
-
-
 def _require_scope(scope: str):
-    """Build a FastAPI dependency that enforces an API-key scope.
+    """FR-02 back-compat factory — delegates to ``taskq.api.deps``.
 
-    - Missing / invalid key  -> 401 + problem+json (SPEC §8 #5)
-    - Valid key, wrong scope -> 403 + generic body (SPEC §8 #6)
-    - Valid + correct scope  -> returns the resolved auth context dict
+    FR-02 tests import this name to drive the 403 branch of the
+    admin-required dependency directly. Returns the SAME callable
+    shape as the new shared ``require_scope`` factory.
     """
-
-    def _dep(
-        x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"),
-    ) -> Dict[str, str]:
-        try:
-            return verify_api_key(x_api_key, scope_required=scope)
-        except InvalidAPIKey as exc:
-            raise Problem(
-                status=401,
-                title="Unauthorized",
-                detail="Invalid or missing API key.",
-                type="about:blank",
-            ) from exc
-        except InsufficientScope as exc:
-            # NFR-02: body must not reveal whether the target exists.
-            raise Problem(
-                status=403,
-                title="Forbidden",
-                detail="Operation not permitted.",
-                type="about:blank",
-            ) from exc
-
-    return _dep
+    return require_scope(scope)
 
 
 # ---------------------------------------------------------------------------
@@ -94,21 +86,20 @@ def _get_results_repo(request: Request) -> TaskResultRepository:
 
 
 # ---------------------------------------------------------------------------
-# Endpoints
+# Handlers
 # ---------------------------------------------------------------------------
 
 
-@router.post("/{task_id}/run", status_code=status.HTTP_202_ACCEPTED)
 def trigger_run(
     task_id: str,
     background_tasks: BackgroundTasks,
-    _auth: Dict[str, str] = Depends(_require_scope("write")),
+    _auth: Dict[str, str] = Depends(require_scope("write")),
     tasks_repo: TaskRepository = Depends(_get_tasks_repo),
     results_repo: TaskResultRepository = Depends(_get_results_repo),
 ) -> Dict[str, Any]:
     """AC-2.1 — POST /v1/tasks/{id}/run returns 202 + run_id.
 
-    The route does NOT block on subprocess exit (NFR-03); the actual
+    The handler does NOT block on subprocess exit (NFR-03); the actual
     execution is scheduled via FastAPI's BackgroundTasks, which runs in
     the threadpool AFTER the 202 response is sent. The HTTP-layer
     contract is preserved by inserting a pending ``task_results`` row
@@ -157,19 +148,23 @@ def trigger_run(
     return {"run_id": run_id}
 
 
-@router.get("/{task_id}/runs")
 def list_runs(
     task_id: str,
-    _auth: Dict[str, str] = Depends(_require_scope("read")),
+    _auth: Dict[str, str] = Depends(require_scope("read")),
     results_repo: TaskResultRepository = Depends(_get_results_repo),
 ) -> Dict[str, Any]:
     """AC-2.5 — GET /v1/tasks/{id}/runs returns history newest-first.
 
-    NFR-06: the route reaches ``task_results`` ONLY through the
-    repository layer (no SQL in the route).
+    NFR-06: the handler reaches ``task_results`` ONLY through the
+    repository layer (no SQL in the handler).
     """
     rows = results_repo.list_results_for_task(task_id=task_id)
     return {"runs": rows}
 
 
-__all__ = ["router"]
+__all__ = [
+    "trigger_run",
+    "list_runs",
+    "_get_tasks_repo",
+    "_get_results_repo",
+]
