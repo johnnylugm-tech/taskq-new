@@ -3,14 +3,22 @@
 [FR-01] Owns SQL access for FR-01; all ORM details are confined here
 (NFR-06). The repository enforces name uniqueness at the persistence
 layer (NFR-02) and returns a domain-level `DuplicateTaskName` so the
-service/route layer can map to HTTP 409. Citations: SPEC.md §3 FR-01,
-§8 #8 (uniqueness at persistence layer); SAD.md §4 repository layer.
+service/route layer can map to HTTP 409.
+
+[FR-06] Engine pool sizing + ``pool_pre_ping`` are read from
+``taskq.config.settings.Settings`` so the engine mirrors the
+``TASKQ_DB_POOL_SIZE`` / ``TASKQ_DB_POOL_PRE_PING`` env vars. The
+list() method eager-loads ``Task.results`` with ``joinedload`` so the
+SQL statement count stays CONSTANT regardless of row count (NFR-01,
+§8 #14). Citations: SPEC.md §3 FR-01 / FR-06, §8 #8 (uniqueness at
+persistence layer); SAD.md §4 repository layer.
 """
 from __future__ import annotations
 
 import base64
 import json
-from typing import Any, Dict, List, Optional, Tuple
+from contextlib import contextmanager
+from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 from sqlalchemy import delete, select
 from sqlalchemy.engine import Engine
@@ -93,6 +101,25 @@ def reset_db() -> None:
     Base.metadata.create_all(engine)
 
 
+# ---------- Session scope (open + close, caller manages commit/rollback) ----------
+
+
+@contextmanager
+def _session_scope(session_factory: sessionmaker) -> Iterator[Session]:
+    """Yield a fresh ``Session`` and close it on exit.
+
+    The caller is responsible for any commit / rollback semantics; this
+    helper only owns the open / close lifecycle so every repository
+    method follows the same connection-hygiene contract (SPEC §3 FR-06,
+    NFR-06 — Session never leaks out of the repository boundary).
+    """
+    session: Session = session_factory()
+    try:
+        yield session
+    finally:
+        session.close()
+
+
 # ---------- Cursor encoding (opaque token, base64(json)) ----------
 
 def _encode_cursor(payload: Dict[str, Any]) -> str:
@@ -131,28 +158,25 @@ class TaskRepository:
     def create(self, name: str, command: str) -> Dict[str, Any]:
         """Insert a new task row. Raises DuplicateTaskName on unique-violation."""
         task = Task(name=name, command=command)
-        session: Session = self._session_factory()
-        try:
+        with _session_scope(self._session_factory) as session:
             session.add(task)
-            session.commit()
+            try:
+                session.commit()
+            except IntegrityError as exc:
+                session.rollback()
+                raise DuplicateTaskName(
+                    f"task name already exists: {name}"
+                ) from exc
             session.refresh(task)
             return self._task_to_dict(task)
-        except IntegrityError as exc:
-            session.rollback()
-            raise DuplicateTaskName(f"task name already exists: {name}") from exc
-        finally:
-            session.close()
 
     def get(self, task_id: str) -> Dict[str, Any]:
         """Fetch a task by id. Raises TaskNotFound if absent."""
-        session: Session = self._session_factory()
-        try:
+        with _session_scope(self._session_factory) as session:
             task = session.get(Task, task_id)
             if task is None:
                 raise TaskNotFound(task_id)
             return self._task_to_dict(task)
-        finally:
-            session.close()
 
     def list(
         self,
@@ -175,8 +199,7 @@ class TaskRepository:
         if limit < 1:
             limit = 1
 
-        session: Session = self._session_factory()
-        try:
+        with _session_scope(self._session_factory) as session:
             # [FR-06] AC-6.4 — eager-load Task.results with joinedload
             # so the SQL statement count stays CONSTANT regardless of
             # row count and well below the N+1 failure threshold
@@ -221,22 +244,16 @@ class TaskRepository:
                 )
 
             return [self._task_to_dict(t) for t in page], next_cursor
-        finally:
-            session.close()
 
     def delete_task_row(self, task_id: str) -> None:
         """Delete the task row itself. Idempotent (no error if missing)."""
-        session: Session = self._session_factory()
-        try:
+        with _session_scope(self._session_factory) as session:
             session.execute(delete(Task).where(Task.id == task_id))
             session.commit()
-        finally:
-            session.close()
 
     def delete_results_for_task(self, task_id: str) -> int:
         """Delete task_result rows for a task. Returns rows removed (cascade)."""
-        session: Session = self._session_factory()
-        try:
+        with _session_scope(self._session_factory) as session:
             result = session.execute(
                 delete(TaskResult).where(TaskResult.task_id == task_id)
             )
@@ -245,27 +262,21 @@ class TaskRepository:
             # use ``getattr`` to keep type-checkers happy without compromising
             # the runtime value (``delete`` statements always populate it).
             return int(getattr(result, "rowcount", 0) or 0)
-        finally:
-            session.close()
 
     # ---- task_results ----
 
     def create_task_result(self, task_id: str, command: str) -> Dict[str, Any]:
         """Insert a task_result row."""
         row = TaskResult(task_id=task_id, command=command)
-        session: Session = self._session_factory()
-        try:
+        with _session_scope(self._session_factory) as session:
             session.add(row)
             session.commit()
             session.refresh(row)
             return self._result_to_dict(row)
-        finally:
-            session.close()
 
     def list_results_for_task(self, task_id: str) -> List[Dict[str, Any]]:
         """Return all task_result rows for a task (used to verify cascade)."""
-        session: Session = self._session_factory()
-        try:
+        with _session_scope(self._session_factory) as session:
             rows = (
                 session.execute(
                     select(TaskResult).where(TaskResult.task_id == task_id)
@@ -274,8 +285,6 @@ class TaskRepository:
                 .all()
             )
             return [self._result_to_dict(r) for r in rows]
-        finally:
-            session.close()
 
     # ---- helpers ----
 
