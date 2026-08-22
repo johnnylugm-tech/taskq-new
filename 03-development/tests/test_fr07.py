@@ -36,6 +36,7 @@ from __future__ import annotations
 
 import inspect
 import io
+import json
 import os
 import re
 import sys
@@ -969,3 +970,111 @@ def test_fr07_ac7_offline_sql_generation_covered(tmp_path: Path):
         "CREATE TABLE task_results" in full_sql
         or "create table task_results" in full_sql.lower()
     ), "AC-7.7 violated: offline SQL missing CREATE TABLE task_results (v3)"
+
+
+# ---------- Coverage test: v3 downgrade UPDATEs existing tasks row ----------
+#
+# NOT a TEST_SPEC.md function — adds coverage for the
+# ``_update_task_result_json`` branch in
+# ``v3_split_result_json_to_task_results.downgrade``. The spec test
+# ``test_fr07_ac5_round_trip_byte_identical_sample`` seeds ONLY
+# ``task_results`` (no ``tasks`` row), so the downgrade always hits
+# the back-create branch. This test seeds BOTH tables so the
+# existing-row UPDATE branch fires, covering lines 160/226 in v3.
+def test_v3_downgrade_updates_existing_tasks_row(tmp_path: Path):
+    """Cover ``_update_task_result_json`` (v3 line 160) and its call
+    site at line 226.
+
+    Setup:
+      - upgrade head (reaches v3 schema: result_json dropped, task_results present)
+      - INSERT a tasks row AND a task_results row with matching task_id
+
+    Action:
+      - downgrade -1 (v3 -> v2) — must hit the
+        ``_update_task_result_json`` branch because the tasks row
+        already exists.
+
+    Assertion:
+      - the existing tasks row is updated in place (id preserved)
+      - ``tasks.result_json`` carries the JSON envelope (added back
+        by step 1 of downgrade)
+      - the JSON envelope has the same id / task_id / command /
+        exit_code / stdout_tail columns the upgrade reads back
+    """
+    db_path = tmp_path / "ac_existing.db"
+    db_url = _sqlite_url(db_path)
+    cfg = _alembic_cfg(db_url)
+
+    from alembic import command
+    from sqlalchemy import create_engine, text
+
+    engine = create_engine(db_url)
+
+    # 1. upgrade head (v3 schema).
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        command.upgrade(cfg, "head")
+    buf.getvalue()
+
+    # 2. Seed BOTH a tasks row AND a matching task_results row.
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                "INSERT INTO tasks (id, name, command, status) "
+                "VALUES (:id, :name, :command, :status)"
+            ),
+            {
+                "id": "existing-task-1",
+                "name": "existing-1",
+                "command": "echo existing",
+                "status": "done",
+            },
+        )
+        conn.execute(
+            text(
+                "INSERT INTO task_results (id, task_id, command, "
+                "exit_code, stdout_tail) VALUES (:id, :task_id, "
+                ":command, :exit_code, :stdout_tail)"
+            ),
+            {
+                "id": "tr-existing-1",
+                "task_id": "existing-task-1",
+                "command": "echo existing",
+                "exit_code": 0,
+                "stdout_tail": "existing-stdout-line\n",
+            },
+        )
+
+    # 3. downgrade -1 — must hit _update_task_result_json.
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        command.downgrade(cfg, "-1")
+    buf.getvalue()
+
+    # 4. Verify the existing tasks row was UPDATED in place
+    #    (not back-created with a different id).
+    with engine.begin() as conn:
+        row = conn.execute(
+            text(
+                "SELECT id, name, result_json FROM tasks "
+                "WHERE id = :tid"
+            ),
+            {"tid": "existing-task-1"},
+        ).fetchone()
+    assert row is not None, (
+        "Coverage: tasks row disappeared after downgrade — "
+        "_update_task_result_json branch may not have executed"
+    )
+    assert row.id == "existing-task-1", (
+        f"Coverage: tasks row id changed across downgrade; "
+        f"expected existing row update, got id={row.id!r}"
+    )
+    assert row.result_json is not None, (
+        "Coverage: tasks.result_json was not populated by the "
+        "downgrade UPDATE branch (line 160/226 uncovered)"
+    )
+    payload = json.loads(row.result_json)
+    assert payload["task_id"] == "existing-task-1"
+    assert payload["exit_code"] == 0
+    assert payload["stdout_tail"] == "existing-stdout-line\n"
+    assert payload["command"] == "echo existing"
