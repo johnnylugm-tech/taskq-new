@@ -1,8 +1,8 @@
 # Harness Methodology — Session Handover
 
-**Checkpoint**: `P2-exit-20260821`  
+**Checkpoint**: `P2-exit-20260822`  
 **Phase**: P2 — Architecture & Design  
-**Generated**: 2026-08-21T21:07:21Z
+**Generated**: 2026-08-22T07:43:38Z
 
 > ⚠️  **開始下一個工作階段前，請先執行 `/compact` 壓縮上下文**，再從「接下來的工作」繼續。
 
@@ -118,28 +118,32 @@ P2 phase completed — pushed for record.
   - ? / persist-TEST_SPEC.md-try1: **complete**
   - ? / sab-generation: **complete**
   - ? / aci-post-sab: **complete**
+  - ? / persist-TEST_SPEC.md-try2: **complete**
+  - ? / preview-next-phase-r1: **complete**
+  - ? / preview-fix-r1: **complete**
+  - ? / preview-next-phase-r2: **complete**
 
 **Recently Committed Files:**
-  - `01-requirements/SRS.md`
+  - `00-summary/Phase2_STAGE_PASS.md`
   - `harness`
-  - `01-requirements/TRACEABILITY_MATRIX.md`
+  - `.methodology/SAB.json`
+  - `.methodology/agent_b_approvals/ADR.md.json`
+  - `.methodology/agent_b_approvals/SAD.md.json`
+  - `.methodology/agent_b_approvals/TEST_SPEC.md.json`
   - `.methodology/state.json`
+  - `.methodology/trace/attestation.json`
+  - `01-requirements/SRS.md`
+  - `02-architecture/SAD.md`
+  - `02-architecture/TEST_SPEC.md`
+  - `02-architecture/adr/ADR.md`
+  - `HANDOVER.md`
+  - `TEST_INVENTORY.yaml`
+  - `01-requirements/TRACEABILITY_MATRIX.md`
   - `.methodology/fr_progress.json`
   - `00-summary/Phase1_STAGE_PASS.md`
   - `CLAUDE.md`
-  - `HANDOVER.md`
   - `.methodology/degradations.jsonl`
   - `.methodology/workflow_blocks.jsonl`
-  - `.github/workflows/harness_quality_gate.yml`
-  - `.methodology/agent_b_approvals/SPEC_TRACKING.md.json`
-  - `.methodology/agent_b_approvals/SRS.md.json`
-  - `.methodology/agent_b_approvals/TEST_INVENTORY.yaml.json`
-  - `.methodology/agent_b_approvals/TRACEABILITY_MATRIX.md.json`
-  - `.methodology/.state.lock`
-  - `01-requirements/SPEC_TRACKING.md`
-  - `TEST_INVENTORY.yaml`
-  - `srs_vs_spec_diff.json`
-  - `.gitignore`
 
 ## 接下來的工作
 

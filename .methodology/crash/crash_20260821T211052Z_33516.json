@@ -1,0 +1,19 @@
+{
+  "timestamp": "20260821T211052Z",
+  "exc_type": "BrokenPipeError",
+  "exc_message": "[Errno 32] Broken pipe",
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/johnny/projects/taskq-new/harness/harness_cli.py\", line 374, in _dispatch\n    return args.func(args)\n           ^^^^^^^^^^^^^^^\n  File \"/Users/johnny/projects/taskq-new/harness/cli/phase_cmds.py\", line 827, in cmd_advance_phase\n    record_degradation(\n  File \"/Users/johnny/projects/taskq-new/harness/core/degradation_ledger.py\", line 77, in record_degradation\n    print(f\"[DEGRADED] {component}: {what}{suffix}\", file=sys.stderr)\nBrokenPipeError: [Errno 32] Broken pipe\n",
+  "argv": [
+    "advance-phase",
+    "--completed",
+    "2",
+    "--project",
+    "/Users/johnny/projects/taskq-new"
+  ],
+  "cwd": "/Users/johnny/projects/taskq-new",
+  "project": "/Users/johnny/projects/taskq-new",
+  "harness_git_sha": "6181d522bbb25cd9ee1e891788b55c0cefb236bd",
+  "python_version": "3.11.15",
+  "repro_command": "/Users/johnny/projects/taskq-new/.venv/bin/python /Users/johnny/projects/taskq-new/harness/harness_cli.py advance-phase --completed 2 --project /Users/johnny/projects/taskq-new",
+  "maintenance_prompt": "harness-methodology crashed with BrokenPipeError: [Errno 32] Broken pipe\nReproduce: /Users/johnny/projects/taskq-new/.venv/bin/python /Users/johnny/projects/taskq-new/harness/harness_cli.py advance-phase --completed 2 --project /Users/johnny/projects/taskq-new\nDiagnose the root cause in harness-methodology's own code (not the target project's), write a regression test that reproduces this crash, then fix it. Follow SKILL.md's Phase 9 CR-BUG maintenance flow (`harness_cli.py cr-open --type bug ...`)."
+}

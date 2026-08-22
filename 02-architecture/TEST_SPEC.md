@@ -683,41 +683,41 @@ the round-trip migration is a bijection on the `task_results` ↔
 
 | # | NFR | Test Function | Layer | Title |
 |---|---|---|---|---|
-| 1 | NFR-02 | `test_nfr02_ac1_shell_true_eval_exec_grep_zero_hits` | lint | grep gate for shell=True / eval( / exec( in src/ |
-| 2 | NFR-02 | `test_nfr02_ac2_string_concat_sql_grep_zero_hits` | lint | grep gate for f-string / % / + SQL composition |
-| 3 | NFR-02 | `test_nfr02_ac3_api_keys_hashed_hmac_compare_digest` | unit | api_keys keyed via sha256 + hmac.compare_digest (FR-03 unit mirror) |
-| 4 | NFR-02 | `test_nfr02_ac6_cors_deny_by_default_with_taskq_cors_origins` | unit | CORS default-deny + allowlist via TASKQ_CORS_ORIGINS |
-| 5 | NFR-02 | `test_nfr02_ac7_bandit_zero_high_zero_medium` | lint | bandit -r src/ 0 HIGH / 0 MEDIUM |
-| 6 | NFR-03 | `test_nfr03_ac1_txn_boundary_context_manager` | unit | per-request txn boundary via context manager |
-| 7 | NFR-03 | `test_nfr03_ac2_no_bare_except_except_exception_pass` | lint | no bare except: / except Exception: pass in src/ |
-| 8 | NFR-03 | `test_nfr03_ac3_cancelled_error_reraise` | unit | asyncio.CancelledError re-raise (FR-08 unit mirror) |
-| 9 | NFR-04 | `test_nfr04_ac1_pattern_redaction_replaced_with_redacted` | unit | redact() applies NFR-04 regex line-level with [REDACTED] |
-| 10 | NFR-04 | `test_nfr04_ac2_db_conn_string_absent_from_logs` | unit | DB connection string absent from logs / metrics |
-| 11 | NFR-05 | `test_nfr05_ac1_docstring_coverage_100_percent_fr_nfr_referenced` | unit | docstring coverage 100% with [FR-XX]/[NFR-XX] token |
-| 12 | NFR-05 | `test_nfr05_ac2_openapi_summary_description_on_each_endpoint` | unit | OpenAPI summary + description asserted on every endpoint |
-| 13 | NFR-06 | `test_nfr06_ac1_importlinter_layers_contract_api_service_repository_models` | unit | .importlinter layers contract api > service > repository > models |
-| 14 | NFR-06 | `test_nfr06_ac2_sqlalchemy_forbidden_outside_repository` | unit | forbidden contract: sqlalchemy outside repository |
-| 15 | NFR-06 | `test_nfr06_ac3_lint_imports_exit_zero` | unit | lint-imports exit 0 |
-| 16 | NFR-06 | `test_nfr06_ac4_no_wildcard_ignore_imports_or_contract_downgrade` | unit | no ignore_imports wildcards or contract downgrade |
-| 17 | NFR-07 | `test_nfr07_ac1_requirements_txt_eq_pinned` | unit | requirements.txt `==`-pinned |
-| 18 | NFR-07 | `test_nfr07_ac2_license_allowlist_mit_bsd_apache_psf` | unit | license allowlist {MIT, BSD-2/3, Apache-2.0, PSF} |
-| 19 | NFR-07 | `test_nfr07_ac3_pip_licenses_full_tree_with_system` | unit | pip-licenses --format=json --with-system full tree |
-| 20 | NFR-07 | `test_nfr07_ac4_sbom_artifact_name_version_license_direct_transitive` | unit | SBOM artifact with name / version / license / direct|transitive |
-| 21 | NFR-08 | `test_nfr08_ac1_harness_config_mutation_testing_true` | unit | harness_config.json features.mutation_testing: true |
-| 22 | NFR-08 | `test_nfr08_ac2_mutation_score_ge_70_services_repositories` | mutation | mutation score ≥ 70 over services + repositories |
-| 23 | NFR-08 | `test_nfr08_ac3_scope_restriction_rationale_recorded` | unit | scope-restriction rationale recorded in harness_config.json |
-| 24 | NFR-09 | `test_nfr09_ac1_no_skip_skipif_xfail_assertion_free_stub` | unit | no pytest.skip / skipif / xfail / assertion-free stub |
-| 25 | NFR-09 | `test_nfr09_ac2_pytest_skipped_count_zero` | unit | pytest tests -q skipped == 0 |
-| 26 | NFR-09 | `test_nfr09_ac3_each_test_has_at_least_one_assert` | unit | every test function ≥ 1 assert |
-| 27 | NFR-09 | `test_nfr09_ac4_no_ignore_deselect_collect_ignore_testpaths_removal` | unit | no --ignore / -k / --deselect / collect_ignore / testpaths removal |
-| 28 | NFR-09 | `test_nfr09_ac6_no_skip_on_difficulty` | unit | migration logic NOT downgraded to skip on difficulty |
-| 29 | NFR-09 | `test_nfr09_ac7_verified_only_after_run_and_pass` | unit | TRACEABILITY_MATRIX.md VERIFIED only after test runs + passes |
-| 30 | NFR-10 | `test_nfr10_ac1_integration_line_coverage_ge_80_percent` | integration | tests/integration/ line coverage ≥ 80% over src/ |
-| 31 | NFR-10 | `test_nfr10_ac2_asgi_transport_driver_no_direct_handler_call` | integration | httpx.ASGITransport driver; no direct handler call |
-| 32 | NFR-10 | `test_nfr10_ac3_error_code_matrix_401_403_404_409_422_429_503` | integration | full error-code matrix 401/403/404/409/422/429/503 |
-| 33 | NFR-11 | `test_nfr11_ac1_project_mi_ge_80_cc_le_10` | lint | project MI ≥ 80; CC ≤ 10 |
-| 34 | NFR-11 | `test_nfr11_ac2_single_file_le_400_dir_le_15` | lint | file ≤ 400 lines; dir ≤ 15 files |
-| 35 | NFR-11 | `test_nfr11_ac3_api_handler_le_40_lines` | lint | API handler ≤ 40 lines |
+| 1 | NFR-02 | `test_nfr02_ac1_shell_true_eval_exec_grep_zero_hits` | lint | grep gate for shell=True / eval( / exec( in src/ (AC-N2.1) |
+| 2 | NFR-02 | `test_nfr02_ac2_string_concat_sql_grep_zero_hits` | lint | grep gate for f-string / % / + SQL composition (AC-N2.2) |
+| 3 | NFR-02 | `test_nfr02_ac3_api_keys_hashed_hmac_compare_digest` | unit | api_keys keyed via sha256 + hmac.compare_digest (FR-03 unit mirror) (AC-N2.3) |
+| 4 | NFR-02 | `test_nfr02_ac6_cors_deny_by_default_with_taskq_cors_origins` | unit | CORS default-deny + allowlist via TASKQ_CORS_ORIGINS (AC-N2.6) |
+| 5 | NFR-02 | `test_nfr02_ac7_bandit_zero_high_zero_medium` | lint | bandit -r src/ 0 HIGH / 0 MEDIUM (AC-N2.7) |
+| 6 | NFR-03 | `test_nfr03_ac1_txn_boundary_context_manager` | unit | per-request txn boundary via context manager (AC-N3.1) |
+| 7 | NFR-03 | `test_nfr03_ac2_no_bare_except_except_exception_pass` | lint | no bare except: / except Exception: pass in src/ (AC-N3.2) |
+| 8 | NFR-03 | `test_nfr03_ac3_cancelled_error_reraise` | unit | asyncio.CancelledError re-raise (FR-08 unit mirror) (AC-N3.3) |
+| 9 | NFR-04 | `test_nfr04_ac1_pattern_redaction_replaced_with_redacted` | unit | redact() applies NFR-04 regex line-level with [REDACTED] (AC-N4.1) |
+| 10 | NFR-04 | `test_nfr04_ac2_db_conn_string_absent_from_logs` | unit | DB connection string absent from logs / metrics (AC-N4.2) |
+| 11 | NFR-05 | `test_nfr05_ac1_docstring_coverage_100_percent_fr_nfr_referenced` | unit | docstring coverage 100% with [FR-XX]/[NFR-XX] token (AC-N5.1) |
+| 12 | NFR-05 | `test_nfr05_ac2_openapi_summary_description_on_each_endpoint` | unit | OpenAPI summary + description asserted on every endpoint (AC-N5.2) |
+| 13 | NFR-06 | `test_nfr06_ac1_importlinter_layers_contract_api_service_repository_models` | unit | .importlinter layers contract api > service > repository > models (AC-N6.1) |
+| 14 | NFR-06 | `test_nfr06_ac2_sqlalchemy_forbidden_outside_repository` | unit | forbidden contract: sqlalchemy outside repository (AC-N6.2) |
+| 15 | NFR-06 | `test_nfr06_ac3_lint_imports_exit_zero` | unit | lint-imports exit 0 (AC-N6.3) |
+| 16 | NFR-06 | `test_nfr06_ac4_no_wildcard_ignore_imports_or_contract_downgrade` | unit | no ignore_imports wildcards or contract downgrade (AC-N6.4) |
+| 17 | NFR-07 | `test_nfr07_ac1_requirements_txt_eq_pinned` | unit | requirements.txt `==`-pinned (AC-N7.1) |
+| 18 | NFR-07 | `test_nfr07_ac2_license_allowlist_mit_bsd_apache_psf` | unit | license allowlist {MIT, BSD-2/3, Apache-2.0, PSF} (AC-N7.2) |
+| 19 | NFR-07 | `test_nfr07_ac3_pip_licenses_full_tree_with_system` | unit | pip-licenses --format=json --with-system full tree (AC-N7.3) |
+| 20 | NFR-07 | `test_nfr07_ac4_sbom_artifact_name_version_license_direct_transitive` | unit | SBOM artifact with name / version / license / direct|transitive (AC-N7.4) |
+| 21 | NFR-08 | `test_nfr08_ac1_harness_config_mutation_testing_true` | unit | harness_config.json features.mutation_testing: true (AC-N8.1) |
+| 22 | NFR-08 | `test_nfr08_ac2_mutation_score_ge_70_services_repositories` | mutation | mutation score ≥ 70 over services + repositories (AC-N8.2) |
+| 23 | NFR-08 | `test_nfr08_ac3_scope_restriction_rationale_recorded` | unit | scope-restriction rationale recorded in harness_config.json (AC-N8.3) |
+| 24 | NFR-09 | `test_nfr09_ac1_no_skip_skipif_xfail_assertion_free_stub` | unit | no pytest.skip / skipif / xfail / assertion-free stub (AC-N9.1) |
+| 25 | NFR-09 | `test_nfr09_ac2_pytest_skipped_count_zero` | unit | pytest tests -q skipped == 0 (AC-N9.2) |
+| 26 | NFR-09 | `test_nfr09_ac3_each_test_has_at_least_one_assert` | unit | every test function ≥ 1 assert (AC-N9.3) |
+| 27 | NFR-09 | `test_nfr09_ac4_no_ignore_deselect_collect_ignore_testpaths_removal` | unit | no --ignore / -k / --deselect / collect_ignore / testpaths removal (AC-N9.4) |
+| 28 | NFR-09 | `test_nfr09_ac6_no_skip_on_difficulty` | unit | migration logic NOT downgraded to skip on difficulty (AC-N9.6) |
+| 29 | NFR-09 | `test_nfr09_ac7_verified_only_after_run_and_pass` | unit | TRACEABILITY_MATRIX.md VERIFIED only after test runs + passes (AC-N9.7) |
+| 30 | NFR-10 | `test_nfr10_ac1_integration_line_coverage_ge_80_percent` | integration | tests/integration/ line coverage ≥ 80% over src/ (AC-N10.1) |
+| 31 | NFR-10 | `test_nfr10_ac2_asgi_transport_driver_no_direct_handler_call` | integration | httpx.ASGITransport driver; no direct handler call (AC-N10.2) |
+| 32 | NFR-10 | `test_nfr10_ac3_error_code_matrix_401_403_404_409_422_429_503` | integration | full error-code matrix 401/403/404/409/422/429/503 (AC-N10.3) |
+| 33 | NFR-11 | `test_nfr11_ac1_project_mi_ge_80_cc_le_10` | lint | project MI ≥ 80; CC ≤ 10 (AC-N11.1) |
+| 34 | NFR-11 | `test_nfr11_ac2_single_file_le_400_dir_le_15` | lint | file ≤ 400 lines; dir ≤ 15 files (AC-N11.2) |
+| 35 | NFR-11 | `test_nfr11_ac3_api_handler_le_40_lines` | lint | API handler ≤ 40 lines (AC-N11.3) |
 
 ---
 
