@@ -41,8 +41,13 @@ from typing import Any, Dict, List
 import pytest
 
 # ---- Import path bootstrap ----
+# Test file lives at 03-development/tests/test_fr06.py; the package
+# source is at 03-development/src. We resolve to the project root so
+# both ``from taskq...`` imports AND the in-process grep over
+# ``03-development/src/taskq/service`` resolve correctly.
 _THIS_DIR = Path(__file__).resolve().parent
-_SRC_DIR = _THIS_DIR / "src"
+_PROJECT_ROOT = _THIS_DIR.parent
+_SRC_DIR = _PROJECT_ROOT / "src"
 if str(_SRC_DIR) not in sys.path:
     sys.path.insert(0, str(_SRC_DIR))
 
