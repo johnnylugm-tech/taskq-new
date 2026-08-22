@@ -2,9 +2,9 @@
 # returncode: 0
 # agent_score: 100.0 | threshold: 80.0
 
-........................................................................ [ 47%]
-........................................................................ [ 94%]
-........                                                                 [100%]
+........................................................................ [ 41%]
+........................................................................ [ 83%]
+............................                                             [100%]
 ================================ tests coverage ================================
 ______________ coverage: platform darwin, python 3.11.15-final-0 _______________
 
@@ -12,11 +12,11 @@ Name                                                                            
 --------------------------------------------------------------------------------------------------------------------
 03-development/src/taskq/__init__.py                                                       0      0   100%
 03-development/src/taskq/api/__init__.py                                                   0      0   100%
-03-development/src/taskq/api/app.py                                                       24      0   100%
+03-development/src/taskq/api/app.py                                                       25      0   100%
 03-development/src/taskq/api/deps.py                                                      15      0   100%
-03-development/src/taskq/api/handlers.py                                                  25      2    92%   61-62
-03-development/src/taskq/api/middleware.py                                                56      0   100%
-03-development/src/taskq/api/problem.py                                                   22      1    95%   55
+03-development/src/taskq/api/handlers.py                                                  35      0   100%
+03-development/src/taskq/api/middleware.py                                               100      0   100%
+03-development/src/taskq/api/problem.py                                                   18      0   100%
 03-development/src/taskq/api/routes/__init__.py                                            0      0   100%
 03-development/src/taskq/api/routes/health.py                                             53      0   100%
 03-development/src/taskq/api/routes/metrics.py                                             8      0   100%
@@ -52,5 +52,5 @@ Name                                                                            
 03-development/src/taskq/service/runner.py                                               174      0   100%
 03-development/src/taskq/service/tasks.py                                                 36      0   100%
 --------------------------------------------------------------------------------------------------------------------
-TOTAL                                                                                   1204     12    99%
-152 passed in 10.09s
+TOTAL                                                                                   1255      9    99%
+172 passed in 10.39s
