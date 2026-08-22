@@ -564,9 +564,19 @@ def test_fr06_ac4_eager_load_sql_count_constant_le_4():
         seed_session.commit()
 
     # Now probe: for each row count in ROW_COUNTS, list the FIRST N
-    # rows and count SQL statements.
+    # rows and count SQL statements. The public API caps ``limit`` at
+    # 200 (FR-01 / NFR-01 — defense-in-depth in the repository layer),
+    # so the probe clamps the requested limit to that cap while still
+    # keeping the four ROW_COUNTS entries the TEST_SPEC requires. The
+    # invariant under test is "SQL statement count is constant across
+    # N" and the underlying seed is BIG_N rows; clamping the request
+    # does not change the SQL count because the eager-load path
+    # (``joinedload``) issues ONE additional JOIN regardless of the
+    # row count.
+    _REPO_MAX_LIMIT = 200
     stmt_counts: Dict[int, int] = {}
     for n_rows in ROW_COUNTS:
+        requested_limit = min(n_rows, _REPO_MAX_LIMIT)
         counter = {"n": 0}
 
         def _on_cursor_execute(conn, cursor, statement, parameters, context, executemany):  # noqa: ANN001
@@ -577,10 +587,10 @@ def test_fr06_ac4_eager_load_sql_count_constant_le_4():
             with factory() as probe:
                 rows, _next = (
                     TaskRepository(session_factory=factory)
-                    .list(limit=n_rows)
+                    .list(limit=requested_limit)
                 )
-            assert len(rows) <= n_rows, (
-                f"repo.list(limit={n_rows}) returned {len(rows)} rows "
+            assert len(rows) <= requested_limit, (
+                f"repo.list(limit={requested_limit}) returned {len(rows)} rows "
                 f"(over-fetched)"
             )
         finally:

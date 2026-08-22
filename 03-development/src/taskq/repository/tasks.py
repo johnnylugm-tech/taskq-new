@@ -198,6 +198,8 @@ class TaskRepository:
         """
         if limit < 1:
             limit = 1
+        if limit > 200:
+            raise ValueError("limit must be <= 200")
 
         with _session_scope(self._session_factory) as session:
             # [FR-06] AC-6.4 — eager-load Task.results with joinedload
