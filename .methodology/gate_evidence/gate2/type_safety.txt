@@ -1,0 +1,46 @@
+{
+    "version": "1.1.409",
+    "time": "1787438736747",
+    "generalDiagnostics": [
+        {
+            "file": "/Users/johnny/projects/taskq-new/03-development/src/taskq/migrations/env.py",
+            "severity": "error",
+            "message": "Argument of type \"str\" cannot be assigned to parameter \"target_metadata\" of type \"MetaData | Sequence[MetaData] | None\" in function \"configure\"\n  Type \"str\" is not assignable to type \"MetaData | Sequence[MetaData] | None\"\n    \"str\" is not assignable to \"MetaData\"\n    \"str\" is not assignable to \"Sequence[MetaData]\"\n      Type parameter \"_T_co@Sequence\" is covariant, but \"str\" is not a subtype of \"MetaData\"\n        \"str\" is not assignable to \"MetaData\"\n    \"str\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 93,
+                    "character": 24
+                },
+                "end": {
+                    "line": 93,
+                    "character": 39
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/johnny/projects/taskq-new/03-development/src/taskq/migrations/env.py",
+            "severity": "error",
+            "message": "Argument of type \"str\" cannot be assigned to parameter \"target_metadata\" of type \"MetaData | Sequence[MetaData] | None\" in function \"configure\"\n  Type \"str\" is not assignable to type \"MetaData | Sequence[MetaData] | None\"\n    \"str\" is not assignable to \"MetaData\"\n    \"str\" is not assignable to \"Sequence[MetaData]\"\n      Type parameter \"_T_co@Sequence\" is covariant, but \"str\" is not a subtype of \"MetaData\"\n        \"str\" is not assignable to \"MetaData\"\n    \"str\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 118,
+                    "character": 28
+                },
+                "end": {
+                    "line": 118,
+                    "character": 43
+                }
+            },
+            "rule": "reportArgumentType"
+        }
+    ],
+    "summary": {
+        "filesAnalyzed": 42,
+        "errorCount": 2,
+        "warningCount": 0,
+        "informationCount": 0,
+        "timeInSec": 1.219
+    }
+}
+

@@ -1,1127 +1,569 @@
-# TEST_INVENTORY.yaml — Phase 1 SSOT for test naming (1:1 with TRACEABILITY_MATRIX.md §2)
-#
-# Schema: matches harness contract (harness/templates/TEST_INVENTORY.yaml v1.1)
-# — top-level `fr_tests:` and `cross_cutting:` keys grouped by FR/NFR →
-# layer → [test names]. These are read by the harness parser
-# (harness/core/quality_gate/spec_coverage.py::_flatten_test_names) to
-# enforce P1 Naming Authority against P2's TEST_SPEC.md.
-#
-# The `test_inventory:` block below is an EXTENSION on top of the contract:
-# it preserves per-AC traceability metadata (tc_id, ac, test_file,
-# cross_ref_frs, cross_ref_nfrs, ac_summary) used by Phase-1 review tooling.
-# The parser does NOT read `test_inventory:` — every test name there MUST
-# also appear under fr_tests or cross_cutting above.
-#
-# Each entry corresponds to exactly one AC enumerated in
-# `01-requirements/TRACEABILITY_MATRIX.md` §2 (AC ↔ Test-Name Mapping).
-# Matrix §2 has 22 rows (10 FR + 12 NFR); ranges like `AC-1.1..AC-1.10`
-# are expanded into individual `tc_id` entries below.
-#
-# Naming convention: `it('test_frNN_acK_descriptive')` per CLAUDE.md
-# §Language (D4 spec-coverage matches test titles). This file is the
-# P1-derived naming authority that P2 `derive_test_cases.md` preserves
-# verbatim in `02-architecture/TEST_SPEC.md`, and P4 expands into
-# concrete tests.
-#
-# Coverage invariants (must hold after any edit):
-#   by_fr_total  ==  sum(by_fr.<FR>.tc_count for FR in 22 FRs/NFRs)
-#   by_layer_total == sum(by_layer.<L>.count for L in {unit, integration, mutation, benchmark, lint})
-#   total_test_cases == sum of all enumerated tc_ids
-#   len(flatten(fr_tests) ∪ flatten(cross_cutting)) == 100
-#   Every name in fr_tests ∪ cross_cutting MUST appear in test_inventory.tests[*].test_name
-
-format_version: "2.1"  # harness contract v1.1 schema + extended test_inventory.tests[] metadata
-generator: "Agent A (Requirements Engineer, Round 2)"
-generated_at: "2026-08-22"
-mapping_source: "01-requirements/TRACEABILITY_MATRIX.md §2 (AC ↔ Test-Name Mapping)"
-mapping_section2_row_count: 22
-naming_convention_root:
-  FR: "test_frNN_acK_<descriptive>"
-  NFR: "test_nfrNN_acK_<descriptive>"
-
-# === HARNESS CONTRACT SCHEMA (harness/templates/TEST_INVENTORY.yaml v1.1) ===
-# This section is the P1 Naming Authority. The harness parser
-# (core.quality_gate.spec_coverage._flatten_test_names) reads ONLY these keys.
+schema_version: '1.0'
 fr_tests:
   FR-01:
     integration:
-      - test_fr01_ac1_post_creates_task_201
-      - test_fr01_ac2_post_no_api_key_returns_401
-      - test_fr01_ac3_post_invalid_body_returns_422
-      - test_fr01_ac4_post_duplicate_name_returns_409
-      - test_fr01_ac5_get_existing_returns_200
-      - test_fr01_ac6_get_unknown_returns_404
-      - test_fr01_ac7_list_supports_cursor_pagination
-      - test_fr01_ac8_list_limit_over_200_returns_422
-      - test_fr01_ac9_delete_write_scope_returns_403_no_leak
-      - test_fr01_ac10_delete_admin_cascades_results
+    - test_fr01_ac1_post_creates_task_201
+    - test_fr01_ac2_post_no_api_key_returns_401
+    - test_fr01_ac3_post_invalid_body_returns_422
+    - test_fr01_ac4_post_duplicate_name_returns_409
+    - test_fr01_ac5_get_existing_returns_200
+    - test_fr01_ac6_get_unknown_returns_404
+    - test_fr01_ac7_list_supports_cursor_pagination
+    - test_fr01_ac8_list_limit_over_200_returns_422
+    - test_fr01_ac9_delete_write_scope_returns_403_no_leak
+    - test_fr01_ac10_delete_admin_cascades_results
   FR-02:
     integration:
-      - test_fr02_ac1_run_returns_202_with_run_id
-      - test_fr02_ac3_state_machine_done_failed_timeout
-      - test_fr02_ac4_results_persisted_to_task_results
-      - test_fr02_ac5_get_runs_newest_first
+    - test_fr02_ac1_run_returns_202_with_run_id
+    - test_fr02_ac4_results_persisted_to_task_results
+    - test_fr02_ac5_get_runs_newest_first
     unit:
-      - test_fr02_ac2_subprocess_exec_no_shell_true
+    - test_fr02_ac2_subprocess_exec_no_shell_true
   FR-03:
     integration:
-      - test_fr03_ac1_missing_or_invalid_key_returns_401
-      - test_fr03_ac4_create_prints_plaintext_once
-      - test_fr03_ac5_revoked_key_invalid
-      - test_fr03_ac6_healthz_readyz_no_auth
+    - test_fr03_ac1_missing_or_invalid_key_returns_401
+    - test_fr03_ac4_create_prints_plaintext_once
+    - test_fr03_ac5_revoked_key_invalid
+    - test_fr03_ac6_healthz_readyz_no_auth
     unit:
-      - test_fr03_ac2_key_hash_sha256_64hex_no_plaintext
-      - test_fr03_ac3_compare_digest_constant_time
+    - test_fr03_ac2_key_hash_sha256_64hex_no_plaintext
+    - test_fr03_ac3_compare_digest_constant_time
   FR-04:
     integration:
-      - test_fr04_ac2_insufficient_scope_403_no_leak
+    - test_fr04_ac2_insufficient_scope_403_no_leak
     unit:
-      - test_fr04_ac1_scope_hierarchy_read_write_admin
-      - test_fr04_ac3_single_dependency_audit
+    - test_fr04_ac1_scope_hierarchy_read_write_admin
+    - test_fr04_ac3_single_dependency_audit
   FR-05:
     integration:
-      - test_fr05_ac2_overflow_returns_429_with_retry_after
-      - test_fr05_ac4_healthz_readyz_rate_limit_exempt
+    - test_fr05_ac2_overflow_returns_429_with_retry_after
+    - test_fr05_ac4_healthz_readyz_rate_limit_exempt
     unit:
-      - test_fr05_ac1_bucket_config_burst_per_sec
-      - test_fr05_ac3_db_backed_row_level_lock
+    - test_fr05_ac1_bucket_config_burst_per_sec
+    - test_fr05_ac3_db_backed_row_level_lock
   FR-06:
     integration:
-      - test_fr06_ac4_eager_load_sql_count_constant_le_4
+    - test_fr06_ac4_eager_load_sql_count_constant_le_4
     unit:
-      - test_fr06_ac1_repository_only_data_access
-      - test_fr06_ac2_one_session_per_request_context_manager
-      - test_fr06_ac3_no_string_concat_sql_grep_gate
-      - test_fr06_ac5_pool_size_and_pre_ping
+    - test_fr06_ac1_repository_only_data_access
+    - test_fr06_ac2_one_session_per_request_context_manager
+    - test_fr06_ac3_no_string_concat_sql_grep_gate
+    - test_fr06_ac5_pool_size_and_pre_ping
   FR-07:
     integration:
-      - test_fr07_ac1_v1_creates_tasks_api_keys_tables
-      - test_fr07_ac2_v2_adds_tags_task_tags_unique_index
-      - test_fr07_ac3_v3_migrates_tasks_result_json_to_task_results
-      - test_fr07_ac4_upgrade_head_downgrade_base_exit_zero
-      - test_fr07_ac5_round_trip_byte_identical_sample
-    unit:
-      - test_fr07_ac6_no_destructive_shortcut_drop_table
-      - test_fr07_ac7_offline_sql_generation_covered
-  FR-08:
-    integration:
-      - test_fr08_ac1_task_group_graceful_drain
-      - test_fr08_ac2_max_concurrent_cap_queues_overflow
-      - test_fr08_ac3_timeout_kills_subprocess_no_orphans
-    unit:
-      - test_fr08_ac4_cancelled_error_propagates
-  FR-09:
-    integration:
-      - test_fr09_ac1_healthz_returns_200_status_ok
-      - test_fr09_ac2_readyz_db_and_alembic_head_check
-      - test_fr09_ac3_metrics_admin_scope
-  FR-10:
-    integration:
-      - test_fr10_ac3_detail_no_sql_stack_path_leak
-    unit:
-      - test_fr10_ac1_problem_json_content_type
-      - test_fr10_ac2_body_fields_type_title_status_detail_instance_correlation_id
-      - test_fr10_ac4_correlation_id_mirrored_header_logs
-      - test_fr10_ac5_status_mapping_422_401_403_404_409_429_503_500
-  # FR-99 is the deferred/placeholder marker per harness convention
-  # (`### FR-99-deferred:` in SRS.md). No real ACs — entry satisfies
-  # validate-handoff P1→P2 coverage check until harness excludes -deferred
-  # suffixes the way it excludes `NFR-99`.
-  FR-99:
-    deferred:
-      - test_fr99_deferred_placeholder_no_real_acs
-  NFR-01:
-    benchmark:
-      - test_nfr01_ac1_get_p95_under_30ms
-      - test_nfr01_ac2_list_p95_under_80ms
-    integration:
-      - test_nfr01_ac3_list_sql_count_constant_variance_zero
-      - test_nfr01_ac4_sql_count_composition_count_main_eager
-  NFR-02:
-    integration:
-      - test_nfr02_ac4_403_no_resource_existence_leak
-      - test_nfr02_ac5_error_body_no_stack_sql_path
-    lint:
-      - test_nfr02_ac1_shell_true_eval_exec_grep_zero_hits
-      - test_nfr02_ac2_string_concat_sql_grep_zero_hits
-      - test_nfr02_ac7_bandit_zero_high_zero_medium
-    unit:
-      - test_nfr02_ac3_api_keys_hashed_hmac_compare_digest
-      - test_nfr02_ac6_cors_deny_by_default_with_taskq_cors_origins
-  NFR-03:
-    integration:
-      - test_nfr03_ac4_db_failure_readyz_503
-      - test_nfr03_ac5_timeout_actually_kills_subprocess
-      - test_nfr03_ac6_migration_failure_rolls_back
-    lint:
-      - test_nfr03_ac2_no_bare_except_except_exception_pass
-    unit:
-      - test_nfr03_ac1_txn_boundary_context_manager
-      - test_nfr03_ac3_cancelled_error_reraise
-  NFR-04:
-    integration:
-      - test_nfr04_ac3_api_key_plaintext_once_no_persist
-    unit:
-      - test_nfr04_ac1_pattern_redaction_replaced_with_redacted
-      - test_nfr04_ac2_db_conn_string_absent_from_logs
-  NFR-05:
-    unit:
-      - test_nfr05_ac1_docstring_coverage_100_percent_fr_nfr_referenced
-      - test_nfr05_ac2_openapi_summary_description_on_each_endpoint
-  NFR-06:
-    unit:
-      - test_nfr06_ac1_importlinter_layers_contract_api_service_repository_models
-      - test_nfr06_ac2_sqlalchemy_forbidden_outside_repository
-      - test_nfr06_ac3_lint_imports_exit_zero
-      - test_nfr06_ac4_no_wildcard_ignore_imports_or_contract_downgrade
-  NFR-07:
-    unit:
-      - test_nfr07_ac1_requirements_txt_eq_pinned
-      - test_nfr07_ac2_license_allowlist_mit_bsd_apache_psf
-      - test_nfr07_ac3_pip_licenses_full_tree_with_system
-      - test_nfr07_ac4_sbom_artifact_name_version_license_direct_transitive
-  NFR-08:
-    mutation:
-      - test_nfr08_ac2_mutation_score_ge_70_services_repositories
-    unit:
-      - test_nfr08_ac1_harness_config_mutation_testing_true
-      - test_nfr08_ac3_scope_restriction_rationale_recorded
-  NFR-09:
-    integration:
-      - test_nfr09_ac5_real_sqlite_file_migration_test
-    unit:
-      - test_nfr09_ac1_no_skip_skipif_xfail_assertion_free_stub
-      - test_nfr09_ac2_pytest_skipped_count_zero
-      - test_nfr09_ac3_each_test_has_at_least_one_assert
-      - test_nfr09_ac4_no_ignore_deselect_collect_ignore_testpaths_removal
-      - test_nfr09_ac6_no_skip_on_difficulty
-      - test_nfr09_ac7_verified_only_after_run_and_pass
-  NFR-10:
-    integration:
-      - test_nfr10_ac1_integration_line_coverage_ge_80_percent
-      - test_nfr10_ac2_asgi_transport_driver_no_direct_handler_call
-      - test_nfr10_ac3_error_code_matrix_401_403_404_409_422_429_503
-  NFR-11:
-    lint:
-      - test_nfr11_ac1_project_mi_ge_80_cc_le_10
-      - test_nfr11_ac2_single_file_le_400_dir_le_15
-      - test_nfr11_ac3_api_handler_le_40_lines
-  NFR-12:
-    integration:
-      - test_nfr12_ac1_makefile_verify_system_target_chain
-      - test_nfr12_ac2_make_verify_system_exit_zero_passes
-
-cross_cutting:
-  security:
-    - test_nfr02_ac1_shell_true_eval_exec_grep_zero_hits
-    - test_nfr02_ac2_string_concat_sql_grep_zero_hits
-    - test_nfr02_ac3_api_keys_hashed_hmac_compare_digest
-    - test_nfr02_ac6_cors_deny_by_default_with_taskq_cors_origins
-    - test_nfr02_ac7_bandit_zero_high_zero_medium
-    - test_nfr04_ac1_pattern_redaction_replaced_with_redacted
-    - test_nfr04_ac2_db_conn_string_absent_from_logs
-  performance:
-    - test_nfr01_ac1_get_p95_under_30ms
-    - test_nfr01_ac2_list_p95_under_80ms
-    - test_nfr01_ac3_list_sql_count_constant_variance_zero
-    - test_nfr01_ac4_sql_count_composition_count_main_eager
-  architecture:
-    - test_nfr06_ac1_importlinter_layers_contract_api_service_repository_models
-    - test_nfr06_ac2_sqlalchemy_forbidden_outside_repository
-    - test_nfr06_ac3_lint_imports_exit_zero
-    - test_nfr06_ac4_no_wildcard_ignore_imports_or_contract_downgrade
-  observability:
-    - test_fr09_ac1_healthz_returns_200_status_ok
-    - test_fr09_ac2_readyz_db_and_alembic_head_check
-    - test_fr09_ac3_metrics_admin_scope
-    - test_nfr03_ac4_db_failure_readyz_503
-  migration:
     - test_fr07_ac1_v1_creates_tasks_api_keys_tables
     - test_fr07_ac2_v2_adds_tags_task_tags_unique_index
     - test_fr07_ac3_v3_migrates_tasks_result_json_to_task_results
     - test_fr07_ac4_upgrade_head_downgrade_base_exit_zero
     - test_fr07_ac5_round_trip_byte_identical_sample
-    - test_nfr09_ac5_real_sqlite_file_migration_test
-
-# === EXTENDED P1 METADATA (extension on top of v1.1 contract) ===
-# Per-AC traceability details (tc_id, ac, test_file, cross_ref_*, ac_summary)
-# used by Phase-1 review tooling. NOT read by harness parser.
+    unit:
+    - test_fr07_ac6_no_destructive_shortcut_drop_table
+    - test_fr07_ac7_offline_sql_generation_covered
+  FR-08:
+    integration:
+    - test_fr08_ac1_task_group_graceful_drain
+    - test_fr08_ac2_max_concurrent_cap_queues_overflow
+    - test_fr08_ac3_timeout_kills_subprocess_no_orphans
+    unit:
+    - test_fr08_ac4_cancelled_error_propagates
+  FR-09:
+    integration:
+    - test_fr09_ac1_healthz_returns_200_status_ok
+    - test_fr09_ac2_readyz_db_and_alembic_head_check
+    - test_fr09_ac3_metrics_admin_scope
+  FR-10:
+    integration:
+    - test_fr10_ac3_detail_no_sql_stack_path_leak
+    unit:
+    - test_fr10_ac1_problem_json_content_type
+    - test_fr10_ac2_body_fields_type_title_status_detail_instance_correlation_id
+    - test_fr10_ac4_correlation_id_mirrored_header_logs
+cross_cutting:
+  observability:
+  - test_fr09_ac1_healthz_returns_200_status_ok
+  - test_fr09_ac2_readyz_db_and_alembic_head_check
+  - test_fr09_ac3_metrics_admin_scope
+  migration:
+  - test_fr07_ac1_v1_creates_tasks_api_keys_tables
+  - test_fr07_ac2_v2_adds_tags_task_tags_unique_index
+  - test_fr07_ac3_v3_migrates_tasks_result_json_to_task_results
+  - test_fr07_ac4_upgrade_head_downgrade_base_exit_zero
+  - test_fr07_ac5_round_trip_byte_identical_sample
 test_inventory:
-
   tests:
-
-    # === FR-01: Task CRUD API (10 ACs) ===
-    - tc_id: TC-FR01-01
-      fr: FR-01
-      ac: AC-1.1
-      layer: integration
-      test_name: test_fr01_ac1_post_creates_task_201
-      test_file: tests/integration/api/tasks/test_create.py
-      ac_summary: "POST /v1/tasks with valid write-scoped key + body returns HTTP 201 with task id"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR01-02
-      fr: FR-01
-      ac: AC-1.2
-      layer: integration
-      test_name: test_fr01_ac2_post_no_api_key_returns_401
-      test_file: tests/integration/api/tasks/test_create.py
-      ac_summary: "POST /v1/tasks without X-API-Key returns HTTP 401 + application/problem+json"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR01-03
-      fr: FR-01
-      ac: AC-1.3
-      layer: integration
-      test_name: test_fr01_ac3_post_invalid_body_returns_422
-      test_file: tests/integration/api/tasks/test_create.py
-      ac_summary: "POST /v1/tasks with empty body / >1000 chars / blacklist chars returns HTTP 422 + problem+json"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR01-04
-      fr: FR-01
-      ac: AC-1.4
-      layer: integration
-      test_name: test_fr01_ac4_post_duplicate_name_returns_409
-      test_file: tests/integration/api/tasks/test_create.py
-      ac_summary: "POST /v1/tasks with existing name returns HTTP 409 + application/problem+json"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR01-05
-      fr: FR-01
-      ac: AC-1.5
-      layer: integration
-      test_name: test_fr01_ac5_get_existing_returns_200
-      test_file: tests/integration/api/tasks/test_get.py
-      ac_summary: "GET /v1/tasks/{existing_id} returns HTTP 200 with task full fields"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR01-06
-      fr: FR-01
-      ac: AC-1.6
-      layer: integration
-      test_name: test_fr01_ac6_get_unknown_returns_404
-      test_file: tests/integration/api/tasks/test_get.py
-      ac_summary: "GET /v1/tasks/{unknown_id} returns HTTP 404 + application/problem+json"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR01-07
-      fr: FR-01
-      ac: AC-1.7
-      layer: integration
-      test_name: test_fr01_ac7_list_supports_cursor_pagination
-      test_file: tests/integration/api/tasks/test_list.py
-      ac_summary: "GET /v1/tasks accepts ?status / ?limit / ?cursor; pagination is cursor-based (NOT offset); default limit=50, max=200"
-      cross_ref_nfrs: [NFR-01]
-    - tc_id: TC-FR01-08
-      fr: FR-01
-      ac: AC-1.8
-      layer: integration
-      test_name: test_fr01_ac8_list_limit_over_200_returns_422
-      test_file: tests/integration/api/tasks/test_list.py
-      ac_summary: "GET /v1/tasks?limit=201 (or any limit > 200) returns HTTP 422 + problem+json"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR01-09
-      fr: FR-01
-      ac: AC-1.9
-      layer: integration
-      test_name: test_fr01_ac9_delete_write_scope_returns_403_no_leak
-      test_file: tests/integration/api/tasks/test_delete.py
-      ac_summary: "DELETE /v1/tasks/{id} with write-scoped (non-admin) key returns HTTP 403; body does NOT reveal id existence"
-      cross_ref_nfrs: [NFR-02]
-    - tc_id: TC-FR01-10
-      fr: FR-01
-      ac: AC-1.10
-      layer: integration
-      test_name: test_fr01_ac10_delete_admin_cascades_results
-      test_file: tests/integration/api/tasks/test_delete.py
-      ac_summary: "DELETE /v1/tasks/{id} with admin-scoped key removes task row + associated task_results rows in same transaction"
-      cross_ref_nfrs: [NFR-03]
-
-    # === FR-02: Task execution endpoint (5 ACs) ===
-    - tc_id: TC-FR02-01
-      fr: FR-02
-      ac: AC-2.1
-      layer: integration
-      test_name: test_fr02_ac1_run_returns_202_with_run_id
-      test_file: tests/integration/api/tasks/test_run.py
-      ac_summary: "POST /v1/tasks/{id}/run returns HTTP 202 with run_id in body"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR02-02
-      fr: FR-02
-      ac: AC-2.2
-      layer: unit
-      test_name: test_fr02_ac2_subprocess_exec_no_shell_true
-      test_file: tests/unit/security/test_shell_injection.py
-      ac_summary: "Subprocess uses asyncio.create_subprocess_exec(*shlex.split(command)); shell=True does NOT appear anywhere in src/"
-      cross_ref_nfrs: [NFR-02]
-    - tc_id: TC-FR02-03
-      fr: FR-02
-      ac: AC-2.3
-      layer: integration
-      test_name: test_fr02_ac3_state_machine_done_failed_timeout
-      test_file: tests/integration/api/tasks/test_run.py
-      ac_summary: "Task state machine pending -> running -> done | failed | timeout; each terminal reachable from running via real subprocess exit"
-      cross_ref_nfrs: [NFR-03]
-    - tc_id: TC-FR02-04
-      fr: FR-02
-      ac: AC-2.4
-      layer: integration
-      test_name: test_fr02_ac4_results_persisted_to_task_results
-      test_file: tests/integration/api/tasks/test_run.py
-      ac_summary: "Execution result persisted to task_results with exit_code / stdout_tail / stderr_tail / duration_ms / finished_at"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR02-05
-      fr: FR-02
-      ac: AC-2.5
-      layer: integration
-      test_name: test_fr02_ac5_get_runs_newest_first
-      test_file: tests/integration/api/tasks/test_run.py
-      ac_summary: "GET /v1/tasks/{id}/runs returns task's execution history sorted newest-first"
-      cross_ref_nfrs: []
-
-    # === FR-03: API Key authentication (6 ACs) ===
-    - tc_id: TC-FR03-01
-      fr: FR-03
-      ac: AC-3.1
-      layer: integration
-      test_name: test_fr03_ac1_missing_or_invalid_key_returns_401
-      test_file: tests/integration/api/test_auth.py
-      ac_summary: "Every /v1/* endpoint requires X-API-Key; missing or invalid key returns HTTP 401 + application/problem+json"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR03-02
-      fr: FR-03
-      ac: AC-3.2
-      layer: unit
-      test_name: test_fr03_ac2_key_hash_sha256_64hex_no_plaintext
-      test_file: tests/unit/service/test_keys.py
-      ac_summary: "API keys stored as SHA-256 hashes in api_keys.key_hash; no plaintext; key_hash is exactly 64 hex chars"
-      cross_ref_nfrs: [NFR-02]
-    - tc_id: TC-FR03-03
-      fr: FR-03
-      ac: AC-3.3
-      layer: unit
-      test_name: test_fr03_ac3_compare_digest_constant_time
-      test_file: tests/unit/service/test_keys.py
-      ac_summary: "Key comparison uses hmac.compare_digest (constant-time)"
-      cross_ref_nfrs: [NFR-02]
-    - tc_id: TC-FR03-04
-      fr: FR-03
-      ac: AC-3.4
-      layer: integration
-      test_name: test_fr03_ac4_create_prints_plaintext_once
-      test_file: tests/integration/service/test_key_create.py
-      ac_summary: "Key creation prints plaintext to stdout exactly once and never persists it; plaintext appears in no log/error body/metrics"
-      cross_ref_nfrs: [NFR-04]
-    - tc_id: TC-FR03-05
-      fr: FR-03
-      ac: AC-3.5
-      layer: integration
-      test_name: test_fr03_ac5_revoked_key_invalid
-      test_file: tests/integration/api/test_auth.py
-      ac_summary: "Key with non-null revoked_at is treated as invalid"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR03-06
-      fr: FR-03
-      ac: AC-3.6
-      layer: integration
-      test_name: test_fr03_ac6_healthz_readyz_no_auth
-      test_file: tests/integration/api/test_auth.py
-      ac_summary: "/healthz and /readyz do not require authentication"
-      cross_ref_frs: [FR-09]
-      cross_ref_nfrs: [NFR-02, NFR-05]
-
-    # === FR-04: Scope authorization (3 ACs) ===
-    - tc_id: TC-FR04-01
-      fr: FR-04
-      ac: AC-4.1
-      layer: unit
-      test_name: test_fr04_ac1_scope_hierarchy_read_write_admin
-      test_file: tests/unit/api/test_scope.py
-      ac_summary: "Each key carries scope from {read, write, admin} with hierarchical containment read < write < admin"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR04-02
-      fr: FR-04
-      ac: AC-4.2
-      layer: integration
-      test_name: test_fr04_ac2_insufficient_scope_403_no_leak
-      test_file: tests/integration/api/test_scope.py
-      ac_summary: "Request to endpoint with insufficient scope returns HTTP 403 + problem+json; body does NOT reveal resource existence"
-      cross_ref_nfrs: [NFR-02]
-    - tc_id: TC-FR04-03
-      fr: FR-04
-      ac: AC-4.3
-      layer: unit
-      test_name: test_fr04_ac3_single_dependency_audit
-      test_file: tests/unit/api/test_dependency_audit.py
-      ac_summary: "Authorization enforced by exactly one FastAPI dependency; every /v1 route passes through this single dependency"
-      cross_ref_nfrs: []
-
-    # === FR-05: Rate limiting (4 ACs) ===
-    - tc_id: TC-FR05-01
-      fr: FR-05
-      ac: AC-5.1
-      layer: unit
-      test_name: test_fr05_ac1_bucket_config_burst_per_sec
-      test_file: tests/unit/service/test_token_bucket.py
-      ac_summary: "Per-token token bucket has capacity TASKQ_RATE_BURST and refill rate TASKQ_RATE_PER_SEC"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR05-02
-      fr: FR-05
-      ac: AC-5.2
-      layer: integration
-      test_name: test_fr05_ac2_overflow_returns_429_with_retry_after
-      test_file: tests/integration/api/test_rate_limit.py
-      ac_summary: "Request exceeding bucket returns HTTP 429 + application/problem+json with Retry-After header in seconds"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR05-03
-      fr: FR-05
-      ac: AC-5.3
-      layer: unit
-      test_name: test_fr05_ac3_db_backed_row_level_lock
-      test_file: tests/unit/service/test_token_bucket.py
-      ac_summary: "Token-bucket state stored in DB (consistent across workers); updates run in single transaction with row-level lock"
-      cross_ref_nfrs: [NFR-03]
-    - tc_id: TC-FR05-04
-      fr: FR-05
-      ac: AC-5.4
-      layer: integration
-      test_name: test_fr05_ac4_healthz_readyz_rate_limit_exempt
-      test_file: tests/integration/api/test_rate_limit.py
-      ac_summary: "/healthz and /readyz are not subject to rate limiting"
-      cross_ref_frs: [FR-09]
-      cross_ref_nfrs: []
-
-    # === FR-06: Persistence + transaction boundaries (5 ACs) ===
-    - tc_id: TC-FR06-01
-      fr: FR-06
-      ac: AC-6.1
-      layer: unit
-      test_name: test_fr06_ac1_repository_only_data_access
-      test_file: tests/unit/architecture/test_layer_contract.py
-      ac_summary: "All data access goes through repository layer; service layer does NOT import or hold a SQLAlchemy Session"
-      cross_ref_nfrs: [NFR-06]
-    - tc_id: TC-FR06-02
-      fr: FR-06
-      ac: AC-6.2
-      layer: unit
-      test_name: test_fr06_ac2_one_session_per_request_context_manager
-      test_file: tests/unit/repository/test_session.py
-      ac_summary: "Each API request gets exactly one Session; transaction boundary enforced by context manager committing on success and rolling back on exception"
-      cross_ref_nfrs: [NFR-03]
-    - tc_id: TC-FR06-03
-      fr: FR-06
-      ac: AC-6.3
-      layer: unit
-      test_name: test_fr06_ac3_no_string_concat_sql_grep_gate
-      test_file: tests/unit/security/test_sql_concat_grep.py
-      ac_summary: "No string-concatenated SQL in src/; grep gate for f-string / % / + SQL composition returns 0 hits"
-      cross_ref_nfrs: [NFR-02]
-    - tc_id: TC-FR06-04
-      fr: FR-06
-      ac: AC-6.4
-      layer: integration
-      test_name: test_fr06_ac4_eager_load_sql_count_constant_le_4
-      test_file: tests/integration/repository/test_eager_load.py
-      ac_summary: "Relationship loads use selectinload / joinedload explicitly; list endpoint SQL statement count is constant (independent of row count) and <= 4"
-      cross_ref_nfrs: [NFR-01]
-    - tc_id: TC-FR06-05
-      fr: FR-06
-      ac: AC-6.5
-      layer: unit
-      test_name: test_fr06_ac5_pool_size_and_pre_ping
-      test_file: tests/unit/repository/test_session.py
-      ac_summary: "Connection pool uses pool_size=TASKQ_DB_POOL_SIZE and pool_pre_ping=True"
-      cross_ref_nfrs: []
-
-    # === FR-07: Schema migration (Alembic three-step, real SQLite, 7 ACs) ===
-    - tc_id: TC-FR07-01
-      fr: FR-07
-      ac: AC-7.1
-      layer: integration
-      test_name: test_fr07_ac1_v1_creates_tasks_api_keys_tables
-      test_file: tests/integration/alembic/test_v1_v2_v3.py
-      ac_summary: "Revision v1 creates tasks and api_keys tables; downgrade drops both tables"
-      cross_ref_nfrs: [NFR-09]
-    - tc_id: TC-FR07-02
-      fr: FR-07
-      ac: AC-7.2
-      layer: integration
-      test_name: test_fr07_ac2_v2_adds_tags_task_tags_unique_index
-      test_file: tests/integration/alembic/test_v1_v2_v3.py
-      ac_summary: "Revision v2 adds tags, task_tags (many-to-many) plus unique index on tasks.name; downgrade drops new tables + index without affecting v1 data"
-      cross_ref_nfrs: [NFR-09]
-    - tc_id: TC-FR07-03
-      fr: FR-07
-      ac: AC-7.3
-      layer: integration
-      test_name: test_fr07_ac3_v3_migrates_tasks_result_json_to_task_results
-      test_file: tests/integration/alembic/test_v1_v2_v3.py
-      ac_summary: "Revision v3 splits tasks.result_json into separate task_results table, migrates existing data, drops original column; downgrade reverses move and drops task_results"
-      cross_ref_nfrs: [NFR-09]
-    - tc_id: TC-FR07-04
-      fr: FR-07
-      ac: AC-7.4
-      layer: integration
-      test_name: test_fr07_ac4_upgrade_head_downgrade_base_exit_zero
-      test_file: tests/integration/alembic/test_v1_v2_v3.py
-      ac_summary: "alembic upgrade head and alembic downgrade base both exit 0 (no residual tables after downgrade base)"
-      cross_ref_nfrs: [NFR-09]
-    - tc_id: TC-FR07-05
-      fr: FR-07
-      ac: AC-7.5
-      layer: integration
-      test_name: test_fr07_ac5_round_trip_byte_identical_sample
-      test_file: tests/integration/alembic/test_v1_v2_v3.py
-      ac_summary: "Round-trip: upgrade head -> write sample -> downgrade -1 -> upgrade head leaves every sample column byte-identical (v3 data-migration focus)"
-      cross_ref_nfrs: [NFR-09, NFR-12]
-    - tc_id: TC-FR07-06
-      fr: FR-07
-      ac: AC-7.6
-      layer: unit
-      test_name: test_fr07_ac6_no_destructive_shortcut_drop_table
-      test_file: tests/unit/alembic/test_no_shortcut.py
-      ac_summary: "Migrations do NOT use op.execute(\"DROP TABLE ...\") or other destructive shortcuts to substitute for real downgrade"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR07-07
-      fr: FR-07
-      ac: AC-7.7
-      layer: unit
-      test_name: test_fr07_ac7_offline_sql_generation_covered
-      test_file: tests/unit/alembic/test_offline_sql.py
-      ac_summary: "Migration files covered by tests (offline SQL generation plus assertions)"
-      cross_ref_nfrs: []
-
-    # === FR-08: Async executor (4 ACs) ===
-    - tc_id: TC-FR08-01
-      fr: FR-08
-      ac: AC-8.1
-      layer: integration
-      test_name: test_fr08_ac1_task_group_graceful_drain
-      test_file: tests/integration/service/test_drain.py
-      ac_summary: "Background execution managed by asyncio.TaskGroup; on shutdown service performs graceful drain up to TASKQ_DRAIN_TIMEOUT, exceeding tasks marked interrupted"
-      cross_ref_nfrs: [NFR-03, NFR-10]
-    - tc_id: TC-FR08-02
-      fr: FR-08
-      ac: AC-8.2
-      layer: integration
-      test_name: test_fr08_ac2_max_concurrent_cap_queues_overflow
-      test_file: tests/integration/service/test_drain.py
-      ac_summary: "Concurrency capped at TASKQ_MAX_CONCURRENT; over-cap submissions queue rather than spawning unbounded coroutines"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR08-03
-      fr: FR-08
-      ac: AC-8.3
-      layer: integration
-      test_name: test_fr08_ac3_timeout_kills_subprocess_no_orphans
-      test_file: tests/integration/service/test_executor.py
-      ac_summary: "Task timeout enforced via asyncio.wait_for; on timeout child process terminated by process.kill() + await process.wait(); no orphan processes remain"
-      cross_ref_nfrs: [NFR-03, NFR-10]
-    - tc_id: TC-FR08-04
-      fr: FR-08
-      ac: AC-8.4
-      layer: unit
-      test_name: test_fr08_ac4_cancelled_error_propagates
-      test_file: tests/unit/service/test_cancelled_propagation.py
-      ac_summary: "asyncio.CancelledError propagates upward; never caught by bare except Exception: block"
-      cross_ref_nfrs: [NFR-03]
-
-    # === FR-09: Health checks + observability (3 ACs) ===
-    - tc_id: TC-FR09-01
-      fr: FR-09
-      ac: AC-9.1
-      layer: integration
-      test_name: test_fr09_ac1_healthz_returns_200_status_ok
-      test_file: tests/integration/api/test_health.py
-      ac_summary: "GET /healthz (no auth) returns HTTP 200 with {\"status\":\"ok\"} when process is alive"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR09-02
-      fr: FR-09
-      ac: AC-9.2
-      layer: integration
-      test_name: test_fr09_ac2_readyz_db_and_alembic_head_check
-      test_file: tests/integration/api/test_readiness.py
-      ac_summary: "GET /readyz (no auth) returns HTTP 200 iff DB reachable AND alembic current == head; otherwise HTTP 503 with body naming which check failed"
-      cross_ref_nfrs: [NFR-03, NFR-12]
-    - tc_id: TC-FR09-03
-      fr: FR-09
-      ac: AC-9.3
-      layer: integration
-      test_name: test_fr09_ac3_metrics_admin_scope
-      test_file: tests/integration/api/test_metrics.py
-      ac_summary: "GET /v1/metrics (admin scope) returns per-status task counts, execution-latency percentiles, rate-limit rejection counts"
-      cross_ref_nfrs: [NFR-04]
-
-    # === FR-10: Error contract RFC 7807 (5 ACs) ===
-    - tc_id: TC-FR10-01
-      fr: FR-10
-      ac: AC-10.1
-      layer: unit
-      test_name: test_fr10_ac1_problem_json_content_type
-      test_file: tests/unit/errors/test_problem.py
-      ac_summary: "Every non-2xx response has Content-Type: application/problem+json"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR10-02
-      fr: FR-10
-      ac: AC-10.2
-      layer: unit
-      test_name: test_fr10_ac2_body_fields_type_title_status_detail_instance_correlation_id
-      test_file: tests/unit/errors/test_problem.py
-      ac_summary: "Error body carries type (URI), title, status, detail, instance, correlation_id"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR10-03
-      fr: FR-10
-      ac: AC-10.3
-      layer: integration
-      test_name: test_fr10_ac3_detail_no_sql_stack_path_leak
-      test_file: tests/integration/api/test_error_contract.py
-      ac_summary: "detail does NOT include SQL statements, stack traces, file paths, or database schema descriptions"
-      cross_ref_nfrs: [NFR-02, NFR-04]
-    - tc_id: TC-FR10-04
-      fr: FR-10
-      ac: AC-10.4
-      layer: unit
-      test_name: test_fr10_ac4_correlation_id_mirrored_header_logs
-      test_file: tests/unit/errors/test_problem.py
-      ac_summary: "correlation_id appears both in response header X-Correlation-Id AND in server logs"
-      cross_ref_nfrs: []
-    - tc_id: TC-FR10-05
-      fr: FR-10
-      ac: AC-10.5
-      layer: unit
-      test_name: test_fr10_ac5_status_mapping_422_401_403_404_409_429_503_500
-      test_file: tests/unit/api/test_error_contract.py
-      ac_summary: "HTTP status map: 422 validation, 401 unauthenticated, 403 forbidden, 404 not-found, 409 conflict, 429 rate-limited (+Retry-After), 503 not-ready, 500 internal"
-      cross_ref_nfrs: [NFR-10]
-
-    # === NFR-01: Performance + query efficiency (4 ACs) ===
-    - tc_id: TC-NFR01-01
-      fr: NFR-01
-      ac: AC-N1.1
-      layer: benchmark
-      test_name: test_nfr01_ac1_get_p95_under_30ms
-      test_file: tests/benchmarks/test_p95.py
-      ac_summary: "GET /v1/tasks/{id} p95 < 30 ms at 10,000 rows, measured via pytest-benchmark over ASGI transport"
-      cross_ref_frs: [FR-01]
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR01-02
-      fr: NFR-01
-      ac: AC-N1.2
-      layer: benchmark
-      test_name: test_nfr01_ac2_list_p95_under_80ms
-      test_file: tests/benchmarks/test_p95.py
-      ac_summary: "GET /v1/tasks?limit=50 p95 < 80 ms at 10,000 rows, measured via pytest-benchmark over ASGI transport"
-      cross_ref_frs: [FR-01]
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR01-03
-      fr: NFR-01
-      ac: AC-N1.3
-      layer: integration
-      test_name: test_nfr01_ac3_list_sql_count_constant_variance_zero
-      test_file: tests/integration/repository/test_sql_count.py
-      ac_summary: "List endpoint issues constant number of SQL statements (<= 4) regardless of row count; variance is 0 across {1, 100, 1000, 10000}"
-      cross_ref_frs: [FR-06]
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR01-04
-      fr: NFR-01
-      ac: AC-N1.4
-      layer: integration
-      test_name: test_nfr01_ac4_sql_count_composition_count_main_eager
-      test_file: tests/integration/repository/test_sql_count.py
-      ac_summary: "Expected statement-count composition is 1 x count + 1 x main query + <= 2 x explicit eager-loaded children"
-      cross_ref_frs: [FR-06]
-      cross_ref_nfrs: []
-
-    # === NFR-02: HTTP + data-layer security (7 ACs) ===
-    - tc_id: TC-NFR02-01
-      fr: NFR-02
-      ac: AC-N2.1
-      layer: lint
-      test_name: test_nfr02_ac1_shell_true_eval_exec_grep_zero_hits
-      test_file: tests/unit/security/test_shell_injection.py
-      ac_summary: "grep -rn \"shell=True|eval(|exec(\" src/ returns 0 hits"
-      cross_ref_frs: [FR-02]
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR02-02
-      fr: NFR-02
-      ac: AC-N2.2
-      layer: lint
-      test_name: test_nfr02_ac2_string_concat_sql_grep_zero_hits
-      test_file: tests/unit/security/test_sql_concat_grep.py
-      ac_summary: "No string-concatenated SQL in src/; f-string / % / + SQL composition grep returns 0 hits"
-      cross_ref_frs: [FR-06]
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR02-03
-      fr: NFR-02
-      ac: AC-N2.3
-      layer: unit
-      test_name: test_nfr02_ac3_api_keys_hashed_hmac_compare_digest
-      test_file: tests/unit/service/test_keys.py
-      ac_summary: "API keys stored hashed and compared with hmac.compare_digest"
-      cross_ref_frs: [FR-03]
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR02-04
-      fr: NFR-02
-      ac: AC-N2.4
-      layer: integration
-      test_name: test_nfr02_ac4_403_no_resource_existence_leak
-      test_file: tests/integration/api/test_scope.py
-      ac_summary: "403 responses do NOT leak resource existence"
-      cross_ref_frs: [FR-01, FR-04]
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR02-05
-      fr: NFR-02
-      ac: AC-N2.5
-      layer: integration
-      test_name: test_nfr02_ac5_error_body_no_stack_sql_path
-      test_file: tests/integration/api/test_error_contract.py
-      ac_summary: "Error bodies contain no stack traces, SQL statements, or file paths"
-      cross_ref_frs: [FR-10]
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR02-06
-      fr: NFR-02
-      ac: AC-N2.6
-      layer: unit
-      test_name: test_nfr02_ac6_cors_deny_by_default_with_taskq_cors_origins
-      test_file: tests/unit/api/test_cors.py
-      ac_summary: "CORS denies all origins by default; allowlist configured via TASKQ_CORS_ORIGINS"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR02-07
-      fr: NFR-02
-      ac: AC-N2.7
-      layer: lint
-      test_name: test_nfr02_ac7_bandit_zero_high_zero_medium
-      test_file: tests/unit/security/test_bandit.py
-      ac_summary: "bandit -r src/ reports 0 HIGH and 0 MEDIUM issues"
-      cross_ref_nfrs: []
-
-    # === NFR-03: Error handling, transactions, async correctness (6 ACs) ===
-    - tc_id: TC-NFR03-01
-      fr: NFR-03
-      ac: AC-N3.1
-      layer: unit
-      test_name: test_nfr03_ac1_txn_boundary_context_manager
-      test_file: tests/unit/repository/test_session.py
-      ac_summary: "Each request has explicit transaction boundary; context manager commits on success and rolls back on exception"
-      cross_ref_frs: [FR-06]
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR03-02
-      fr: NFR-03
-      ac: AC-N3.2
-      layer: lint
-      test_name: test_nfr03_ac2_no_bare_except_except_exception_pass
-      test_file: tests/unit/api/test_txn_boundary.py
-      ac_summary: "No bare except: or except Exception: pass appears in src/"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR03-03
-      fr: NFR-03
-      ac: AC-N3.3
-      layer: unit
-      test_name: test_nfr03_ac3_cancelled_error_reraise
-      test_file: tests/unit/service/test_cancelled_propagation.py
-      ac_summary: "asyncio.CancelledError is never swallowed; re-raised in any catch site that touches it"
-      cross_ref_frs: [FR-08]
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR03-04
-      fr: NFR-03
-      ac: AC-N3.4
-      layer: integration
-      test_name: test_nfr03_ac4_db_failure_readyz_503
-      test_file: tests/integration/api/test_readiness.py
-      ac_summary: "DB connection failure causes /readyz to return 503 with clear detail; no silent retry forever"
-      cross_ref_frs: [FR-09]
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR03-05
-      fr: NFR-03
-      ac: AC-N3.5
-      layer: integration
-      test_name: test_nfr03_ac5_timeout_actually_kills_subprocess
-      test_file: tests/integration/service/test_executor.py
-      ac_summary: "Task timeout actually terminates subprocess; no orphan processes remain"
-      cross_ref_frs: [FR-08]
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR03-06
-      fr: NFR-03
-      ac: AC-N3.6
-      layer: integration
-      test_name: test_nfr03_ac6_migration_failure_rolls_back
-      test_file: tests/integration/alembic/test_v1_v2_v3.py
-      ac_summary: "Migration failure rolls back transaction; database stays at previous revision"
-      cross_ref_frs: [FR-07]
-      cross_ref_nfrs: []
-
-    # === NFR-04: Sensitive data redaction (3 ACs) ===
-    - tc_id: TC-NFR04-01
-      fr: NFR-04
-      ac: AC-N4.1
-      layer: unit
-      test_name: test_nfr04_ac1_pattern_redaction_replaced_with_redacted
-      test_file: tests/unit/security/test_redaction.py
-      ac_summary: "Lines matching (sk-[A-Za-z0-9_-]{8,}|token=\\S+|Bearer\\s+\\S+|postgres(ql)?://[^\\s]+) are fully replaced with [REDACTED] before write or emit"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR04-02
-      fr: NFR-04
-      ac: AC-N4.2
-      layer: unit
-      test_name: test_nfr04_ac2_db_conn_string_absent_from_logs
-      test_file: tests/unit/security/test_redaction.py
-      ac_summary: "Database connection string (incl. password) does NOT appear in any log, error message, or /v1/metrics response"
-      cross_ref_frs: [FR-09]
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR04-03
-      fr: NFR-04
-      ac: AC-N4.3
-      layer: integration
-      test_name: test_nfr04_ac3_api_key_plaintext_once_no_persist
-      test_file: tests/integration/service/test_key_create.py
-      ac_summary: "API key plaintext printed exactly once at key create; never written to any persistent location"
-      cross_ref_frs: [FR-03]
-      cross_ref_nfrs: []
-
-    # === NFR-05: Documentation coverage (2 ACs) ===
-    - tc_id: TC-NFR05-01
-      fr: NFR-05
-      ac: AC-N5.1
-      layer: unit
-      test_name: test_nfr05_ac1_docstring_coverage_100_percent_fr_nfr_referenced
-      test_file: tests/unit/test_docstring_coverage.py
-      ac_summary: "Every public function/class has docstring referencing [FR-XX] or [NFR-XX]; public-API docstring coverage is 100%"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR05-02
-      fr: NFR-05
-      ac: AC-N5.2
-      layer: unit
-      test_name: test_nfr05_ac2_openapi_summary_description_on_each_endpoint
-      test_file: tests/unit/api/test_openapi.py
-      ac_summary: "Every API endpoint has summary + description in OpenAPI schema; test asserts fields in /openapi.json"
-      cross_ref_nfrs: []
-
-    # === NFR-06: Architecture layer contract (4 ACs) ===
-    - tc_id: TC-NFR06-01
-      fr: NFR-06
-      ac: AC-N6.1
-      layer: unit
-      test_name: test_nfr06_ac1_importlinter_layers_contract_api_service_repository_models
-      test_file: tests/unit/architecture/test_import_linter.py
-      ac_summary: ".importlinter declares layers contract api > service > repository > models; upper may import lower, lower may NOT import upper; config + errors are independence modules"
-      cross_ref_frs: [FR-06]
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR06-02
-      fr: NFR-06
-      ac: AC-N6.2
-      layer: unit
-      test_name: test_nfr06_ac2_sqlalchemy_forbidden_outside_repository
-      test_file: tests/unit/architecture/test_import_linter.py
-      ac_summary: "Forbidden contract bans any non-repository layer from importing sqlalchemy"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR06-03
-      fr: NFR-06
-      ac: AC-N6.3
-      layer: unit
-      test_name: test_nfr06_ac3_lint_imports_exit_zero
-      test_file: tests/unit/architecture/test_import_linter.py
-      ac_summary: "lint-imports exits 0"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR06-04
-      fr: NFR-06
-      ac: AC-N6.4
-      layer: unit
-      test_name: test_nfr06_ac4_no_wildcard_ignore_imports_or_contract_downgrade
-      test_file: tests/unit/architecture/test_import_linter.py
-      ac_summary: "Passing gate does NOT require removing .importlinter, using wildcards in ignore_imports, or downgrading the contract"
-      cross_ref_nfrs: []
-
-    # === NFR-07: Dependency + license compliance (4 ACs) ===
-    - tc_id: TC-NFR07-01
-      fr: NFR-07
-      ac: AC-N7.1
-      layer: unit
-      test_name: test_nfr07_ac1_requirements_txt_eq_pinned
-      test_file: tests/unit/test_licenses.py
-      ac_summary: "All runtime dependencies in requirements.txt are == pinned; transitive deps fully pinned via requirements.lock"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR07-02
-      fr: NFR-07
-      ac: AC-N7.2
-      layer: unit
-      test_name: test_nfr07_ac2_license_allowlist_mit_bsd_apache_psf
-      test_file: tests/unit/test_licenses.py
-      ac_summary: "Allowed licenses: MIT / BSD-2-Clause / BSD-3-Clause / Apache-2.0 / PSF; any other-licensed dep must NOT be used"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR07-03
-      fr: NFR-07
-      ac: AC-N7.3
-      layer: unit
-      test_name: test_nfr07_ac3_pip_licenses_full_tree_with_system
-      test_file: tests/unit/test_licenses.py
-      ac_summary: "License scan covers full dependency tree (direct + transitive) via pip-licenses --format=json --with-system"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR07-04
-      fr: NFR-07
-      ac: AC-N7.4
-      layer: unit
-      test_name: test_nfr07_ac4_sbom_artifact_name_version_license_direct_transitive
-      test_file: tests/unit/test_sbom.py
-      ac_summary: "SBOM artifact produced with per-dependency name / version / license / direct|transitive"
-      cross_ref_nfrs: []
-
-    # === NFR-08: Mutation testing (3 ACs) ===
-    - tc_id: TC-NFR08-01
-      fr: NFR-08
-      ac: AC-N8.1
-      layer: unit
-      test_name: test_nfr08_ac1_harness_config_mutation_testing_true
-      test_file: tests/unit/test_mutation_config.py
-      ac_summary: ".methodology/harness_config.json sets features.mutation_testing: true"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR08-02
-      fr: NFR-08
-      ac: AC-N8.2
-      layer: mutation
-      test_name: test_nfr08_ac2_mutation_score_ge_70_services_repositories
-      test_file: tests/mutation/test_services_repositories.py
-      ac_summary: "Mutation score >= 70 over services and repositories layers (NFR-06 roles)"
-      cross_ref_nfrs: [NFR-06]
-    - tc_id: TC-NFR08-03
-      fr: NFR-08
-      ac: AC-N8.3
-      layer: unit
-      test_name: test_nfr08_ac3_scope_restriction_rationale_recorded
-      test_file: tests/unit/test_mutation_config.py
-      ac_summary: "Scope restricted to NFR-06 layers (services + repositories); runtime-budget rationale recorded in harness_config.json"
-      cross_ref_nfrs: [NFR-06]
-
-    # === NFR-09: Verification honesty / zero-skip (7 ACs) ===
-    - tc_id: TC-NFR09-01
-      fr: NFR-09
-      ac: AC-N9.1
-      layer: unit
-      test_name: test_nfr09_ac1_no_skip_skipif_xfail_assertion_free_stub
-      test_file: tests/unit/test_zero_skip.py
-      ac_summary: "No FR/NFR verification test marked pytest.skip / skipif / xfail; no test is assertion-free stub"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR09-02
-      fr: NFR-09
-      ac: AC-N9.2
-      layer: unit
-      test_name: test_nfr09_ac2_pytest_skipped_count_zero
-      test_file: tests/unit/test_zero_skip.py
-      ac_summary: "pytest tests -q reports skipped = 0"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR09-03
-      fr: NFR-09
-      ac: AC-N9.3
-      layer: unit
-      test_name: test_nfr09_ac3_each_test_has_at_least_one_assert
-      test_file: tests/unit/test_assert_count.py
-      ac_summary: "Every test function contains at least one assert (zero_assert == 0)"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR09-04
-      fr: NFR-09
-      ac: AC-N9.4
-      layer: unit
-      test_name: test_nfr09_ac4_no_ignore_deselect_collect_ignore_testpaths_removal
-      test_file: tests/unit/test_zero_skip.py
-      ac_summary: "No test excluded via --ignore / -k / --deselect / collect_ignore / removal from testpaths"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR09-05
-      fr: NFR-09
-      ac: AC-N9.5
-      layer: integration
-      test_name: test_nfr09_ac5_real_sqlite_file_migration_test
-      test_file: tests/integration/alembic/test_real_sqlite_migration.py
-      ac_summary: "Three-step FR-07 migration tested against real SQLite file (not in-memory mock); round-trip reversibility verified by actual data comparison"
-      cross_ref_frs: [FR-07]
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR09-06
-      fr: NFR-09
-      ac: AC-N9.6
-      layer: unit
-      test_name: test_nfr09_ac6_no_skip_on_difficulty
-      test_file: tests/unit/test_zero_skip.py
-      ac_summary: "Migration logic NOT downgraded to skip on grounds of being too hard to test"
-      cross_ref_frs: [FR-07]
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR09-07
-      fr: NFR-09
-      ac: AC-N9.7
-      layer: unit
-      test_name: test_nfr09_ac7_verified_only_after_run_and_pass
-      test_file: tests/unit/test_zero_skip.py
-      ac_summary: "TRACEABILITY_MATRIX.md marks a requirement VERIFIED only after the corresponding test actually runs and passes"
-      cross_ref_nfrs: []
-
-    # === NFR-10: Integration coverage (3 ACs) ===
-    - tc_id: TC-NFR10-01
-      fr: NFR-10
-      ac: AC-N10.1
-      layer: integration
-      test_name: test_nfr10_ac1_integration_line_coverage_ge_80_percent
-      test_file: tests/integration/test_coverage.py
-      ac_summary: "tests/integration/ line coverage >= 80% over src/"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR10-02
-      fr: NFR-10
-      ac: AC-N10.2
-      layer: integration
-      test_name: test_nfr10_ac2_asgi_transport_driver_no_direct_handler_call
-      test_file: tests/integration/test_crud_chain.py
-      ac_summary: "Integration tests driven through httpx.AsyncClient(transport=ASGITransport(app)); do NOT call handler functions directly"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR10-03
-      fr: NFR-10
-      ac: AC-N10.3
-      layer: integration
-      test_name: test_nfr10_ac3_error_code_matrix_401_403_404_409_422_429_503
-      test_file: tests/integration/test_error_codes_matrix.py
-      ac_summary: "Coverage includes full CRUD chain, each error code 401/403/404/409/422/429/503 at least once, migration round-trip, rate-limit trigger+recovery, graceful drain"
-      cross_ref_frs: [FR-01, FR-07, FR-08, FR-10]
-      cross_ref_nfrs: []
-
-    # === NFR-11: Readability (3 ACs) ===
-    - tc_id: TC-NFR11-01
-      fr: NFR-11
-      ac: AC-N11.1
-      layer: lint
-      test_name: test_nfr11_ac1_project_mi_ge_80_cc_le_10
-      test_file: tests/unit/quality/test_complexity.py
-      ac_summary: "Project MI (LLOC-weighted) >= 80; single function CC <= 10"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR11-02
-      fr: NFR-11
-      ac: AC-N11.2
-      layer: lint
-      test_name: test_nfr11_ac2_single_file_le_400_dir_le_15
-      test_file: tests/unit/quality/test_file_size.py
-      ac_summary: "Single source file <= 400 lines; single source directory <= 15 files"
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR11-03
-      fr: NFR-11
-      ac: AC-N11.3
-      layer: lint
-      test_name: test_nfr11_ac3_api_handler_le_40_lines
-      test_file: tests/unit/api/test_handler_size.py
-      ac_summary: "Each API handler <= 40 lines; business logic descends to service layer"
-      cross_ref_frs: [FR-01, FR-02]
-      cross_ref_nfrs: [NFR-06]
-
-    # === NFR-12: System verification target (2 ACs) ===
-    - tc_id: TC-NFR12-01
-      fr: NFR-12
-      ac: AC-N12.1
-      layer: integration
-      test_name: test_nfr12_ac1_makefile_verify_system_target_chain
-      test_file: tests/integration/test_verify_system.py
-      ac_summary: "Makefile defines verify-system target chaining (1) alembic upgrade head (2) full test suite (3) service start + /healthz + /readyz smoke (4) alembic downgrade base then upgrade head"
-      cross_ref_frs: [FR-07, FR-09]
-      cross_ref_nfrs: []
-    - tc_id: TC-NFR12-02
-      fr: NFR-12
-      ac: AC-N12.2
-      layer: integration
-      test_name: test_nfr12_ac2_make_verify_system_exit_zero_passes
-      test_file: tests/integration/test_verify_system.py
-      ac_summary: "make verify-system exits 0 and prints verify-system: PASS to stdout"
-      cross_ref_nfrs: []
-
-  # === Coverage summary (arithmetic invariants must hold) ===
+  - tc_id: TC-FR01-01
+    fr: FR-01
+    ac: AC-1.1
+    layer: integration
+    test_name: test_fr01_ac1_post_creates_task_201
+    test_file: tests/integration/api/tasks/test_create.py
+    ac_summary: POST /v1/tasks with valid write-scoped key + body returns HTTP 201
+      with task id
+    cross_ref_nfrs: []
+  - tc_id: TC-FR01-02
+    fr: FR-01
+    ac: AC-1.2
+    layer: integration
+    test_name: test_fr01_ac2_post_no_api_key_returns_401
+    test_file: tests/integration/api/tasks/test_create.py
+    ac_summary: POST /v1/tasks without X-API-Key returns HTTP 401 + application/problem+json
+    cross_ref_nfrs: []
+  - tc_id: TC-FR01-03
+    fr: FR-01
+    ac: AC-1.3
+    layer: integration
+    test_name: test_fr01_ac3_post_invalid_body_returns_422
+    test_file: tests/integration/api/tasks/test_create.py
+    ac_summary: POST /v1/tasks with empty body / >1000 chars / blacklist chars returns
+      HTTP 422 + problem+json
+    cross_ref_nfrs: []
+  - tc_id: TC-FR01-04
+    fr: FR-01
+    ac: AC-1.4
+    layer: integration
+    test_name: test_fr01_ac4_post_duplicate_name_returns_409
+    test_file: tests/integration/api/tasks/test_create.py
+    ac_summary: POST /v1/tasks with existing name returns HTTP 409 + application/problem+json
+    cross_ref_nfrs: []
+  - tc_id: TC-FR01-05
+    fr: FR-01
+    ac: AC-1.5
+    layer: integration
+    test_name: test_fr01_ac5_get_existing_returns_200
+    test_file: tests/integration/api/tasks/test_get.py
+    ac_summary: GET /v1/tasks/{existing_id} returns HTTP 200 with task full fields
+    cross_ref_nfrs: []
+  - tc_id: TC-FR01-06
+    fr: FR-01
+    ac: AC-1.6
+    layer: integration
+    test_name: test_fr01_ac6_get_unknown_returns_404
+    test_file: tests/integration/api/tasks/test_get.py
+    ac_summary: GET /v1/tasks/{unknown_id} returns HTTP 404 + application/problem+json
+    cross_ref_nfrs: []
+  - tc_id: TC-FR01-07
+    fr: FR-01
+    ac: AC-1.7
+    layer: integration
+    test_name: test_fr01_ac7_list_supports_cursor_pagination
+    test_file: tests/integration/api/tasks/test_list.py
+    ac_summary: GET /v1/tasks accepts ?status / ?limit / ?cursor; pagination is cursor-based
+      (NOT offset); default limit=50, max=200
+    cross_ref_nfrs:
+    - NFR-01
+  - tc_id: TC-FR01-08
+    fr: FR-01
+    ac: AC-1.8
+    layer: integration
+    test_name: test_fr01_ac8_list_limit_over_200_returns_422
+    test_file: tests/integration/api/tasks/test_list.py
+    ac_summary: GET /v1/tasks?limit=201 (or any limit > 200) returns HTTP 422 + problem+json
+    cross_ref_nfrs: []
+  - tc_id: TC-FR01-09
+    fr: FR-01
+    ac: AC-1.9
+    layer: integration
+    test_name: test_fr01_ac9_delete_write_scope_returns_403_no_leak
+    test_file: tests/integration/api/tasks/test_delete.py
+    ac_summary: DELETE /v1/tasks/{id} with write-scoped (non-admin) key returns HTTP
+      403; body does NOT reveal id existence
+    cross_ref_nfrs:
+    - NFR-02
+  - tc_id: TC-FR01-10
+    fr: FR-01
+    ac: AC-1.10
+    layer: integration
+    test_name: test_fr01_ac10_delete_admin_cascades_results
+    test_file: tests/integration/api/tasks/test_delete.py
+    ac_summary: DELETE /v1/tasks/{id} with admin-scoped key removes task row + associated
+      task_results rows in same transaction
+    cross_ref_nfrs:
+    - NFR-03
+  - tc_id: TC-FR02-01
+    fr: FR-02
+    ac: AC-2.1
+    layer: integration
+    test_name: test_fr02_ac1_run_returns_202_with_run_id
+    test_file: tests/integration/api/tasks/test_run.py
+    ac_summary: POST /v1/tasks/{id}/run returns HTTP 202 with run_id in body
+    cross_ref_nfrs: []
+  - tc_id: TC-FR02-02
+    fr: FR-02
+    ac: AC-2.2
+    layer: unit
+    test_name: test_fr02_ac2_subprocess_exec_no_shell_true
+    test_file: tests/unit/security/test_shell_injection.py
+    ac_summary: Subprocess uses asyncio.create_subprocess_exec(*shlex.split(command));
+      shell=True does NOT appear anywhere in src/
+    cross_ref_nfrs:
+    - NFR-02
+  - tc_id: TC-FR02-04
+    fr: FR-02
+    ac: AC-2.4
+    layer: integration
+    test_name: test_fr02_ac4_results_persisted_to_task_results
+    test_file: tests/integration/api/tasks/test_run.py
+    ac_summary: Execution result persisted to task_results with exit_code / stdout_tail
+      / stderr_tail / duration_ms / finished_at
+    cross_ref_nfrs: []
+  - tc_id: TC-FR02-05
+    fr: FR-02
+    ac: AC-2.5
+    layer: integration
+    test_name: test_fr02_ac5_get_runs_newest_first
+    test_file: tests/integration/api/tasks/test_run.py
+    ac_summary: GET /v1/tasks/{id}/runs returns task's execution history sorted newest-first
+    cross_ref_nfrs: []
+  - tc_id: TC-FR03-01
+    fr: FR-03
+    ac: AC-3.1
+    layer: integration
+    test_name: test_fr03_ac1_missing_or_invalid_key_returns_401
+    test_file: tests/integration/api/test_auth.py
+    ac_summary: Every /v1/* endpoint requires X-API-Key; missing or invalid key returns
+      HTTP 401 + application/problem+json
+    cross_ref_nfrs: []
+  - tc_id: TC-FR03-02
+    fr: FR-03
+    ac: AC-3.2
+    layer: unit
+    test_name: test_fr03_ac2_key_hash_sha256_64hex_no_plaintext
+    test_file: tests/unit/service/test_keys.py
+    ac_summary: API keys stored as SHA-256 hashes in api_keys.key_hash; no plaintext;
+      key_hash is exactly 64 hex chars
+    cross_ref_nfrs:
+    - NFR-02
+  - tc_id: TC-FR03-03
+    fr: FR-03
+    ac: AC-3.3
+    layer: unit
+    test_name: test_fr03_ac3_compare_digest_constant_time
+    test_file: tests/unit/service/test_keys.py
+    ac_summary: Key comparison uses hmac.compare_digest (constant-time)
+    cross_ref_nfrs:
+    - NFR-02
+  - tc_id: TC-FR03-04
+    fr: FR-03
+    ac: AC-3.4
+    layer: integration
+    test_name: test_fr03_ac4_create_prints_plaintext_once
+    test_file: tests/integration/service/test_key_create.py
+    ac_summary: Key creation prints plaintext to stdout exactly once and never persists
+      it; plaintext appears in no log/error body/metrics
+    cross_ref_nfrs:
+    - NFR-04
+  - tc_id: TC-FR03-05
+    fr: FR-03
+    ac: AC-3.5
+    layer: integration
+    test_name: test_fr03_ac5_revoked_key_invalid
+    test_file: tests/integration/api/test_auth.py
+    ac_summary: Key with non-null revoked_at is treated as invalid
+    cross_ref_nfrs: []
+  - tc_id: TC-FR03-06
+    fr: FR-03
+    ac: AC-3.6
+    layer: integration
+    test_name: test_fr03_ac6_healthz_readyz_no_auth
+    test_file: tests/integration/api/test_auth.py
+    ac_summary: /healthz and /readyz do not require authentication
+    cross_ref_frs:
+    - FR-09
+    cross_ref_nfrs:
+    - NFR-02
+    - NFR-05
+  - tc_id: TC-FR04-01
+    fr: FR-04
+    ac: AC-4.1
+    layer: unit
+    test_name: test_fr04_ac1_scope_hierarchy_read_write_admin
+    test_file: tests/unit/api/test_scope.py
+    ac_summary: Each key carries scope from {read, write, admin} with hierarchical
+      containment read < write < admin
+    cross_ref_nfrs: []
+  - tc_id: TC-FR04-02
+    fr: FR-04
+    ac: AC-4.2
+    layer: integration
+    test_name: test_fr04_ac2_insufficient_scope_403_no_leak
+    test_file: tests/integration/api/test_scope.py
+    ac_summary: Request to endpoint with insufficient scope returns HTTP 403 + problem+json;
+      body does NOT reveal resource existence
+    cross_ref_nfrs:
+    - NFR-02
+  - tc_id: TC-FR04-03
+    fr: FR-04
+    ac: AC-4.3
+    layer: unit
+    test_name: test_fr04_ac3_single_dependency_audit
+    test_file: tests/unit/api/test_dependency_audit.py
+    ac_summary: Authorization enforced by exactly one FastAPI dependency; every /v1
+      route passes through this single dependency
+    cross_ref_nfrs: []
+  - tc_id: TC-FR05-01
+    fr: FR-05
+    ac: AC-5.1
+    layer: unit
+    test_name: test_fr05_ac1_bucket_config_burst_per_sec
+    test_file: tests/unit/service/test_token_bucket.py
+    ac_summary: Per-token token bucket has capacity TASKQ_RATE_BURST and refill rate
+      TASKQ_RATE_PER_SEC
+    cross_ref_nfrs: []
+  - tc_id: TC-FR05-02
+    fr: FR-05
+    ac: AC-5.2
+    layer: integration
+    test_name: test_fr05_ac2_overflow_returns_429_with_retry_after
+    test_file: tests/integration/api/test_rate_limit.py
+    ac_summary: Request exceeding bucket returns HTTP 429 + application/problem+json
+      with Retry-After header in seconds
+    cross_ref_nfrs: []
+  - tc_id: TC-FR05-03
+    fr: FR-05
+    ac: AC-5.3
+    layer: unit
+    test_name: test_fr05_ac3_db_backed_row_level_lock
+    test_file: tests/unit/service/test_token_bucket.py
+    ac_summary: Token-bucket state stored in DB (consistent across workers); updates
+      run in single transaction with row-level lock
+    cross_ref_nfrs:
+    - NFR-03
+  - tc_id: TC-FR05-04
+    fr: FR-05
+    ac: AC-5.4
+    layer: integration
+    test_name: test_fr05_ac4_healthz_readyz_rate_limit_exempt
+    test_file: tests/integration/api/test_rate_limit.py
+    ac_summary: /healthz and /readyz are not subject to rate limiting
+    cross_ref_frs:
+    - FR-09
+    cross_ref_nfrs: []
+  - tc_id: TC-FR06-01
+    fr: FR-06
+    ac: AC-6.1
+    layer: unit
+    test_name: test_fr06_ac1_repository_only_data_access
+    test_file: tests/unit/architecture/test_layer_contract.py
+    ac_summary: All data access goes through repository layer; service layer does
+      NOT import or hold a SQLAlchemy Session
+    cross_ref_nfrs:
+    - NFR-06
+  - tc_id: TC-FR06-02
+    fr: FR-06
+    ac: AC-6.2
+    layer: unit
+    test_name: test_fr06_ac2_one_session_per_request_context_manager
+    test_file: tests/unit/repository/test_session.py
+    ac_summary: Each API request gets exactly one Session; transaction boundary enforced
+      by context manager committing on success and rolling back on exception
+    cross_ref_nfrs:
+    - NFR-03
+  - tc_id: TC-FR06-03
+    fr: FR-06
+    ac: AC-6.3
+    layer: unit
+    test_name: test_fr06_ac3_no_string_concat_sql_grep_gate
+    test_file: tests/unit/security/test_sql_concat_grep.py
+    ac_summary: No string-concatenated SQL in src/; grep gate for f-string / % / +
+      SQL composition returns 0 hits
+    cross_ref_nfrs:
+    - NFR-02
+  - tc_id: TC-FR06-04
+    fr: FR-06
+    ac: AC-6.4
+    layer: integration
+    test_name: test_fr06_ac4_eager_load_sql_count_constant_le_4
+    test_file: tests/integration/repository/test_eager_load.py
+    ac_summary: Relationship loads use selectinload / joinedload explicitly; list
+      endpoint SQL statement count is constant (independent of row count) and <= 4
+    cross_ref_nfrs:
+    - NFR-01
+  - tc_id: TC-FR06-05
+    fr: FR-06
+    ac: AC-6.5
+    layer: unit
+    test_name: test_fr06_ac5_pool_size_and_pre_ping
+    test_file: tests/unit/repository/test_session.py
+    ac_summary: Connection pool uses pool_size=TASKQ_DB_POOL_SIZE and pool_pre_ping=True
+    cross_ref_nfrs: []
+  - tc_id: TC-FR07-01
+    fr: FR-07
+    ac: AC-7.1
+    layer: integration
+    test_name: test_fr07_ac1_v1_creates_tasks_api_keys_tables
+    test_file: tests/integration/alembic/test_v1_v2_v3.py
+    ac_summary: Revision v1 creates tasks and api_keys tables; downgrade drops both
+      tables
+    cross_ref_nfrs:
+    - NFR-09
+  - tc_id: TC-FR07-02
+    fr: FR-07
+    ac: AC-7.2
+    layer: integration
+    test_name: test_fr07_ac2_v2_adds_tags_task_tags_unique_index
+    test_file: tests/integration/alembic/test_v1_v2_v3.py
+    ac_summary: Revision v2 adds tags, task_tags (many-to-many) plus unique index
+      on tasks.name; downgrade drops new tables + index without affecting v1 data
+    cross_ref_nfrs:
+    - NFR-09
+  - tc_id: TC-FR07-03
+    fr: FR-07
+    ac: AC-7.3
+    layer: integration
+    test_name: test_fr07_ac3_v3_migrates_tasks_result_json_to_task_results
+    test_file: tests/integration/alembic/test_v1_v2_v3.py
+    ac_summary: Revision v3 splits tasks.result_json into separate task_results table,
+      migrates existing data, drops original column; downgrade reverses move and drops
+      task_results
+    cross_ref_nfrs:
+    - NFR-09
+  - tc_id: TC-FR07-04
+    fr: FR-07
+    ac: AC-7.4
+    layer: integration
+    test_name: test_fr07_ac4_upgrade_head_downgrade_base_exit_zero
+    test_file: tests/integration/alembic/test_v1_v2_v3.py
+    ac_summary: alembic upgrade head and alembic downgrade base both exit 0 (no residual
+      tables after downgrade base)
+    cross_ref_nfrs:
+    - NFR-09
+  - tc_id: TC-FR07-05
+    fr: FR-07
+    ac: AC-7.5
+    layer: integration
+    test_name: test_fr07_ac5_round_trip_byte_identical_sample
+    test_file: tests/integration/alembic/test_v1_v2_v3.py
+    ac_summary: 'Round-trip: upgrade head -> write sample -> downgrade -1 -> upgrade
+      head leaves every sample column byte-identical (v3 data-migration focus)'
+    cross_ref_nfrs:
+    - NFR-09
+    - NFR-12
+  - tc_id: TC-FR07-06
+    fr: FR-07
+    ac: AC-7.6
+    layer: unit
+    test_name: test_fr07_ac6_no_destructive_shortcut_drop_table
+    test_file: tests/unit/alembic/test_no_shortcut.py
+    ac_summary: Migrations do NOT use op.execute("DROP TABLE ...") or other destructive
+      shortcuts to substitute for real downgrade
+    cross_ref_nfrs: []
+  - tc_id: TC-FR07-07
+    fr: FR-07
+    ac: AC-7.7
+    layer: unit
+    test_name: test_fr07_ac7_offline_sql_generation_covered
+    test_file: tests/unit/alembic/test_offline_sql.py
+    ac_summary: Migration files covered by tests (offline SQL generation plus assertions)
+    cross_ref_nfrs: []
+  - tc_id: TC-FR08-01
+    fr: FR-08
+    ac: AC-8.1
+    layer: integration
+    test_name: test_fr08_ac1_task_group_graceful_drain
+    test_file: tests/integration/service/test_drain.py
+    ac_summary: Background execution managed by asyncio.TaskGroup; on shutdown service
+      performs graceful drain up to TASKQ_DRAIN_TIMEOUT, exceeding tasks marked interrupted
+    cross_ref_nfrs:
+    - NFR-03
+    - NFR-10
+  - tc_id: TC-FR08-02
+    fr: FR-08
+    ac: AC-8.2
+    layer: integration
+    test_name: test_fr08_ac2_max_concurrent_cap_queues_overflow
+    test_file: tests/integration/service/test_drain.py
+    ac_summary: Concurrency capped at TASKQ_MAX_CONCURRENT; over-cap submissions queue
+      rather than spawning unbounded coroutines
+    cross_ref_nfrs: []
+  - tc_id: TC-FR08-03
+    fr: FR-08
+    ac: AC-8.3
+    layer: integration
+    test_name: test_fr08_ac3_timeout_kills_subprocess_no_orphans
+    test_file: tests/integration/service/test_executor.py
+    ac_summary: Task timeout enforced via asyncio.wait_for; on timeout child process
+      terminated by process.kill() + await process.wait(); no orphan processes remain
+    cross_ref_nfrs:
+    - NFR-03
+    - NFR-10
+  - tc_id: TC-FR08-04
+    fr: FR-08
+    ac: AC-8.4
+    layer: unit
+    test_name: test_fr08_ac4_cancelled_error_propagates
+    test_file: tests/unit/service/test_cancelled_propagation.py
+    ac_summary: 'asyncio.CancelledError propagates upward; never caught by bare except
+      Exception: block'
+    cross_ref_nfrs:
+    - NFR-03
+  - tc_id: TC-FR09-01
+    fr: FR-09
+    ac: AC-9.1
+    layer: integration
+    test_name: test_fr09_ac1_healthz_returns_200_status_ok
+    test_file: tests/integration/api/test_health.py
+    ac_summary: GET /healthz (no auth) returns HTTP 200 with {"status":"ok"} when
+      process is alive
+    cross_ref_nfrs: []
+  - tc_id: TC-FR09-02
+    fr: FR-09
+    ac: AC-9.2
+    layer: integration
+    test_name: test_fr09_ac2_readyz_db_and_alembic_head_check
+    test_file: tests/integration/api/test_readiness.py
+    ac_summary: GET /readyz (no auth) returns HTTP 200 iff DB reachable AND alembic
+      current == head; otherwise HTTP 503 with body naming which check failed
+    cross_ref_nfrs:
+    - NFR-03
+    - NFR-12
+  - tc_id: TC-FR09-03
+    fr: FR-09
+    ac: AC-9.3
+    layer: integration
+    test_name: test_fr09_ac3_metrics_admin_scope
+    test_file: tests/integration/api/test_metrics.py
+    ac_summary: GET /v1/metrics (admin scope) returns per-status task counts, execution-latency
+      percentiles, rate-limit rejection counts
+    cross_ref_nfrs:
+    - NFR-04
+  - tc_id: TC-FR10-01
+    fr: FR-10
+    ac: AC-10.1
+    layer: unit
+    test_name: test_fr10_ac1_problem_json_content_type
+    test_file: tests/unit/errors/test_problem.py
+    ac_summary: 'Every non-2xx response has Content-Type: application/problem+json'
+    cross_ref_nfrs: []
+  - tc_id: TC-FR10-02
+    fr: FR-10
+    ac: AC-10.2
+    layer: unit
+    test_name: test_fr10_ac2_body_fields_type_title_status_detail_instance_correlation_id
+    test_file: tests/unit/errors/test_problem.py
+    ac_summary: Error body carries type (URI), title, status, detail, instance, correlation_id
+    cross_ref_nfrs: []
+  - tc_id: TC-FR10-03
+    fr: FR-10
+    ac: AC-10.3
+    layer: integration
+    test_name: test_fr10_ac3_detail_no_sql_stack_path_leak
+    test_file: tests/integration/api/test_error_contract.py
+    ac_summary: detail does NOT include SQL statements, stack traces, file paths,
+      or database schema descriptions
+    cross_ref_nfrs:
+    - NFR-02
+    - NFR-04
+  - tc_id: TC-FR10-04
+    fr: FR-10
+    ac: AC-10.4
+    layer: unit
+    test_name: test_fr10_ac4_correlation_id_mirrored_header_logs
+    test_file: tests/unit/errors/test_problem.py
+    ac_summary: correlation_id appears both in response header X-Correlation-Id AND
+      in server logs
+    cross_ref_nfrs: []
   summary:
     total_test_cases: 100
-
     by_fr:
       FR-01:
         tc_count: 10
@@ -1189,7 +631,6 @@ test_inventory:
       NFR-12:
         tc_count: 2
         ac_range: AC-N12.1..AC-N12.2
-
     by_layer:
       unit:
         count: 42
@@ -1201,7 +642,6 @@ test_inventory:
         count: 2
       lint:
         count: 7
-
     arithmetic_check:
       by_fr_total: 100
       by_layer_total: 100

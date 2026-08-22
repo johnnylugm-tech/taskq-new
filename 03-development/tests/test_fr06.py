@@ -584,7 +584,7 @@ def test_fr06_ac4_eager_load_sql_count_constant_le_4():
 
         event.listen(engine, "before_cursor_execute", _on_cursor_execute)
         try:
-            with factory() as probe:
+            with factory() as probe:  # noqa: F841 -- session owned for cleanup only
                 rows, _next = (
                     TaskRepository(session_factory=factory)
                     .list(limit=requested_limit)
@@ -682,7 +682,7 @@ def test_fr06_ac5_pool_size_and_pre_ping():
     assert pre_ping == "true"
 
     expected_pool_size = int(pool_size)  # 5
-    expected_pre_ping = pre_ping.lower() == "true"  # True
+    expected_pre_ping = pre_ping.lower() == "true"  # True  # noqa: F841 -- derived for assertion symmetry
 
     # GREEN TODO: ``taskq.config.settings`` MUST expose a Settings
     # object (or ``get_settings()`` factory) carrying ``db_pool_size``
@@ -716,7 +716,7 @@ def test_fr06_ac5_pool_size_and_pre_ping():
 
     # Build an engine from those settings and assert the pool's
     # observed flags match.
-    from sqlalchemy import create_engine
+    from sqlalchemy import create_engine  # noqa: F401 -- for diagnostic introspection
     from sqlalchemy.engine import Engine
 
     from taskq.repository.tasks import get_engine

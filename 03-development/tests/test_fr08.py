@@ -46,7 +46,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List  # noqa: F401 -- Any/Dict referenced in test bodies
 
 import pytest
 

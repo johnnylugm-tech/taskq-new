@@ -1,5 +1,5 @@
 ---
-key: 2026-08-23-fr99-finalization
+lesson_id: lesson-fr99-finalization
 source: gate-block
 phase: 3
 dimension: dispatch-loop

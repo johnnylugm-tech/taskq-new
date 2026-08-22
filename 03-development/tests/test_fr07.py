@@ -37,8 +37,8 @@ from __future__ import annotations
 import inspect
 import io
 import json
-import os
-import re
+import os  # noqa: F401 -- referenced in GREEN TODO env setup
+import re  # noqa: F401 -- referenced in GREEN TODO docstrings
 import sys
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -144,7 +144,7 @@ def _isolate_taskq_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     yield home
 
 
-def _alembic_cfg(db_url: str) -> "alembic.config.Config":
+def _alembic_cfg(db_url: str) -> "alembic.config.Config":  # noqa: F821 -- forward reference resolved at runtime
     """Build an in-memory alembic Config pointing at the project migrations.
 
     The Config is constructed programmatically (no alembic.ini required

@@ -35,13 +35,12 @@ from __future__ import annotations
 
 import json
 import os
-import re
 import subprocess
 import sys
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional  # noqa: F401 -- Any/Dict/List referenced in test bodies
 
 import httpx
 import pytest
@@ -65,7 +64,7 @@ from taskq.api.app import create_app  # noqa: E402
 #       HTTP 202 + {"run_id": "<uuid>"}. Must NOT block on subprocess exit.
 #     - GET  "/{task_id}/runs" (scope=read)  -> returns the task's run
 #       history sorted newest-first.
-from taskq.api.routes.runs import router as runs_router  # noqa: E402
+from taskq.api.routes.runs import router as runs_router  # noqa: E402, F401 -- referenced in GREEN TODO docstrings
 
 # GREEN TODO: taskq.service.runner must expose the async runner that takes
 # a task_id, looks up the command, schedules the subprocess via

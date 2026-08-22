@@ -1,0 +1,12 @@
+assertion_density=3.38 zero_assert_ratio=0.062
+  ZERO-ASSERT: test_integration_fr10.py::test_task_create_rejects_blacklisted_characters
+  ZERO-ASSERT: test_fr01.py::test_fr01_inprocess_validation_oversize_command_raises
+  ZERO-ASSERT: test_fr01.py::test_fr01_inprocess_list_limit_over_200_raises
+  ZERO-ASSERT: test_fr01.py::test_fr01_inprocess_list_limit_zero_raises
+  ZERO-ASSERT: test_fr01.py::test_fr01_inprocess_taskcreate_blacklist_char_raises_value_error
+  ZERO-ASSERT: test_fr01.py::test_fr01_inprocess_delete_unknown_task_raises_tasknotfound
+  ZERO-ASSERT: test_fr03.py::test_fr03_cov_auth_verify_rejects_missing_key_none
+  ZERO-ASSERT: test_fr03.py::test_fr03_cov_auth_verify_rejects_missing_key_empty
+  ZERO-ASSERT: test_fr03.py::test_fr03_cov_auth_verify_insufficient_admin_scope
+  ZERO-ASSERT: test_fr06.py::test_coverage_task_repository_delete_task_row
+tool_score=100
