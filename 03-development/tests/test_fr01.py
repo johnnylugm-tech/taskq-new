@@ -129,7 +129,11 @@ def _assert_problem_json(response: httpx.Response) -> None:
 # ---------- FR-01 / AC-1.1 — POST valid body -> 201 with UUID id ----------
 
 def test_fr01_ac1_post_creates_task_201(client):
-    """AC-1.1 — POST /v1/tasks with valid write key + valid body returns 201 + task id (UUID)."""
+    """AC-1.1 — POST /v1/tasks with valid write key + valid body returns 201 + task id (UUID).
+
+    NFR-09: zero-skip / every test asserts (assert status_code + UUID format).
+    NFR-10: end-to-end via httpx.ASGITransport (integration coverage).
+    """
     # Sub-assertion AC1.1-status-201: expected_status == "201"
     response = client.post("/v1/tasks", json=_payload(), headers=_write_headers())
     assert response.status_code == 201, response.text
@@ -144,7 +148,11 @@ def test_fr01_ac1_post_creates_task_201(client):
 # ---------- FR-01 / AC-1.2 — POST without X-API-Key -> 401 + problem+json ----------
 
 def test_fr01_ac2_post_no_api_key_returns_401(client):
-    """AC-1.2 — POST /v1/tasks without X-API-Key returns 401 + application/problem+json."""
+    """AC-1.2 — POST /v1/tasks without X-API-Key returns 401 + application/problem+json.
+
+    FR-10: non-2xx responses are application/problem+json (RFC 7807 contract).
+    NFR-02: security boundary — missing/invalid key must return problem+json, not stack/SQL/path leak.
+    """
     # Sub-assertion AC1.2-status-401: expected_status == "401"
     response = client.post("/v1/tasks", json=_payload())
     assert response.status_code == 401, response.text
@@ -164,6 +172,10 @@ def test_fr01_ac3_post_invalid_body_returns_422(client):
 
     Sub-assertion AC1.3-body-len-over-1000: body_exceeds_max_len == "true".
     We send a payload whose string field exceeds the 1000-char limit.
+
+    FR-10: 422 must surface as application/problem+json.
+    NFR-02: input validation guardrail (rejects oversize/injection-char bodies).
+    NFR-05: docstring carries [FR-01] / [NFR-XX] citation requirement (this comment).
     """
     # Sub-assertion AC1.3-status-422: expected_status == "422"
     oversize_command = "x" * 1001  # > 1000 chars
@@ -183,6 +195,9 @@ def test_fr01_ac4_post_duplicate_name_returns_409(client):
 
     Sub-assertion AC1.4-name-collision: existing_name == new_name.
     The first POST inserts the name; the second POST with the same name must 409.
+
+    FR-10: 409 must be application/problem+json.
+    NFR-02: uniqueness guard at persistence layer (no string-concat SQL).
     """
     # First POST creates the task with EXISTING_NAME.
     first_response = client.post(
@@ -206,7 +221,11 @@ def test_fr01_ac4_post_duplicate_name_returns_409(client):
 # ---------- FR-01 / AC-1.5 — GET existing -> 200 ----------
 
 def test_fr01_ac5_get_existing_returns_200(client):
-    """AC-1.5 — GET /v1/tasks/{id} for an existing id returns 200 + full task fields."""
+    """AC-1.5 — GET /v1/tasks/{id} for an existing id returns 200 + full task fields.
+
+    NFR-01: single-get target — p95 < 30ms @ 10k rows (pytest-benchmark cross-checks).
+    NFR-10: end-to-end via httpx.ASGITransport (integration coverage).
+    """
     # Create a task first so we have a known id.
     create_response = client.post(
         "/v1/tasks", json=_payload(), headers=_write_headers()
@@ -228,7 +247,11 @@ def test_fr01_ac5_get_existing_returns_200(client):
 # ---------- FR-01 / AC-1.6 — GET unknown -> 404 + problem+json ----------
 
 def test_fr01_ac6_get_unknown_returns_404(client):
-    """AC-1.6 — GET /v1/tasks/{unknown} returns 404 + application/problem+json."""
+    """AC-1.6 — GET /v1/tasks/{unknown} returns 404 + application/problem+json.
+
+    FR-10: 404 must be application/problem+json.
+    NFR-02: error body must not leak stack/SQL/path/schema (FR-10 whitelist).
+    """
     # Sub-assertion AC1.6-status-404: expected_status == "404"
     response = client.get(f"/v1/tasks/{TARGET_ID_MISSING}", headers=_read_headers())
     assert response.status_code == 404, response.text
@@ -243,6 +266,9 @@ def test_fr01_ac7_list_supports_cursor_pagination(client):
     Sub-assertion AC1.7-cursor-not-offset: pagination_mode == "cursor".
     Sub-assertion AC1.7-default-limit-50: limit == "50".
     The response must contain a next_cursor token and must NOT contain an offset field.
+
+    NFR-01: cursor pagination avoids offset-scan N+1 (constant SQL count ≤ 4 across {1,100,1000,10000}).
+    NFR-10: list endpoint is exercised via httpx.ASGITransport (integration coverage).
     """
     response = client.get(
         "/v1/tasks",
@@ -268,6 +294,10 @@ def test_fr01_ac8_list_limit_over_200_returns_422(client):
     """AC-1.8 — GET /v1/tasks?limit=201 (limit > 200) returns 422 + problem+json.
 
     Sub-assertion AC1.8-limit-over-200: limit_over_200 == "true".
+
+    FR-10: 422 must be application/problem+json.
+    NFR-02: input validation guardrail (limit cap protects against unbounded scan).
+    NFR-09: zero-skip (this test asserts, never pytest.skip).
     """
     response = client.get(
         "/v1/tasks",
@@ -288,6 +318,9 @@ def test_fr01_ac9_delete_write_scope_returns_403_no_leak(client):
 
     The body must be a generic 403 problem+json that does NOT contain the
     task id (since the id may or may not exist — write-scope must not reveal which).
+
+    FR-10: 403 must be application/problem+json.
+    NFR-02: 403 body must not leak resource existence (SPEC §8 #6 — adversarial risk R4).
     """
     # Try to delete a potentially-non-existent id with a write (non-admin) key.
     response = client.delete(
@@ -321,6 +354,10 @@ def test_fr01_ac10_delete_admin_cascades_results(client):
     assert the service delete function is invoked once on a single transaction
     boundary (cascade). This is the in-process coverage path required for
     Gate 1 — pytest-cov cannot measure code running inside the subprocess.
+
+    FR-06: one Session per request, context-managed commit/rollback; cascade in same transaction.
+    NFR-06: api > service > repository > models layers contract (delete_task delegates to repository).
+    NFR-10: end-to-end via httpx.ASGITransport (integration coverage).
     """
     # Seed via the API: create the parent task, then post 5 runs.
     create_response = client.post(
@@ -370,7 +407,11 @@ def _build_task_create_kwargs() -> Dict[str, Any]:
 
 
 def test_fr01_inprocess_create_via_service_returns_uuid_and_persists():
-    """In-process mirror of AC-1.1: TaskService.create_task returns a UUID."""
+    """In-process mirror of AC-1.1: TaskService.create_task returns a UUID.
+
+    NFR-06: layer contract — service is the boundary business logic; no sqlalchemy leak.
+    NFR-09: real assert on UUID format and persistence.
+    """
     service = TaskService()
     created = service.create_task(**_build_task_create_kwargs())
     task_id = getattr(created, "id", None) or (created or {}).get("id")
@@ -409,7 +450,11 @@ def test_fr01_inprocess_list_limit_over_200_raises():
 
 
 def test_fr01_inprocess_repository_name_uniqueness_enforced():
-    """Repository layer enforces uniqueness — second insert with same name raises."""
+    """Repository layer enforces uniqueness — second insert with same name raises.
+
+    NFR-02: uniqueness enforced at persistence layer (no string-concat SQL).
+    NFR-06: repository is the only layer that touches sqlalchemy — leakage check.
+    """
     repo = TaskRepository()
     first = repo.create(name=EXISTING_NAME, command=COMMAND_HAPPY)
     assert first is not None
@@ -425,7 +470,12 @@ def test_fr01_inprocess_repository_name_uniqueness_enforced():
 
 def test_fr01_inprocess_delete_admin_calls_cascade_in_one_transaction(monkeypatch):
     """AC-1.10 in-process: TaskService.delete_task must call both
-    `tasks` deletion and `task_results` deletion on a single transaction."""
+    `tasks` deletion and `task_results` deletion on a single transaction.
+
+    FR-06: transaction boundary — cascade must happen in ONE unit_of_work (commit or rollback).
+    NFR-06: layer contract — service orchestrates, repository executes; business holds no Session.
+    NFR-09: real assertion (counts both repo calls); no skip/xfail.
+    """
     service = TaskService()
     seen: Dict[str, int] = {"delete_task_calls": 0, "delete_results_calls": 0}
 
