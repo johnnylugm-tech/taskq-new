@@ -30,6 +30,10 @@ Public surface:
   bucket. Used by the API middleware to compute the ``Retry-After``
   header (HTTP semantics: integer seconds, per RFC 9110 §10.2.3).
 
+* ``compute_refill(tokens, last_refill_at, now, burst, per_sec)`` —
+  pure refill math shared by the in-memory bucket and the
+  DB-backed repository (AC-5.3) so the two layers never drift.
+
 The service layer owns NO SQL — the persistent bucket row lives in
 ``taskq.repository.rate_buckets`` (NFR-06). This module is the
 unit-level mirror used by AC-5.1 and is re-used by the HTTP
@@ -44,7 +48,7 @@ from __future__ import annotations
 import math
 import time
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Tuple
 
 
 @dataclass(frozen=True)
@@ -60,6 +64,35 @@ class RateLimitConfig:
 
     burst: int
     per_sec: float
+
+
+def compute_refill(
+    tokens: float,
+    last_refill_at: float,
+    now: float,
+    burst: float,
+    per_sec: float,
+) -> Tuple[float, float]:
+    """Pure refill math — return ``(new_tokens, new_last_refill_at)``.
+
+    Shared by ``TokenBucket._refill_locked`` and
+    ``RateBucketRepository.consume`` so the in-memory and DB-backed
+    bucket implementations can't drift.
+
+    Monotonicity:
+      * When ``now <= last_refill_at`` the wall clock hasn't advanced
+        (or stepped backwards): ``last_refill_at`` is bumped to
+        ``now`` so a clock recovery cannot silently grant tokens.
+      * When the refill amount is non-positive (``per_sec <= 0``)
+        ``last_refill_at`` is left untouched so we don't drift
+        ``last_refill_at`` forward without actually adding tokens.
+    """
+    if now <= last_refill_at:
+        return tokens, now
+    refilled = (now - last_refill_at) * float(per_sec)
+    if refilled <= 0.0:
+        return tokens, last_refill_at
+    return min(float(burst), tokens + refilled), now
 
 
 class TokenBucket:
@@ -90,11 +123,8 @@ class TokenBucket:
         # A fresh bucket starts FULL so a brand-new principal can
         # immediately spend ``burst`` tokens before being throttled.
         full = float(config.burst)
-        self._tokens = full if initial_tokens is None else float(initial_tokens)
-        if self._tokens < 0.0:
-            self._tokens = 0.0
-        if self._tokens > full:
-            self._tokens = full
+        seeded = float(initial_tokens) if initial_tokens is not None else full
+        self._tokens = max(0.0, min(full, seeded))
         self._last_refill_at = float(now) if now is not None else time.time()
 
     # ---- Properties (read-only) ----
@@ -113,18 +143,15 @@ class TokenBucket:
 
     def _refill_locked(self, now: float) -> None:
         """Bring the bucket up to date with elapsed wall-clock time."""
-        if now <= self._last_refill_at:
-            # Clock didn't advance (or stepped backwards): nothing to
-            # refill, but keep ``_last_refill_at`` monotonic to avoid
-            # accidentally granting tokens when the clock recovers.
-            self._last_refill_at = now
-            return
-        elapsed = now - self._last_refill_at
-        refilled = elapsed * self._config.per_sec
-        if refilled <= 0.0:
-            return
-        self._tokens = min(float(self._config.burst), self._tokens + refilled)
-        self._last_refill_at = now
+        new_tokens, new_last = compute_refill(
+            self._tokens,
+            self._last_refill_at,
+            now,
+            float(self._config.burst),
+            float(self._config.per_sec),
+        )
+        self._tokens = new_tokens
+        self._last_refill_at = new_last
 
     def consume(self, now: Optional[float] = None) -> bool:
         """Try to consume a single token; return True on success."""
@@ -183,6 +210,7 @@ def seconds_until_next_token(
 __all__ = [
     "RateLimitConfig",
     "TokenBucket",
+    "compute_refill",
     "consume_token",
     "seconds_until_next_token",
 ]

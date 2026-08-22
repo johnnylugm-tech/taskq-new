@@ -28,6 +28,9 @@ Both ``get`` and ``consume`` lazily materialise a row at full capacity
 the first time a fresh ``key_id`` is observed, so callers don't need
 a separate seeding step.
 
+The refill math is delegated to ``taskq.service.rate_limit.compute_refill``
+so the in-memory and DB-backed buckets cannot drift (AC-5.1 / AC-5.3).
+
 Citations: SPEC.md §3 FR-05, §5.1; SAD.md §4 repository layer;
 NFR-03 (shared state across workers); NFR-06 (no SQL past the
 repository); NFR-13 (row-level lock under concurrency).
@@ -38,13 +41,14 @@ import os
 import time
 import uuid
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional, TypeVar
 
 from sqlalchemy import Float, Integer, String, select
 from sqlalchemy.orm import Mapped, Session, mapped_column, sessionmaker
 
 from taskq.models.base import Base
 from taskq.repository.tasks import get_session_factory
+from taskq.service.rate_limit import compute_refill
 
 
 # ---------- ORM model ----------
@@ -76,28 +80,27 @@ class RateBucket(Base):
 # ---------- Defaults (TASKQ_RATE_BURST / TASKQ_RATE_PER_SEC) ----------
 
 
-def _env_int(name: str, default: int) -> int:
-    raw = os.environ.get(name)
-    if raw is None or raw.strip() == "":
+_T = TypeVar("_T")
+
+
+def _env_typed(name: str, default: _T, parse: Callable[[str], _T]) -> _T:
+    """Read ``name`` from the environment and parse via ``parse``.
+
+    Returns ``default`` when the variable is unset, blank, or fails to
+    parse — both ``_env_int`` and ``_env_float`` previously did this
+    in two near-identical copies.
+    """
+    raw = os.environ.get(name, "").strip()
+    if not raw:
         return default
     try:
-        return int(raw)
-    except ValueError:
+        return parse(raw)
+    except (ValueError, TypeError):
         return default
 
 
-def _env_float(name: str, default: float) -> float:
-    raw = os.environ.get(name)
-    if raw is None or raw.strip() == "":
-        return default
-    try:
-        return float(raw)
-    except ValueError:
-        return default
-
-
-DEFAULT_BURST: int = _env_int("TASKQ_RATE_BURST", 20)
-DEFAULT_PER_SEC: float = _env_float("TASKQ_RATE_PER_SEC", 5.0)
+DEFAULT_BURST: int = _env_typed("TASKQ_RATE_BURST", 20, int)
+DEFAULT_PER_SEC: float = _env_typed("TASKQ_RATE_PER_SEC", 5.0, float)
 
 
 # ---------- Row projection ----------
@@ -150,23 +153,6 @@ class RateBucketRepository:
 
     # ---- helpers ----
 
-    def _refill_locked(
-        self, row: RateBucket, now: float, burst: int, per_sec: float
-    ) -> None:
-        """Refill ``row`` in-place based on elapsed wall-clock seconds."""
-        last = float(row.last_refill_at)
-        if now <= last:
-            # Clock didn't advance (or stepped backwards) — keep
-            # ``last_refill_at`` monotonic so a clock recovery does
-            # not silently grant extra tokens.
-            row.last_refill_at = now
-            return
-        elapsed = now - last
-        refilled = elapsed * float(per_sec)
-        if refilled > 0.0:
-            row.tokens = min(float(burst), float(row.tokens) + refilled)
-        row.last_refill_at = now
-
     def _materialise(
         self,
         session: Session,
@@ -196,6 +182,11 @@ class RateBucketRepository:
         Lazily materialises a full bucket when no row exists yet so
         the unit test (and the middleware) can probe a previously
         unseen ``key_id`` without a separate seeding step.
+
+        The refill math is applied to a snapshot copy, not the
+        persisted row, so ``get`` stays side-effect-free for callers
+        while still reporting the would-be tokens value a follow-up
+        ``consume`` would observe.
         """
         session: Session = self._session_factory()
         try:
@@ -212,19 +203,15 @@ class RateBucketRepository:
                 session.commit()
                 return _row_to_dict(row)
 
-            # Existing row — refill lazily to mirror the live state
-            # callers would observe after the in-process ``consume``
-            # has run. We do NOT mutate ``row.tokens`` here because
-            # ``get`` is meant to be side-effect-free for callers;
-            # the refill math is identical to what ``consume`` would
-            # do so the returned count is what a follow-up ``consume``
-            # would actually see.
             burst = int(row.config_burst)
             per_sec = float(row.config_per_sec)
-            last = float(row.last_refill_at)
-            tokens = float(row.tokens)
-            if now > last:
-                tokens = min(float(burst), tokens + (now - last) * per_sec)
+            tokens, _ = compute_refill(
+                float(row.tokens),
+                float(row.last_refill_at),
+                now,
+                float(burst),
+                float(per_sec),
+            )
             out = _row_to_dict(row)
             out["tokens"] = tokens
             return out
@@ -261,11 +248,19 @@ class RateBucketRepository:
 
                 burst = int(row.config_burst)
                 per_sec = float(row.config_per_sec)
-                self._refill_locked(row, now, burst, per_sec)
+                new_tokens, new_last = compute_refill(
+                    float(row.tokens),
+                    float(row.last_refill_at),
+                    now,
+                    float(burst),
+                    float(per_sec),
+                )
+                row.tokens = new_tokens
+                row.last_refill_at = new_last
 
                 granted = False
-                if float(row.tokens) >= 1.0:
-                    row.tokens = float(row.tokens) - 1.0
+                if new_tokens >= 1.0:
+                    row.tokens = new_tokens - 1.0
                     granted = True
 
             # Transaction committed by ``session.begin()``'s context
