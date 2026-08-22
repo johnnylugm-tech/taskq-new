@@ -1,12 +1,12 @@
-"""APIKey repository — hashing, constant-time verify, persistence.
+"""APIKey repository — hashing, constant-time verify, persistence (FR-03).
 
-[FR-03] Owns the SHA-256 hashing of plaintext keys and the
+Owns the SHA-256 hashing of plaintext keys and the
 ``hmac.compare_digest`` constant-time comparison used to authenticate
 incoming keys against the ``api_keys`` table. All ORM details live
 here (NFR-06); service / route callers see only plain dicts or domain
 exceptions.
 
-Exposed surface:
+Public surface:
 
 * ``hash_api_key(plaintext: str) -> str``
     64-char lowercase hex SHA-256 of the plaintext.
@@ -21,10 +21,9 @@ Exposed surface:
 
 The repository shares the engine / session factory with
 ``taskq.repository.tasks`` so reads / writes across the two layers
-observe the same SQLite database (the GREEN tests run against a
-single in-memory SQLite via StaticPool).
+observe the same SQLite database.
 
-Citations: SPEC.md §3 FR-03, §7, §8 #5, #18; NFR-02 (constant-time
+Citations: SPEC.md §3 FR-03, §7, §8 #5, §8 #18; NFR-02 (constant-time
 compare; no plaintext on the wire / in logs / metrics); NFR-04 (no
 plaintext in logs / error body / metrics); NFR-06 (layer contract).
 """
@@ -47,11 +46,7 @@ from taskq.repository.tasks import get_engine, get_session_factory
 
 
 def hash_api_key(plaintext: str) -> str:
-    """Return the 64-char lowercase hex SHA-256 of ``plaintext``.
-
-    Used both at key creation time (CLI) and inside ``verify_api_key``
-    so a single hash function backs the entire auth path.
-    """
+    """Return the 64-char lowercase hex SHA-256 of ``plaintext``."""
     return hashlib.sha256(plaintext.encode("utf-8")).hexdigest()
 
 
@@ -59,19 +54,32 @@ def verify_api_key(candidate: str, stored_hash: str) -> bool:
     """Constant-time comparison of ``candidate`` against ``stored_hash``.
 
     The candidate plaintext is hashed first so the comparison is
-    ``sha256(candidate) == stored_hash``. The equality itself uses
-    ``hmac.compare_digest`` (NFR-02) so the comparison time is
-    independent of how many bytes differ.
+    ``sha256(candidate) == stored_hash``. Equality itself uses
+    ``hmac.compare_digest`` (NFR-02) so timing is independent of how
+    many bytes differ.
     """
-    candidate_hash = hash_api_key(candidate)
-    return hmac.compare_digest(candidate_hash, stored_hash)
+    return hmac.compare_digest(hash_api_key(candidate), stored_hash)
 
 
 # ---------- Domain-level exceptions ----------
 
 
 class DuplicateAPIKey(Exception):
-    """Raised when an insert collides on the unique api_keys.key_hash index."""
+    """Raised when an insert collides on the api_keys.key_hash index."""
+
+
+# ---------- Row projection ----------
+
+
+def _row_to_dict(row: APIKey) -> Dict[str, Any]:
+    """Project an ``APIKey`` ORM row to a plain dict for callers."""
+    return {
+        "id": row.id,
+        "key_hash": row.key_hash,
+        "scope": row.scope,
+        "created_at": row.created_at.isoformat() if row.created_at else None,
+        "revoked_at": row.revoked_at.isoformat() if row.revoked_at else None,
+    }
 
 
 # ---------- Repository ----------
@@ -92,8 +100,8 @@ class APIKeyRepository:
         """Insert a new api_keys row.
 
         Accepts either an ``APIKey`` instance via the ``model=`` kwarg
-        OR the column fields directly (id / scope / key_hash /
-        revoked_at). Returns the inserted row as a dict. Raises
+        OR the column fields directly (``id`` / ``scope`` / ``key_hash``
+        / ``revoked_at``). Returns the inserted row as a dict. Raises
         ``DuplicateAPIKey`` on a unique-violation.
         """
         if "model" in kwargs:
@@ -109,7 +117,7 @@ class APIKeyRepository:
             session.add(row)
             session.commit()
             session.refresh(row)
-            return self._to_dict(row)
+            return _row_to_dict(row)
         except Exception:
             session.rollback()
             raise
@@ -117,7 +125,7 @@ class APIKeyRepository:
             session.close()
 
     def lookup_active(self, candidate: str) -> Optional[Dict[str, Any]]:
-        """Return the row dict whose ``key_hash`` matches the candidate,
+        """Return the row dict whose ``key_hash`` matches the candidate
         AND whose ``revoked_at`` is NULL. Returns ``None`` when no row
         matches (caller decides whether to raise ``InvalidAPIKey``).
         """
@@ -133,19 +141,9 @@ class APIKeyRepository:
             row = session.execute(stmt).scalars().first()
             if row is None:
                 return None
-            return self._to_dict(row)
+            return _row_to_dict(row)
         finally:
             session.close()
-
-    @staticmethod
-    def _to_dict(row: APIKey) -> Dict[str, Any]:
-        return {
-            "id": row.id,
-            "key_hash": row.key_hash,
-            "scope": row.scope,
-            "created_at": row.created_at.isoformat() if row.created_at else None,
-            "revoked_at": row.revoked_at.isoformat() if row.revoked_at else None,
-        }
 
 
 __all__ = [
