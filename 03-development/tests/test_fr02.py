@@ -1,9 +1,15 @@
-"""RED tests for FR-02: Task execution endpoint.
+"""Tests for FR-02: Task execution endpoint.
 
-Test names MUST match TEST_SPEC.md (`02-architecture/TEST_SPEC.md`).
-These tests intentionally fail at collection time because the source
-modules are not implemented yet — that is the valid RED state for
-TDD-RED. Do NOT add try/except ImportError wrappers.
+Test names MUST match TEST_SPEC.md (`02-architecture/TEST_SPEC.md`)
+for the canonical FR-02 cases (test_fr02_ac1..ac5). Additional
+in-process coverage tests appended below exercise the remaining
+branches of the route / runner / repository modules so the Gate 1
+``test_coverage`` dimension reaches >= 80% (NP-09 zero-skip: every
+test performs real asserts — no skip / xfail / stubs).
+
+NFR-09 (zero-skip / no xfail): every test in this file performs real asserts
+on the runner / repository / route under test. No skip / xfail / assertion-free
+stubs are permitted (AC-N9.1..AC-N9.7).
 
 NFR-09 (zero-skip / no xfail): every test in this file performs real asserts
 on the runner / repository / route under test. No skip / xfail / assertion-free
@@ -33,6 +39,7 @@ import re
 import subprocess
 import sys
 import uuid
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -462,3 +469,348 @@ def test_fr02_ac5_get_runs_newest_first(client):
         f"runs must be newest-first; insertion was {captured_run_ids}, "
         f"got {returned_run_ids}"
     )
+
+
+# =============================================================================
+# Coverage tests (Gate 1 test_coverage)
+#
+# The TEST_SPEC.md catalog covers the canonical FR-02 scenarios; the tests
+# below exercise the REMAINING branches in:
+#   - taskq.api.routes.runs    -> 401 (missing/invalid key), 403 (wrong scope),
+#                                 404 (unknown task id).
+#   - taskq.repository.results -> _parse_finished_at naive + aware datetime
+#                                 branches, ValueError on unsupported value,
+#                                 ValueError on update_result row-not-found.
+#   - taskq.service.runner     -> timeout path (in-process), command-not-found
+#                                 path, invalid + non-positive TASKQ_TASK_TIMEOUT
+#                                 env-var parsing, and stdout tail-cap path.
+#
+# All tests perform real asserts (no skip / xfail / stub).
+# =============================================================================
+
+
+# ---------- runs.py — auth (401) + scope (403) + 404 coverage ----------
+
+def test_fr02_route_run_no_api_key_returns_401(client):
+    """POST /v1/tasks/{id}/run without X-API-Key must return 401 + problem+json.
+
+    Exercises runs.py lines 56-62 (``except InvalidAPIKey`` branch in
+    ``_require_scope`` dependency). NFR-02 (no info leak on auth failure).
+    """
+    # Seed a task so the path reaches the auth dependency (auth runs before
+    # the task lookup so a missing key still produces 401, but we want to
+    # exercise the *real* dependency path against the wired app).
+    task_id_str = _seed_task(client, name="fr02-coverage-401-missing", command=COMMAND_HAPPY)
+
+    response = client.post(f"/v1/tasks/{task_id_str}/run")  # no headers
+    assert response.status_code == 401, response.text
+    # SPEC §10 / FR-10: error envelope MUST be application/problem+json.
+    assert response.headers["content-type"].startswith("application/problem+json"), (
+        f"expected problem+json content type, got {response.headers.get('content-type')!r}"
+    )
+    # NFR-02: body must not leak the resource existence.
+    body = response.json()
+    assert task_id_str not in (body.get("detail") or ""), (
+        f"auth failure body leaked task id {task_id_str!r}: {body!r}"
+    )
+
+
+def test_fr02_route_run_invalid_api_key_returns_401(client):
+    """POST /v1/tasks/{id}/run with an unknown key must return 401.
+
+    Exercises runs.py line 56-62 (``verify_api_key`` raises InvalidAPIKey
+    on unrecognised key — the second branch of the auth dependency).
+    """
+    task_id_str = _seed_task(client, name="fr02-coverage-401-invalid", command=COMMAND_HAPPY)
+
+    response = client.post(
+        f"/v1/tasks/{task_id_str}/run",
+        headers={"X-API-Key": "definitely-not-a-valid-key"},
+    )
+    assert response.status_code == 401, response.text
+    assert response.headers["content-type"].startswith("application/problem+json")
+
+
+def test_fr02_route_run_read_key_returns_403(client):
+    """POST /v1/tasks/{id}/run with a read-only key must return 403.
+
+    Exercises runs.py lines 63-70 (``except InsufficientScope`` branch in
+    ``_require_scope``). NFR-02: 403 body MUST be generic (no resource leak).
+
+    Note: ``verify_api_key`` only raises ``InsufficientScope`` when
+    ``scope_required == "admin"``. The FR-02 routes use ``write``/``read``
+    so the branch is unreachable through the HTTP layer; we drive the
+    dependency DIRECTLY (with ``scope="admin"`` + a write key) so the
+    closure body executes and the 403 Problem is raised.
+    """
+    from taskq.api.problem import Problem
+    from taskq.api.routes.runs import _require_scope
+
+    dep = _require_scope("admin")
+    # A non-admin key against an admin-required dependency must trigger
+    # the ``except InsufficientScope`` arm (lines 63-70 of runs.py).
+    with pytest.raises(Problem) as excinfo:
+        dep(x_api_key=VALID_WRITE_KEY)
+    raised = excinfo.value
+    assert raised.status == 403, (
+        f"expected Problem.status == 403 from admin-required dep + write key, "
+        f"got {raised!r}"
+    )
+    # NFR-02: body must not leak resource existence; Problem has no resource
+    # id in detail for the 403 branch (the detail is generic "Operation not
+    # permitted.").
+    assert "task" not in (raised.detail or "").lower(), (
+        f"403 detail must be generic (no 'task' leak), got {raised.detail!r}"
+    )
+
+
+def test_fr02_route_run_unknown_task_returns_404(client):
+    """POST /v1/tasks/{unknown_id}/run must return 404 + problem+json.
+
+    Exercises runs.py lines 120-126 (``except TaskNotFound`` -> 404 Problem).
+    """
+    unknown_id = str(uuid.uuid4())
+    response = client.post(
+        f"/v1/tasks/{unknown_id}/run",
+        headers=_write_headers(),
+    )
+    assert response.status_code == 404, response.text
+    assert response.headers["content-type"].startswith("application/problem+json")
+    body = response.json()
+    assert unknown_id not in (body.get("detail") or ""), (
+        f"404 body leaked unknown task id {unknown_id!r}: {body!r}"
+    )
+
+
+def test_fr02_route_list_runs_no_api_key_returns_401(client):
+    """GET /v1/tasks/{id}/runs without X-API-Key must return 401.
+
+    Exercises the 401 path on the read-scope auth dependency (runs.py
+    lines 56-62) so the read-side branch is not the only path covered.
+    """
+    task_id_str = _seed_task(client, name="fr02-coverage-401-list", command=COMMAND_HAPPY)
+    response = client.get(f"/v1/tasks/{task_id_str}/runs")  # no headers
+    assert response.status_code == 401, response.text
+    assert response.headers["content-type"].startswith("application/problem+json")
+
+
+# ---------- results.py — _parse_finished_at + update_result branches ----------
+
+def test_fr02_repo_parse_finished_at_naive_datetime_adds_utc():
+    """``_parse_finished_at`` must tag naive datetimes as UTC.
+
+    Exercises results.py lines 57-59 (the ``isinstance(value, datetime)``
+    branch with ``value.tzinfo is None``).
+    """
+    from taskq.repository.results import _parse_finished_at
+
+    naive = datetime(2026, 8, 22, 12, 0, 0)  # no tzinfo
+    parsed = _parse_finished_at(naive)
+    assert isinstance(parsed, datetime), f"expected datetime, got {parsed!r}"
+    assert parsed.tzinfo is not None, f"naive datetime must be tagged, got {parsed!r}"
+    # The wall-clock time must be preserved (only tzinfo is added).
+    assert parsed.replace(tzinfo=None) == naive, (
+        f"wall-clock time changed: in={naive!r} out={parsed!r}"
+    )
+
+
+def test_fr02_repo_parse_finished_at_aware_datetime_unchanged():
+    """``_parse_finished_at`` must pass aware datetimes through unchanged.
+
+    Exercises the aware-datetime branch (results.py line 59). NFR-09:
+    real assert that tzinfo is preserved (not re-tagged).
+    """
+    from datetime import timezone
+
+    from taskq.repository.results import _parse_finished_at
+
+    aware = datetime(2026, 8, 22, 12, 0, 0, tzinfo=timezone.utc)
+    parsed = _parse_finished_at(aware)
+    assert parsed is aware, (
+        f"aware datetime must be returned unchanged, got a new object: {parsed!r}"
+    )
+    assert parsed.tzinfo is timezone.utc
+
+
+def test_fr02_repo_parse_finished_at_invalid_value_raises():
+    """``_parse_finished_at`` must raise ValueError on unsupported types.
+
+    Exercises results.py line 63 (the unsupported-type branch). NFR-09:
+    real assert that an exception is raised — no try/except swallowing.
+    """
+    from taskq.repository.results import _parse_finished_at
+
+    with pytest.raises(ValueError) as excinfo:
+        _parse_finished_at(12345)  # int is not a datetime or ISO string
+    assert "unsupported" in str(excinfo.value).lower(), (
+        f"error message should mention 'unsupported', got: {excinfo.value!r}"
+    )
+
+
+def test_fr02_repo_update_result_unknown_run_id_raises():
+    """``update_result`` must raise ValueError when the run_id row is absent.
+
+    Exercises results.py line 195 (``raise ValueError`` when the UPDATE
+    target row does not exist). NFR-09: real assert.
+    """
+    repo = TaskResultRepository()
+    unknown_run_id = str(uuid.uuid4())
+    with pytest.raises(ValueError) as excinfo:
+        repo.update_result(
+            run_id=unknown_run_id,
+            exit_code=0,
+            stdout_tail="hello",
+            stderr_tail="",
+            duration_ms=12,
+            finished_at="2026-08-22T00:00:00Z",
+            status="done",
+        )
+    assert unknown_run_id in str(excinfo.value), (
+        f"error must identify the missing run_id, got: {excinfo.value!r}"
+    )
+
+
+# ---------- runner.py — timeout, command-not-found, env parsing, tail-cap ----------
+
+def test_fr02_runner_timeout_path_in_process():
+    """TaskRunner must hard-kill a long-running subprocess on timeout.
+
+    Exercises runner.py lines 124-126 (``except asyncio.TimeoutError``)
+    AND lines 172-179 (``_hard_kill`` body, both the
+    ``proc.kill()`` and ``await proc.wait()`` paths).
+
+    Driven in-process via a private timeout=0.1 against ``sleep 30`` so the
+    subprocess IS killed (not just the awaiting coroutine cancelled).
+    """
+    from taskq.service.runner import TIMEOUT_EXIT_CODE
+
+    runner = TaskRunner(timeout=0.1)  # short — guarantees overrun against sleep 30
+    result = runner.run(task_id=str(uuid.uuid4()), command="sleep 30")
+    assert isinstance(result, dict), f"runner.run must return dict, got {result!r}"
+    assert result.get("terminal") == "timeout", (
+        f"expected terminal 'timeout', got {result!r}"
+    )
+    # Sentinel exit code per runner.TIMEOUT_EXIT_CODE (-1).
+    assert result.get("exit_code") == TIMEOUT_EXIT_CODE, (
+        f"expected sentinel exit_code {TIMEOUT_EXIT_CODE}, got {result!r}"
+    )
+
+
+def test_fr02_runner_command_not_found_path():
+    """TaskRunner must report ``failed``/exit_code=127 when the program is absent.
+
+    Exercises runner.py line 110 (the ``proc is None`` branch in
+    ``_execute`` -> ``_build_result`` with terminal='failed', exit_code=127)
+    AND lines 161-162 (``_spawn`` catching ``FileNotFoundError`` and
+    returning None).
+    """
+    runner = TaskRunner()
+    # Binary guaranteed not to exist on a POSIX PATH.
+    missing_cmd = "taskq_no_such_binary_xyz_should_never_exist_42"
+    result = runner.run(task_id=str(uuid.uuid4()), command=missing_cmd)
+    assert isinstance(result, dict), f"runner.run must return dict, got {result!r}"
+    assert result.get("terminal") == "failed", (
+        f"expected terminal 'failed' for missing program, got {result!r}"
+    )
+    assert result.get("exit_code") == 127, (
+        f"expected exit_code 127 (POSIX 'command not found'), got {result!r}"
+    )
+    # stderr_tail should be non-empty so callers can diagnose the failure.
+    assert result.get("stderr_tail"), (
+        f"stderr_tail must be populated for missing-program failure, got {result!r}"
+    )
+
+
+def test_fr02_runner_invalid_timeout_env_returns_default(monkeypatch):
+    """Unparseable ``TASKQ_TASK_TIMEOUT`` must fall back to the default.
+
+    Exercises runner.py lines 82-86 — the ``except ValueError`` arm of
+    ``_read_timeout`` and the ``value if value > 0 else DEFAULT`` guard.
+    NFR-09: real assert on the timeout value used (not just no exception).
+    """
+    from taskq.service.runner import DEFAULT_TIMEOUT_SECONDS
+
+    monkeypatch.setenv("TASKQ_TASK_TIMEOUT", "not-a-float")
+    # Clear any cached state by constructing a fresh runner.
+    runner = TaskRunner()
+    assert runner._timeout == DEFAULT_TIMEOUT_SECONDS, (
+        f"non-numeric TASKQ_TASK_TIMEOUT must fall back to default, got {runner._timeout!r}"
+    )
+
+
+def test_fr02_runner_nonpositive_timeout_env_returns_default(monkeypatch):
+    """``TASKQ_TASK_TIMEOUT <= 0`` must fall back to the default (no zero-timeout DoS).
+
+    Exercises runner.py line 86 (``return value if value > 0 else DEFAULT``).
+    """
+    from taskq.service.runner import DEFAULT_TIMEOUT_SECONDS
+
+    monkeypatch.setenv("TASKQ_TASK_TIMEOUT", "-1.5")
+    runner = TaskRunner()
+    assert runner._timeout == DEFAULT_TIMEOUT_SECONDS, (
+        f"non-positive TASKQ_TASK_TIMEOUT must fall back to default, got {runner._timeout!r}"
+    )
+
+
+def test_fr02_runner_decode_tail_cap_branch():
+    """``_decode`` must tail-cap streams longer than ``TAIL_LIMIT``.
+
+    Exercises runner.py line 56 (the ``text[-TAIL_LIMIT:]`` branch in
+    ``_decode``). Drives via ``runner.run`` against a command that emits
+    > TAIL_LIMIT bytes of stdout so the decoder sees a long stream.
+    """
+    from taskq.service.runner import TAIL_LIMIT
+
+    runner = TaskRunner()
+    # Emit 2 * TAIL_LIMIT bytes of stdout deterministically.
+    overflow_bytes = TAIL_LIMIT * 2
+    # ``printf`` is POSIX-portable and does not require shell quoting.
+    cmd = f"python3 -c 'import sys; sys.stdout.write(\"A\"*{overflow_bytes})'"
+    result = runner.run(task_id=str(uuid.uuid4()), command=cmd)
+    assert isinstance(result, dict), f"runner.run must return dict, got {result!r}"
+    assert result.get("terminal") == "done", (
+        f"expected terminal 'done' for python3 printf, got {result!r}"
+    )
+    stdout = result.get("stdout_tail") or ""
+    assert len(stdout) == TAIL_LIMIT, (
+        f"stdout_tail must be tail-capped to {TAIL_LIMIT} bytes, "
+        f"got len={len(stdout)}"
+    )
+
+
+def test_fr02_runner_hard_kill_swallows_process_lookup_error_and_wait_exception():
+    """``_hard_kill`` must swallow ``ProcessLookupError`` from ``proc.kill()``
+    and any ``Exception`` from ``proc.wait()`` (defensive cleanup path).
+
+    Exercises runner.py lines 174-175 (``except ProcessLookupError: pass``)
+    AND lines 178-179 (``except Exception: pass``).
+
+    The exception-handler branches are unreachable through the timeout path
+    (the runner's subprocess is alive when ``kill()`` is called and ``wait()``
+    succeeds); we drive the static method directly with a fake process whose
+    ``kill()`` and ``wait()`` raise to prove the defensive branches work.
+    """
+    import asyncio
+
+    from taskq.service.runner import TaskRunner
+
+    class _FakeProcAlreadyDead:
+        """``kill()`` raises ``ProcessLookupError``; ``wait()`` raises a generic exception."""
+
+        killed = False
+        waited = False
+
+        def kill(self) -> None:
+            _FakeProcAlreadyDead.killed = True
+            raise ProcessLookupError("No such process")
+
+        async def wait(self) -> int:
+            _FakeProcAlreadyDead.waited = True
+            raise RuntimeError("simulated wait failure")
+
+    _FakeProcAlreadyDead.killed = False
+    _FakeProcAlreadyDead.waited = False
+    # Should NOT raise despite proc.kill() and proc.wait() both throwing.
+    asyncio.run(TaskRunner._hard_kill(_FakeProcAlreadyDead()))
+    assert _FakeProcAlreadyDead.killed, "hard_kill must invoke proc.kill()"
+    assert _FakeProcAlreadyDead.waited, "hard_kill must invoke proc.wait()"
