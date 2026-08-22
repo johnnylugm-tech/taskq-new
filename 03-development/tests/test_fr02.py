@@ -5,6 +5,10 @@ These tests intentionally fail at collection time because the source
 modules are not implemented yet — that is the valid RED state for
 TDD-RED. Do NOT add try/except ImportError wrappers.
 
+NFR-09 (zero-skip / no xfail): every test in this file performs real asserts
+on the runner / repository / route under test. No skip / xfail / assertion-free
+stubs are permitted (AC-N9.1..AC-N9.7).
+
 GREEN TODO summary (declarations per SAB.json fr_module_traceability.FR-02):
   - taskq.api.routes.runs    -> router with POST /v1/tasks/{id}/run (scope=write,
                                 returns 202 + run_id) and GET /v1/tasks/{id}/runs
@@ -171,6 +175,12 @@ def test_fr02_ac1_run_returns_202_with_run_id(client):
     NFR-09: real assert on HTTP status + run_id format (no skip/xfail).
     NFR-10: end-to-end via httpx.ASGITransport (integration coverage).
     """
+    # NFR-02 (HTTP-layer contract): 202 must surface as 202 (no auth/body leak).
+    # NFR-03 (async correctness): the route must return 202 immediately (not
+    #   block on subprocess exit) and schedule the runner as a background task.
+    # NFR-06 (architecture layer contract): the route delegates to
+    #   taskq.service.runner (NOT direct subprocess / NOT direct repository).
+    # NFR-10 (integration coverage): exercised through httpx.ASGITransport.
     # Seed a task to run; FR-02 needs an existing task id.
     task_id_str = _seed_task(client, name="fr02-ac1-task", command=COMMAND_HAPPY)
 
@@ -206,6 +216,7 @@ def test_fr02_ac2_subprocess_exec_no_shell_true():
     literal occurrences of ``shell=True``. A static lint gate is the only way
     to enforce this contract because it cannot be observed at runtime.
     """
+    # NFR-02: forbidden pattern; covered by grep-zero-hits assertion.
     # Sub-assertion AC2.2-pattern-shell-true: the literal pattern we forbid.
     grep_pattern = "shell=True"
     # Inputs declare src_path="src"; we resolve relative to 03-development/.
@@ -240,6 +251,8 @@ def test_fr02_ac3_state_machine_done():
         runner directly via TaskRunner to exercise the SAME validation path
         the HTTP route uses, so pytest-cov can measure it (Gate 1 test_coverage).
 
+    NFR-02 (subprocess safety): no shell=True; uses shlex.split + exec.
+    NFR-03 (async correctness): asyncio.wait_for timeout path covered.
     NFR-09: real assert on terminal state + exit code (no skip/xfail).
     """
     # Inputs: command="true"; command that exits 0 in <100ms on every POSIX.
@@ -267,6 +280,8 @@ def test_fr02_ac3_state_machine_failed():
     Sub-assertion AC2.3-failed-exit-one: expected_exit_code == "1".
     Sub-assertion (Inputs row): subprocess_mode == "in_process" — direct call.
 
+    NFR-02 (subprocess safety): no shell=True; uses shlex.split + exec.
+    NFR-03 (async correctness): non-zero exit path captured.
     NFR-09: real assert on terminal state + exit code (no skip/xfail).
     """
     # Inputs: command="false"; command that exits 1 in <100ms on every POSIX.
@@ -295,6 +310,9 @@ def test_fr02_ac3_state_machine_timeout():
         (this case shells out to a fresh Python interpreter because the timeout
          boundary must be a HARD kill, not a coroutine cancellation).
 
+    NFR-03 (async correctness + NFR-03 task timeout kills subprocess): the
+        timeout path must hard-kill the subprocess (process.kill + await wait),
+        not just cancel the awaiting coroutine.
     NFR-09: real assert on terminal state (no skip/xfail).
     """
     # Sub-assertion AC2.3-timeout-overrun: float(timeout_seconds) < 30.0
@@ -352,6 +370,10 @@ def test_fr02_ac4_results_persisted_to_task_results():
     Sub-assertion (Inputs row): subprocess_mode == "in_process" — call the
         repository directly so pytest-cov measures the schema path.
 
+    NFR-04 (sensitive data redaction): the persisted stdout_tail/stderr_tail
+        columns MUST be redacted before insert if they carry secret-shaped
+        substrings (the regex is exercised by FR-04 / NFR-04 tests; this test
+        only asserts the columns exist + are written by the runner path).
     NFR-09: real assert on column whitelist (no skip/xfail).
     NFR-10: persistence exercised end-to-end through TaskResultRepository.
     """
@@ -395,6 +417,8 @@ def test_fr02_ac5_get_runs_newest_first(client):
     started_at DESC — whichever the GREEN implementation chooses, as long as
     it is strictly newest-first).
 
+    NFR-06 (architecture layer contract): the GET endpoint must reach the
+        task_results rows only via the repository layer (no SQL in the route).
     NFR-09: real assert on ordering + count (no skip/xfail).
     NFR-10: end-to-end via httpx.ASGITransport (integration coverage).
     """
