@@ -141,7 +141,8 @@
         },
         {
           "name": "taskq.config.env"
-        }
+        },
+        "taskq.config"
       ],
       "allowed_dependencies": []
     },
