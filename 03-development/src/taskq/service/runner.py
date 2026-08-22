@@ -32,7 +32,7 @@ import os
 import shlex
 import time
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 
 DEFAULT_TIMEOUT_SECONDS: float = 30.0
@@ -133,7 +133,7 @@ class TaskRunner:
                 started=started_monotonic,
             )
 
-        exit_code = proc.returncode
+        exit_code = cast(int, proc.returncode)
         terminal = "done" if exit_code == 0 else "failed"
         return self._build_result(
             task_id=task_id,
