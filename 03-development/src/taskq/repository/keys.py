@@ -34,12 +34,10 @@ import hmac
 from typing import Any, Dict, Optional
 
 from sqlalchemy import select
-from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from taskq.models.api_key import APIKey
-from taskq.models.base import Base
-from taskq.repository.tasks import get_engine, get_session_factory
+from taskq.repository.tasks import get_session_factory
 
 
 # ---------- Hash + verify primitives (NFR-02 / AC-3.2 / AC-3.3) ----------
