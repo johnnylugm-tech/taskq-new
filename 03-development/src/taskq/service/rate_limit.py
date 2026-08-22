@@ -31,8 +31,11 @@ Public surface:
   header (HTTP semantics: integer seconds, per RFC 9110 §10.2.3).
 
 * ``compute_refill(tokens, last_refill_at, now, burst, per_sec)`` —
-  pure refill math shared by the in-memory bucket and the
-  DB-backed repository (AC-5.3) so the two layers never drift.
+  pure refill math re-exported from ``taskq.repository.rate_buckets``
+  (the canonical owner — AC-5.3) so service-layer callers can pull
+  the helper without depending on the ORM surface directly. The
+  in-memory ``TokenBucket._refill_locked`` calls into the SAME
+  function so the two layers never drift.
 
 The service layer owns NO SQL — the persistent bucket row lives in
 ``taskq.repository.rate_buckets`` (NFR-06). This module is the
@@ -48,7 +51,13 @@ from __future__ import annotations
 import math
 import time
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional
+
+# ``compute_refill`` is owned by the repository layer (the DB-backed
+# bucket row is the cross-worker source of truth per AC-5.3 / NFR-03).
+# Re-export it here so callers that only depend on the service layer
+# can pull the pure-math helper without importing the ORM surface.
+from taskq.repository.rate_buckets import compute_refill
 
 
 @dataclass(frozen=True)
@@ -64,35 +73,6 @@ class RateLimitConfig:
 
     burst: int
     per_sec: float
-
-
-def compute_refill(
-    tokens: float,
-    last_refill_at: float,
-    now: float,
-    burst: float,
-    per_sec: float,
-) -> Tuple[float, float]:
-    """Pure refill math — return ``(new_tokens, new_last_refill_at)``.
-
-    Shared by ``TokenBucket._refill_locked`` and
-    ``RateBucketRepository.consume`` so the in-memory and DB-backed
-    bucket implementations can't drift.
-
-    Monotonicity:
-      * When ``now <= last_refill_at`` the wall clock hasn't advanced
-        (or stepped backwards): ``last_refill_at`` is bumped to
-        ``now`` so a clock recovery cannot silently grant tokens.
-      * When the refill amount is non-positive (``per_sec <= 0``)
-        ``last_refill_at`` is left untouched so we don't drift
-        ``last_refill_at`` forward without actually adding tokens.
-    """
-    if now <= last_refill_at:
-        return tokens, now
-    refilled = (now - last_refill_at) * float(per_sec)
-    if refilled <= 0.0:
-        return tokens, last_refill_at
-    return min(float(burst), tokens + refilled), now
 
 
 class TokenBucket:

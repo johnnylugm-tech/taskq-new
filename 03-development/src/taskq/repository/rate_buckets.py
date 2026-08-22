@@ -28,8 +28,11 @@ Both ``get`` and ``consume`` lazily materialise a row at full capacity
 the first time a fresh ``key_id`` is observed, so callers don't need
 a separate seeding step.
 
-The refill math is delegated to ``taskq.service.rate_limit.compute_refill``
-so the in-memory and DB-backed buckets cannot drift (AC-5.1 / AC-5.3).
+The refill math is owned by this module (``compute_refill`` below) so
+the in-memory and DB-backed buckets cannot drift (AC-5.1 / AC-5.3).
+``taskq.service.rate_limit`` re-exports ``compute_refill`` from here for
+consumers that want the pure-math helper without pulling in the
+repository / ORM surface.
 
 Citations: SPEC.md §3 FR-05, §5.1; SAD.md §4 repository layer;
 NFR-03 (shared state across workers); NFR-06 (no SQL past the
@@ -41,14 +44,46 @@ import os
 import time
 import uuid
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, Optional, TypeVar
+from typing import Any, Callable, Dict, Optional, Tuple, TypeVar
 
 from sqlalchemy import Float, Integer, String, select
 from sqlalchemy.orm import Mapped, Session, mapped_column, sessionmaker
 
 from taskq.models.base import Base
 from taskq.repository.tasks import get_session_factory
-from taskq.service.rate_limit import compute_refill
+
+
+# ---------- Refill math (shared with service layer) ----------
+
+
+def compute_refill(
+    tokens: float,
+    last_refill_at: float,
+    now: float,
+    burst: float,
+    per_sec: float,
+) -> Tuple[float, float]:
+    """Pure refill math — return ``(new_tokens, new_last_refill_at)``.
+
+    Owned by the repository layer because the DB-backed bucket row
+    is the cross-worker source of truth (AC-5.3 / NFR-03). The
+    in-memory ``TokenBucket`` in ``taskq.service.rate_limit`` calls
+    into the SAME function so the two implementations cannot drift.
+
+    Monotonicity:
+      * When ``now <= last_refill_at`` the wall clock hasn't advanced
+        (or stepped backwards): ``last_refill_at`` is bumped to
+        ``now`` so a clock recovery cannot silently grant tokens.
+      * When the refill amount is non-positive (``per_sec <= 0``)
+        ``last_refill_at`` is left untouched so we don't drift
+        ``last_refill_at`` forward without actually adding tokens.
+    """
+    if now <= last_refill_at:
+        return tokens, now
+    refilled = (now - last_refill_at) * float(per_sec)
+    if refilled <= 0.0:
+        return tokens, last_refill_at
+    return min(float(burst), tokens + refilled), now
 
 
 # ---------- ORM model ----------
@@ -285,4 +320,5 @@ __all__ = [
     "RateBucketRepository",
     "DEFAULT_BURST",
     "DEFAULT_PER_SEC",
+    "compute_refill",
 ]
