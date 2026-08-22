@@ -71,6 +71,7 @@ from taskq.service.rate_limit import (  # noqa: E402
     RateLimitConfig,
     TokenBucket,
     consume_token,
+    seconds_until_next_token,
 )
 
 # GREEN TODO: taskq.repository.rate_buckets must expose a
@@ -264,6 +265,7 @@ def test_fr05_ac2_overflow_returns_429_with_retry_after(client):
     Implementation choice (in_process): httpx.ASGITransport so the
     NFR-10 end-to-end integration boundary is exercised.
 
+    # NFR-02 (problem+json 429 body — error contract)
     # NFR-03 (rate limit 429)
     # NFR-09
     # NFR-10
@@ -577,4 +579,402 @@ def test_fr05_ac4_healthz_readyz_rate_limit_exempt(client):
     assert 429 not in readyz_statuses, (
         "AC-5.4 violated: /readyz returned at least one HTTP 429; "
         "rate-limit middleware must EXEMPT /readyz from the bucket"
+    )
+
+
+# ---------- Coverage tests for uncovered source lines ----------
+#
+# The TEST_SPEC.md-named tests above are the gate-traceable FR-05 cases
+# (ac1..ac4). The tests below target specific source lines in the three
+# FR-05 modules so coverage reaches the 80% threshold without invoking
+# the Gate 1 audit's pragma-no-cover escape hatch on reachable code.
+
+def test_coverage_bucket_key_falls_back_to_ip_when_no_api_key():
+    """Cover middleware.py lines 98-100 (_bucket_key IP fallback).
+
+    When no ``X-API-Key`` header is present, the per-request bucket key
+    MUST fall back to the client's source address (``ip:<host>``) so an
+    anonymous caller cannot share a bucket with every authenticated
+    caller. The ``host`` may be ``None`` for some ASGI transports, in
+    which case the key MUST be the literal string ``ip:unknown``.
+    """
+    from starlette.requests import Request
+
+    from taskq.api.middleware import _bucket_key
+
+    # ASGI scope ``client`` is a 2-tuple (host, port) per the ASGI HTTP
+    # spec; the middleware reads it directly without going through
+    # ``request.client.host`` so the path it takes is the
+    # ``client = request.client`` branch at line 98.
+    scope_with_host = {
+        "type": "http",
+        "headers": [],
+        "client": ("203.0.113.42", 12345),
+    }
+    req = Request(scope_with_host)
+    key = _bucket_key(req)
+    assert key == "ip:203.0.113.42", (
+        f"expected ip:203.0.113.42 when host is present, got {key!r}"
+    )
+
+    # When ``client`` is absent from the scope the middleware's
+    # ``client = request.client`` yields ``None`` and the inner
+    # ``host = getattr(client, "host", None)`` falls back to ``None``,
+    # so the final branch ``return "ip:unknown" if host else
+    # "ip:unknown"`` is taken.
+    scope_no_host = {
+        "type": "http",
+        "headers": [],
+        "client": None,
+    }
+    req_no_host = Request(scope_no_host)
+    key_no_host = _bucket_key(req_no_host)
+    assert key_no_host == "ip:unknown", (
+        f"expected ip:unknown when client is None, got {key_no_host!r}"
+    )
+
+
+def test_coverage_middleware_retry_after_one_on_infinite_wait(client):
+    """Cover middleware.py line 145 (``retry_after = 1`` path).
+
+    When the bucket is empty and ``seconds_until_next_token`` returns
+    ``math.inf`` (i.e. the configured ``per_sec`` is zero or negative
+    so no refill is possible), the middleware MUST still emit a
+    well-formed ``Retry-After`` header — never an ``inf`` or negative
+    value. The fallback is the integer 1 second per SPEC §3 FR-05.
+
+    Strategy: pre-seize every token on a bucket whose ``per_sec=0``
+    so the next token never comes. The 429 response MUST carry
+    ``Retry-After: 1`` (not empty, not inf, not 0).
+    """
+    from taskq.service.rate_limit import RateLimitConfig, TokenBucket
+
+    # /v1/tasks is a /v1/* endpoint (not /healthz, not /readyz) so it
+    # IS gated by the rate-limit middleware.
+    cfg_zero = RateLimitConfig(burst=2, per_sec=0.0)
+
+    # Drain the bucket through legitimate requests first so the next
+    # request hits the empty path (consume succeeds burst times).
+    bucket = TokenBucket(cfg_zero)
+    bucket.consume(now=0.0)
+    bucket.consume(now=0.0)
+    # The third attempt fails — bucket is empty AND refill is 0/sec.
+    assert bucket.consume(now=0.0) is False, (
+        "precondition: bucket exhausted and rate=0 so wait is inf"
+    )
+    assert bucket.seconds_until_next_token(now=0.0) == float("inf"), (
+        "precondition: seconds_until_next_token must report inf when rate=0"
+    )
+
+    # Pre-populate the per-app bucket dict with the exhausted bucket
+    # for our read key. The middleware reads this dict via
+    # ``request.app.state.rate_limit_buckets`` and skips bucket creation
+    # when an entry already exists — so injecting the zero-rate bucket
+    # here triggers the ``retry_after = 1`` fallback on the next 429.
+    asgi_app = client._transport.app
+    state = asgi_app.state
+    existing = getattr(state, "rate_limit_buckets", None)
+    if existing is None:
+        state.rate_limit_buckets = {f"key:{VALID_READ_KEY}": bucket}
+    else:
+        existing[f"key:{VALID_READ_KEY}"] = bucket
+
+    response = client.get(
+        "/v1/tasks",
+        headers={"X-API-Key": VALID_READ_KEY},
+    )
+    assert response.status_code == 429, (
+        f"expected 429 when bucket is exhausted and refill rate=0, "
+        f"got {response.status_code}"
+    )
+    retry_after = response.headers.get("Retry-After", "")
+    assert retry_after.strip() != "", (
+        "Retry-After must be present on 429 even when wait is inf"
+    )
+    assert retry_after.strip().isdigit(), (
+        f"Retry-After must be an integer (seconds), got {retry_after!r}"
+    )
+    seconds = int(retry_after.strip())
+    assert 0 <= seconds <= 1, (
+        f"when wait is inf, middleware must emit Retry-After=1 "
+        f"(or 0 after ceil), got {seconds}"
+    )
+
+
+def test_coverage_env_typed_falls_back_on_parse_failure(monkeypatch):
+    """Cover rate_buckets.py lines 96-99 (env parse failure path).
+
+    When ``TASKQ_RATE_BURST`` or ``TASKQ_RATE_PER_SEC`` carries an
+    unparseable value, the helpers MUST fall back to the documented
+    defaults (20 / 5.0) rather than crash at import time.
+    """
+    import taskq.repository.rate_buckets as rb
+
+    # Empty / unset env var: ``if not raw: return default``.
+    monkeypatch.delenv("TASKQ_RATE_BURST", raising=False)
+    monkeypatch.delenv("TASKQ_RATE_PER_SEC", raising=False)
+    assert rb._env_typed("TASKQ_RATE_BURST", 20, int) == 20
+    assert rb._env_typed("TASKQ_RATE_PER_SEC", 5.0, float) == 5.0
+
+    # Whitespace-only env var (covers ``if not raw: return default``).
+    monkeypatch.setenv("TASKQ_RATE_BURST", "   ")
+    monkeypatch.setenv("TASKQ_RATE_PER_SEC", "  \t  ")
+    assert rb._env_typed("TASKQ_RATE_BURST", 20, int) == 20, (
+        "whitespace-only env value must fall back to default"
+    )
+    assert rb._env_typed("TASKQ_RATE_PER_SEC", 5.0, float) == 5.0, (
+        "whitespace-only env value must fall back to default"
+    )
+
+    # Unparseable env value: ``except (ValueError, TypeError): return default``.
+    monkeypatch.setenv("TASKQ_RATE_BURST", "not-an-int")
+    monkeypatch.setenv("TASKQ_RATE_PER_SEC", "also-not-a-float")
+    burst = rb._env_typed("TASKQ_RATE_BURST", 20, int)
+    per_sec = rb._env_typed("TASKQ_RATE_PER_SEC", 5.0, float)
+    assert burst == 20, (
+        f"parse failure must fall back to default 20, got {burst!r}"
+    )
+    assert per_sec == 5.0, (
+        f"parse failure must fall back to default 5.0, got {per_sec!r}"
+    )
+
+    # Sanity: a well-formed value still parses through (so we know the
+    # fallback isn't masking the happy path).
+    monkeypatch.setenv("TASKQ_RATE_BURST", "42")
+    monkeypatch.setenv("TASKQ_RATE_PER_SEC", "7.5")
+    assert rb._env_typed("TASKQ_RATE_BURST", 20, int) == 42
+    assert rb._env_typed("TASKQ_RATE_PER_SEC", 5.0, float) == 7.5
+
+
+def test_coverage_repo_consume_materialises_fresh_key_id():
+    """Cover rate_buckets.py line 247 (consume's _materialise branch).
+
+    When ``consume`` is called with a previously-unseen ``key_id``,
+    the SELECT-FOR-UPDATE returns no row and the repository MUST
+    materialise a fresh full-capacity bucket inside the same
+    transaction (AC-5.3) rather than ``None``-deref'ing.
+    """
+    repo = RateBucketRepository()
+    fresh_key = f"coverage-fresh-{int(time.time()*1000)}"
+
+    # No prior ``get`` on this key — consume must create the row.
+    result = repo.consume(fresh_key)
+    assert isinstance(result, dict), (
+        f"repo.consume must return a dict, got {type(result).__name__}"
+    )
+    assert result["key_id"] == fresh_key, (
+        f"materialised row must carry the requested key_id, got "
+        f"{result.get('key_id')!r}"
+    )
+    assert "tokens" in result, (
+        f"materialised row must carry tokens, got keys={list(result.keys())!r}"
+    )
+    assert "granted" in result, (
+        "consume must report whether the token was granted"
+    )
+    assert result["granted"] is True, (
+        f"a freshly-materialised full bucket must grant the first "
+        f"token, got {result.get('granted')!r}"
+    )
+
+
+def test_coverage_repo_consume_rolls_back_on_exception(monkeypatch):
+    """Cover rate_buckets.py lines 276-278 (rollback path).
+
+    When the ``session.begin()`` block raises inside ``consume``,
+    the repository MUST roll back (NOT leave a half-consumed row)
+    and re-raise the original exception so the API layer can map
+    it to 503. We simulate by patching ``RateBucketRepository`` so
+    the inner UPDATE step blows up.
+    """
+    repo = RateBucketRepository()
+
+    captured: Dict[str, Any] = {}
+
+    original_refresh = None
+
+    class _ExplodingSession:
+        """Proxy session whose ``begin()`` block raises a generic error."""
+
+        def __init__(self):
+            self.rolled_back = False
+
+        def begin(self):
+            return _ExplodingCtx(self)
+
+        def rollback(self):
+            self.rolled_back = True
+            captured["rolled_back"] = True
+
+        def close(self):
+            captured["closed"] = True
+
+        def execute(self, *a, **kw):
+            raise RuntimeError("forced rollback coverage probe")
+
+        def refresh(self, *a, **kw):
+            return None
+
+    class _ExplodingCtx:
+        def __init__(self, session):
+            self._s = session
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            # Simulate SQLAlchemy session.begin() context manager:
+            # if an exception is in flight, do NOT auto-commit;
+            # the explicit rollback in our except block closes the
+            # transaction. We surface the exception so the outer
+            # ``except Exception`` in repo.consume() can run.
+            return False
+
+    import sqlalchemy.orm as _orm
+
+    class _ExplodingFactory:
+        def __call__(self):
+            return _ExplodingSession()
+
+    repo._session_factory = _ExplodingFactory()  # type: ignore[assignment]
+
+    # Now consume() must hit ``except Exception: session.rollback(); raise``.
+    with pytest.raises(RuntimeError, match="forced rollback coverage probe"):
+        repo.consume("coverage-rollback-key")
+
+    assert captured.get("rolled_back") is True, (
+        "consume's except block must call session.rollback() on failure"
+    )
+    assert captured.get("closed") is True, (
+        "consume's finally block must close the session even on failure"
+    )
+
+
+def test_coverage_compute_refill_per_sec_zero_branch():
+    """Cover rate_limit.py line 94 (``refilled <= 0.0`` branch).
+
+    When the configured refill rate is zero or negative, the elapsed
+    time cannot add tokens (refilled <= 0). ``compute_refill`` MUST
+    leave ``last_refill_at`` UNCHANGED so we don't silently drift
+    the timestamp forward and lose future refill accounting.
+    """
+    from taskq.service.rate_limit import compute_refill
+
+    # per_sec=0 -> refilled is 0 -> branch is taken
+    tokens, last = compute_refill(
+        tokens=5.0,
+        last_refill_at=10.0,
+        now=100.0,
+        burst=20.0,
+        per_sec=0.0,
+    )
+    assert tokens == 5.0, (
+        f"refilled<=0 branch must leave tokens unchanged, got {tokens!r}"
+    )
+    assert last == 10.0, (
+        f"refilled<=0 branch must leave last_refill_at unchanged, "
+        f"got {last!r}"
+    )
+
+
+def test_coverage_token_bucket_initial_tokens_clamped():
+    """Cover rate_limit.py line 135 (initial_tokens clamping).
+
+    ``TokenBucket(..., initial_tokens=...)`` MUST clamp the seeded
+    count into ``[0.0, config.burst]``. Both over-seeded (above burst)
+    and negative seeds (e.g. a corrupt persisted row) are clamped
+    before being assigned to the internal counter.
+    """
+    cfg = RateLimitConfig(burst=10, per_sec=2.0)
+
+    # Over-seeded: must be clamped DOWN to burst.
+    over = TokenBucket(cfg, initial_tokens=42.0, now=0.0)
+    assert over._tokens == 10.0, (
+        f"initial_tokens above burst must clamp to burst, got {over._tokens!r}"
+    )
+
+    # Under-seeded / zero: must be clamped UP to 0.0.
+    zero = TokenBucket(cfg, initial_tokens=0.0, now=0.0)
+    assert zero._tokens == 0.0, (
+        f"initial_tokens=0 must clamp to 0.0, got {zero._tokens!r}"
+    )
+
+    # Mid-range: passes through unchanged.
+    mid = TokenBucket(cfg, initial_tokens=4.5, now=0.0)
+    assert mid._tokens == 4.5, (
+        f"initial_tokens within [0,burst] must pass through unchanged, "
+        f"got {mid._tokens!r}"
+    )
+
+
+def test_coverage_tokens_property_returns_internal_counter():
+    """Cover rate_limit.py line 140 (read-only tokens property)."""
+    cfg = RateLimitConfig(burst=7, per_sec=1.0)
+    bucket = TokenBucket(cfg, initial_tokens=5.0, now=0.0)
+    # The property is the public read API — NFR-09 mandates we
+    # exercise it so the in-memory bookkeeping cannot silently
+    # desync from consume()/refill(). The ``config`` property
+    # (line 135) MUST hand back the same config object that was
+    # used at construction time — a fresh-bucket protocol check.
+    assert bucket.config is cfg, (
+        "config property must return the same object passed to __init__"
+    )
+    assert bucket.tokens == 5.0, (
+        f"tokens property must return the internal counter, "
+        f"got {bucket.tokens!r}"
+    )
+    bucket.consume(now=0.0)
+    assert bucket.tokens == 4.0, (
+        f"tokens property must reflect the post-consume counter, "
+        f"got {bucket.tokens!r}"
+    )
+
+
+def test_coverage_seconds_until_next_token_ready_bucket_returns_zero():
+    """Cover rate_limit.py line 176 (early-return 0.0 path).
+
+    When the bucket ALREADY holds at least one token, the next-token
+    wait MUST be exactly 0.0 — independent of the configured refill
+    rate — so the middleware does NOT emit a Retry-After on a request
+    that will be granted immediately.
+    """
+    cfg = RateLimitConfig(burst=10, per_sec=1.0)
+    bucket = TokenBucket(cfg, initial_tokens=1.0, now=0.0)
+
+    # The lazy refill has NOT run yet (initial_tokens is the snapshot
+    # count); seconds_until_next_token internally calls _refill_locked
+    # so it sees the seeded value (1.0) > 0.5 refill (0s*1/s).
+    wait = seconds_until_next_token(bucket, now=0.0)
+    # 0 elapsed since last_refill_at (now=0), so _refill_locked is
+    # the no-op branch in compute_refill — tokens stays at 1.0.
+    assert wait == 0.0, (
+        f"a bucket that already has a token must report wait=0.0, "
+        f"got {wait!r}"
+    )
+
+
+def test_coverage_seconds_until_next_token_zero_rate_returns_inf():
+    """Cover rate_limit.py line 182 (math.inf path).
+
+    When ``per_sec <= 0``, the deficit-to-rate division would be
+    ``ZeroDivisionError``. The implementation MUST short-circuit
+    to ``math.inf`` so the middleware can map that to the
+    ``retry_after = 1`` fallback instead of crashing on every 429.
+    """
+    cfg = RateLimitConfig(burst=2, per_sec=0.0)
+    bucket = TokenBucket(cfg, initial_tokens=0.0, now=0.0)
+
+    wait = seconds_until_next_token(bucket, now=0.0)
+    assert wait == float("inf"), (
+        f"seconds_until_next_token must return math.inf when rate=0, "
+        f"got {wait!r}"
+    )
+
+    # Negative rate is the same branch — covered by the same test.
+    cfg_neg = RateLimitConfig(burst=2, per_sec=-1.0)
+    bucket_neg = TokenBucket(cfg_neg, initial_tokens=0.0, now=0.0)
+    wait_neg = seconds_until_next_token(bucket_neg, now=0.0)
+    assert wait_neg == float("inf"), (
+        f"seconds_until_next_token must return math.inf when rate<0, "
+        f"got {wait_neg!r}"
     )
