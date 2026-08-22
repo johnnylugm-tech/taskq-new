@@ -140,7 +140,7 @@ def _serialize_task_result_to_json(row: Row) -> str:
             "exit_code": row.exit_code,
             "stdout_tail": row.stdout_tail,
         },
-        ensure_ascii=True,
+        ensure_ascii=False,
     )
 
 
