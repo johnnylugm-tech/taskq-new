@@ -36,7 +36,7 @@ from taskq.api.schemas import TaskCreate  # noqa: E402
 from taskq.service.tasks import TaskService  # noqa: E402
 
 # GREEN TODO: taskq.repository.tasks must provide task persistence (incl. name uniqueness check).
-from taskq.repository.tasks import TaskRepository  # noqa: E402
+from taskq.repository.tasks import TaskNotFound, TaskRepository  # noqa: E402
 
 
 # ---------- Constants declared by TEST_SPEC Inputs rows ----------
@@ -609,4 +609,48 @@ def test_fr01_inprocess_taskcreate_blacklist_char_raises_value_error():
     """
     with pytest.raises(ValueError):
         TaskCreate(name="ok-name", command="echo a; rm -rf /")
+
+
+def test_fr01_inprocess_delete_unknown_task_raises_tasknotfound(monkeypatch):
+    """DELETE on a missing task id surfaces TaskNotFound from the service.
+
+    Covers src/taskq/api/routes/tasks.py:145-146 (the except TaskNotFound
+    branch in the delete_task route), which the happy-path AC-1.10 test
+    cannot reach because delete_task_row is idempotent and does not raise.
+    NFR-09: real assert on the service-level signal that the route catches.
+    """
+    service = TaskService()
+
+    def _raise_not_found(task_id: str) -> None:
+        raise TaskNotFound(task_id)
+
+    monkeypatch.setattr(service, "delete_task_row", _raise_not_found)
+
+    with pytest.raises(TaskNotFound):
+        service.delete_task(task_id=str(uuid.uuid4()))
+
+
+def test_fr01_delete_unknown_task_returns_404_problem_json(client, app):
+    """DELETE /v1/tasks/{id} on a missing task id returns 404 problem+json.
+
+    Covers src/taskq/api/routes/tasks.py:145-151 — the except TaskNotFound
+    branch in the route handler. AC-1.9 / NFR-02 contract: error response is
+    generic and uses application/problem+json.
+    """
+    # Force the per-request service to raise TaskNotFound by patching the
+    # cached service on the app's state object before issuing the request.
+    svc = TaskService()
+
+    def _raise_not_found(task_id: str) -> None:
+        raise TaskNotFound(task_id)
+
+    svc.delete_task_row = _raise_not_found  # type: ignore[method-assign]
+    app.state.task_service = svc
+
+    response = client.delete(
+        f"/v1/tasks/{uuid.uuid4()}",
+        headers=_admin_headers(),
+    )
+    assert response.status_code == 404, response.text
+    _assert_problem_json(response)
 
