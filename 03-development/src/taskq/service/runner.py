@@ -43,7 +43,7 @@ import os
 import shlex
 import time
 from datetime import datetime, timezone
-from typing import Any, Deque, Dict, Optional, cast
+from typing import Any, Deque, Dict, Optional, Set, Tuple, cast
 
 
 # =============================================================================
@@ -66,6 +66,13 @@ TAIL_LIMIT: int = 8000  # matches stdout_tail / stderr_tail column width
 # Sentinel exit code emitted on the timeout path. Distinct from any
 # real POSIX exit code (0..255) so the repository can recognise it.
 TIMEOUT_EXIT_CODE: int = -1
+
+# [FR-08] Per-task terminal status values reported in the result dict
+# returned by ``AsyncExecutor.run_until_drained``. Stable wire strings —
+# callers (FastAPI shutdown handler, audit log) pattern-match on them.
+STATUS_DRAINED: str = "drained"
+STATUS_INTERRUPTED: str = "interrupted"
+TERMINAL_STATUSES: Tuple[str, ...] = (STATUS_DRAINED, STATUS_INTERRUPTED)
 
 
 def _now_iso() -> str:
@@ -133,22 +140,10 @@ class TaskRunner:
 
     def __init__(self, timeout: Optional[float] = None) -> None:
         self._timeout = (
-            timeout if timeout is not None else self._read_timeout()
+            timeout
+            if timeout is not None
+            else _env_float("TASKQ_TASK_TIMEOUT", DEFAULT_TIMEOUT_SECONDS)
         )
-
-    # ---- env / timeout ----
-
-    @staticmethod
-    def _read_timeout() -> float:
-        """Read ``TASKQ_TASK_TIMEOUT`` from env, falling back to the default."""
-        raw = os.environ.get("TASKQ_TASK_TIMEOUT")
-        if raw is None:
-            return DEFAULT_TIMEOUT_SECONDS
-        try:
-            value = float(raw)
-        except ValueError:
-            return DEFAULT_TIMEOUT_SECONDS
-        return value if value > 0 else DEFAULT_TIMEOUT_SECONDS
 
     # ---- public sync façade ----
 
@@ -290,19 +285,21 @@ class AsyncExecutor:
         self._task_timeout = task_timeout
 
         # FIFO of (task_id, command) waiting for a slot.
-        self._pending: Deque[tuple] = collections.deque()
+        self._pending: Deque[Tuple[str, str]] = collections.deque()
         # Dispatched ``asyncio.Task`` instances keyed by ``task_id``.
         self._tasks: Dict[str, asyncio.Task] = {}
         # Set of task_ids ever submitted in the current wave; persists
         # across per-task completion so the drain-timeout ledger can
-        # still seed ``"interrupted"`` entries for tasks whose per-task
-        # finally clause has already popped them from ``self._tasks``.
-        self._submitted: set = set()
+        # still seed ``STATUS_INTERRUPTED`` entries for tasks whose
+        # per-task finally clause has already popped them from
+        # ``self._tasks``.
+        self._submitted: Set[str] = set()
         # Number of slots consumed in the current wave. Monotonic between
         # ``submit`` calls within a single ``run_until_drained`` cycle,
         # reset when drain returns.
         self._in_flight_count: int = 0
-        # Per-task terminal status: ``"drained"`` or ``"interrupted"``.
+        # Per-task terminal status: ``STATUS_DRAINED`` or
+        # ``STATUS_INTERRUPTED``.
         self._results: Dict[str, str] = {}
 
     # ---- public observable state ----
@@ -383,28 +380,28 @@ class AsyncExecutor:
             )
             try:
                 await asyncio.wait_for(proc.communicate(), timeout=self._task_timeout)
-                self._results[task_id] = "drained"
+                self._results[task_id] = STATUS_DRAINED
             except asyncio.TimeoutError:
                 await _hard_kill_process(proc)
-                self._results[task_id] = "interrupted"
+                self._results[task_id] = STATUS_INTERRUPTED
         except asyncio.CancelledError:
             # NEVER swallow; clean up and re-raise (NFR-03).
             if proc is not None:
                 await _hard_kill_process(proc)
             raise
         except FileNotFoundError:
-            # Command not on PATH — executor still attempted, so ``"drained"``.
-            self._results[task_id] = "drained"
+            # Command not on PATH — executor still attempted, so ``STATUS_DRAINED``.
+            self._results[task_id] = STATUS_DRAINED
         except Exception:
             # Any other error during subprocess exec; record terminal state.
-            self._results[task_id] = "drained"
+            self._results[task_id] = STATUS_DRAINED
         finally:
             # Remove from the dispatched set; ``run_until_drained``'s
             # wait-loop relies on this so the loop can terminate when
             # every dispatched task has finished. The drain-timeout
             # path snapshots ``self._tasks`` BEFORE the cancellation
-            # wave so the per-task ``"interrupted"`` ledger can still
-            # be seeded even if the cancel races the pop.
+            # wave so the per-task ``STATUS_INTERRUPTED`` ledger can
+            # still be seeded even if the cancel races the pop.
             self._tasks.pop(task_id, None)
 
     # ---- drain ----
@@ -414,96 +411,107 @@ class AsyncExecutor:
 
         Returns a structured result::
 
-            {"status": "drained" | "interrupted",
-             "tasks": {task_id: "drained" | "interrupted"}}
+            {"status": STATUS_DRAINED | STATUS_INTERRUPTED,
+             "tasks": {task_id: STATUS_DRAINED | STATUS_INTERRUPTED}}
 
-        * ``status == "drained"`` when every dispatched task finished
-          cleanly within ``drain_timeout``.
-        * ``status == "interrupted"`` when the drain deadline elapsed
-          first; every still-running task is cancelled and any task
-          that never started (remaining in the FIFO) is reported as
-          ``"interrupted"`` too. Cancelled tasks are hard-killed via
-          the per-task ``asyncio.CancelledError`` handler so no orphan
-          survives.
+        * ``status == STATUS_DRAINED`` when every dispatched task
+          finished cleanly within ``drain_timeout``.
+        * ``status == STATUS_INTERRUPTED`` when the drain deadline
+          elapsed first; every still-running task is cancelled and any
+          task that never started (remaining in the FIFO) is reported
+          as ``STATUS_INTERRUPTED`` too. Cancelled tasks are hard-killed
+          via the per-task ``asyncio.CancelledError`` handler so no
+          orphan survives.
 
         Implementation uses ``asyncio.wait_for`` over a single
         await-all inner coroutine; this matches TaskGroup's
         single-cancellation-boundary semantics.
         """
-        async def _wait_all() -> None:
-            # Loop until every submitted task has terminated and the
-            # FIFO is empty. The loop is safe under cancellation: any
-            # awaiting point propagates ``CancelledError`` upward
-            # (NFR-03). Per-task ``finally`` clauses pop their
-            # ``task_id`` from ``self._tasks`` but the submission ledger
-            # (``self._submitted``) is preserved, so completion is
-            # observed via ``self._results`` rather than ``self._tasks``.
-            while True:
-                current = list(self._tasks.values())
-                if current:
-                    # Wait for the current wave; ``return_exceptions=True``
-                    # so per-task ``CancelledError`` does not abort the
-                    # siblings (TaskGroup semantics).
-                    await asyncio.gather(*current, return_exceptions=True)
-                # Pull as much of the FIFO as we have capacity for.
-                while self._pending and self._in_flight_count < self._max_concurrent:
-                    tid, cmd = self._pending.popleft()
-                    self._dispatch(tid, cmd)
-                # Termination: every submitted task has a result, and
-                # no more are pending dispatch.
-                if (
-                    not self._tasks
-                    and not self._pending
-                    and self._submitted.issubset(self._results.keys())
-                ):
-                    return
-
         try:
-            await asyncio.wait_for(_wait_all(), timeout=self._drain_timeout)
-            status = "drained"
+            await asyncio.wait_for(self._wait_all(), timeout=self._drain_timeout)
+            status = STATUS_DRAINED
         except asyncio.TimeoutError:
             # Drain deadline beat the in-flight tasks. Mark every
             # submitted task whose result is not yet recorded as
-            # ``"interrupted"`` (covers in-flight + still-queued), then
-            # cancel the asyncio tasks so their per-task handler
+            # ``STATUS_INTERRUPTED`` (covers in-flight + still-queued),
+            # then cancel the asyncio tasks so their per-task handler
             # hard-kills the subprocess.
-            status = "interrupted"
-            # Snapshot the live dispatched-set; per-task ``finally``
-            # clauses may pop entries during the cancel wave below, but
-            # ``self._submitted`` already records every task_id we need
-            # to seed.
-            in_flight_snapshot = list(self._tasks.values())
-            # Queued but never started → interrupted.
-            while self._pending:
-                tid, _ = self._pending.popleft()
-                self._results.setdefault(tid, "interrupted")
-            # In-flight → mark and cancel.
-            for task in in_flight_snapshot:
-                if not task.done():
-                    task.cancel()
-            # Seed the interrupted ledger from the submitted set AFTER
-            # cancelling so the per-task handler does not race the
-            # ``setdefault`` (the handler sets the entry to
-            # ``"interrupted"`` itself, but the ``setdefault`` covers
-            # the rare case where the task finished cleanly just before
-            # cancel arrived and recorded ``"drained"`` — we preserve
-            # the existing recorded terminal state).
-            for tid in self._submitted:
-                self._results.setdefault(tid, "interrupted")
-            # Reap cancellations; ``return_exceptions=True`` keeps the
-            # per-task ``CancelledError`` from bubbling out of drain.
-            if in_flight_snapshot:
-                await asyncio.gather(*in_flight_snapshot, return_exceptions=True)
+            status = STATUS_INTERRUPTED
+            await self._cancel_and_seed_interrupted()
 
-        # Snapshot and reset wave state so the executor can accept a new
-        # submission cycle.
-        tasks_snapshot = dict(self._results)
+        return self._finalize_wave(status)
+
+    # ---- drain helpers ----
+
+    async def _wait_all(self) -> None:
+        """Loop until every submitted task has terminated and the FIFO is empty.
+
+        The loop is safe under cancellation: any awaiting point
+        propagates ``CancelledError`` upward (NFR-03). Per-task
+        ``finally`` clauses pop their ``task_id`` from ``self._tasks``
+        but the submission ledger (``self._submitted``) is preserved,
+        so completion is observed via ``self._results`` rather than
+        ``self._tasks``.
+        """
+        while True:
+            current = list(self._tasks.values())
+            if current:
+                # Wait for the current wave; ``return_exceptions=True``
+                # so per-task ``CancelledError`` does not abort the
+                # siblings (TaskGroup semantics).
+                await asyncio.gather(*current, return_exceptions=True)
+            # Pull as much of the FIFO as we have capacity for.
+            while self._pending and self._in_flight_count < self._max_concurrent:
+                tid, cmd = self._pending.popleft()
+                self._dispatch(tid, cmd)
+            # Termination: every submitted task has a result, and
+            # no more are pending dispatch.
+            if (
+                not self._tasks
+                and not self._pending
+                and self._submitted.issubset(self._results.keys())
+            ):
+                return
+
+    async def _cancel_and_seed_interrupted(self) -> None:
+        """Cancel every live task and seed ``STATUS_INTERRUPTED`` for any
+        task that has not yet recorded a terminal state.
+
+        Snapshots the live dispatched-set before cancelling so per-task
+        ``finally`` clauses (which pop entries from ``self._tasks``)
+        cannot drop a task_id before we have a chance to seed its
+        ledger entry. ``setdefault`` preserves any state already
+        recorded (e.g. a task that finished cleanly in the same tick as
+        the timeout — its ``STATUS_DRAINED`` wins).
+        """
+        in_flight_snapshot = list(self._tasks.values())
+        # Queued but never started → interrupted.
+        while self._pending:
+            tid, _ = self._pending.popleft()
+            self._results.setdefault(tid, STATUS_INTERRUPTED)
+        # In-flight → cancel.
+        for task in in_flight_snapshot:
+            if not task.done():
+                task.cancel()
+        # Seed interrupted ledger from the submitted set AFTER
+        # cancelling so the per-task handler does not race the
+        # ``setdefault``.
+        for tid in self._submitted:
+            self._results.setdefault(tid, STATUS_INTERRUPTED)
+        # Reap cancellations; ``return_exceptions=True`` keeps the
+        # per-task ``CancelledError`` from bubbling out of drain.
+        if in_flight_snapshot:
+            await asyncio.gather(*in_flight_snapshot, return_exceptions=True)
+
+    def _finalize_wave(self, status: str) -> Dict[str, Any]:
+        """Snapshot the per-task result ledger and reset wave state so
+        the executor can accept a new submission cycle."""
+        snapshot = dict(self._results)
         self._results.clear()
         self._tasks.clear()
         self._submitted.clear()
         self._in_flight_count = 0
-
-        return {"status": status, "tasks": tasks_snapshot}
+        return {"status": status, "tasks": snapshot}
 
 
 __all__ = [
@@ -513,5 +521,8 @@ __all__ = [
     "MAX_CONCURRENT_DEFAULT",
     "DRAIN_TIMEOUT_DEFAULT",
     "TASK_TIMEOUT_DEFAULT",
+    "STATUS_DRAINED",
+    "STATUS_INTERRUPTED",
+    "TERMINAL_STATUSES",
     "TIMEOUT_EXIT_CODE",
 ]
