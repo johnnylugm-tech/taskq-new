@@ -177,6 +177,8 @@ def _reflection_inspector(db_url: str):
 # ---------- AC-7.1: revision v1 creates `tasks` + `api_keys` ----------
 
 def test_fr07_ac1_v1_creates_tasks_api_keys_tables(tmp_path: Path):
+    # NFR-09: real SQLite file (AC-N9.5: FR-07 migration tested against real SQLite file, not in-memory)
+    # NFR-12: verify-system target chains alembic upgrade head / downgrade base
     """AC-7.1 — Revision v1 creates the ``tasks`` and ``api_keys``
     tables; downgrade drops both tables (SPEC.md §3 FR-07).
 
@@ -262,6 +264,8 @@ def test_fr07_ac1_v1_creates_tasks_api_keys_tables(tmp_path: Path):
 # ---------- AC-7.2: revision v2 adds `tags`, `task_tags`, unique index ----------
 
 def test_fr07_ac2_v2_adds_tags_task_tags_unique_index(tmp_path: Path):
+    # NFR-09: real SQLite file (AC-N9.5)
+    # NFR-12: verify-system target (alembic upgrade head in chain)
     """AC-7.2 — Revision v2 adds ``tags``, ``task_tags`` (many-to-many),
     plus a unique index on ``tasks.name``; downgrade drops the new
     tables and index without affecting v1 data (SPEC.md §3 FR-07).
@@ -368,6 +372,9 @@ def test_fr07_ac2_v2_adds_tags_task_tags_unique_index(tmp_path: Path):
 # ---------- AC-7.3: revision v3 migrates tasks.result_json -> task_results ----------
 
 def test_fr07_ac3_v3_migrates_tasks_result_json_to_task_results(tmp_path: Path):
+    # NFR-09: real SQLite file (AC-N9.5)
+    # NFR-03: error handling + txn — data migration must be transactional; failure rolls back
+    # NFR-12: verify-system target chains upgrade head
     """AC-7.3 — Revision v3 performs the data migration: splits
     ``tasks.result_json`` into a separate ``task_results`` table,
     migrates existing data, then drops the original column; downgrade
@@ -490,6 +497,8 @@ def test_fr07_ac3_v3_migrates_tasks_result_json_to_task_results(tmp_path: Path):
 # ---------- AC-7.4: alembic upgrade head + downgrade base both exit 0 ----------
 
 def test_fr07_ac4_upgrade_head_downgrade_base_exit_zero(tmp_path: Path):
+    # NFR-12: verify-system target — `alembic upgrade head` and `alembic downgrade base` both exit 0
+    # NFR-09: real SQLite file (AC-N9.5)
     """AC-7.4 — ``alembic upgrade head`` and ``alembic downgrade base``
     both exit 0 (SPEC.md §3 FR-07, §8 #13).
 
@@ -567,6 +576,9 @@ def test_fr07_ac4_upgrade_head_downgrade_base_exit_zero(tmp_path: Path):
 # ---------- AC-7.5: round-trip v3 migration is byte-identical on sample data ----------
 
 def test_fr07_ac5_round_trip_byte_identical_sample(tmp_path: Path):
+    # NFR-09: real SQLite file (AC-N9.5) — round-trip on a real file
+    # NFR-12: verify-system target — round-trip is the load-bearing verification (SAD §3.4)
+    # NFR-03: error handling + txn — data migration must round-trip without loss
     """AC-7.5 — Round-trip test: ``upgrade head`` → write sample data
     → ``downgrade -1`` → ``upgrade head`` leaves every column of the
     sample data byte-identical; this is the focus of the v3
@@ -747,6 +759,8 @@ def test_fr07_ac5_round_trip_byte_identical_sample(tmp_path: Path):
 # ---------- AC-7.6: no `op.execute("DROP TABLE")` destructive shortcut ----------
 
 def test_fr07_ac6_no_destructive_shortcut_drop_table():
+    # NFR-02: HTTP + data-layer security — no destructive SQL shortcut in src/
+    # NFR-09: verification honesty — real assert on file contents (zero-skip)
     """AC-7.6 — Migrations do NOT use ``op.execute("DROP TABLE ...")``
     or other destructive shortcuts to substitute for a real downgrade
     (SPEC.md §3 FR-07).
@@ -829,6 +843,8 @@ def test_fr07_ac6_no_destructive_shortcut_drop_table():
 # ---------- AC-7.7: alembic offline SQL generation is covered ----------
 
 def test_fr07_ac7_offline_sql_generation_covered(tmp_path: Path):
+    # NFR-09: verification honesty — migration files covered by real assertions
+    # NFR-12: verify-system target — alembic --sql (offline mode) coverage
     """AC-7.7 — Migration files are covered by tests (offline SQL
     generation plus assertions) (SPEC.md §3 FR-07).
 
