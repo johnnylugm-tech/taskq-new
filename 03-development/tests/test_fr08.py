@@ -172,6 +172,11 @@ def test_fr08_ac1_task_group_graceful_drain():
     result whose ``status`` field is one of {"drained", "interrupted"}.
     NFR-09: real assert on result status + per-task status (no skip/xfail).
     """
+    # NFR-03: AsyncExecutor.run_until_drained surfaces a structured
+    # {"status": "drained"|"interrupted", "tasks": {...}} result so the
+    # caller (FastAPI shutdown handler) can decide whether to log
+    # graceful-shutdown vs. forced-interrupt.
+    # NFR-09: real assert on status field — no skip / xfail.
     # Inputs declared by TEST_SPEC:
     drain_timeout = DRAIN_TIMEOUT_WITHIN       # 5.0
     in_flight_count = IN_FLIGHT_COUNT          # 3
@@ -238,6 +243,10 @@ def test_fr08_ac1a_task_group_drain_overrun():
     drain_timeout=1.0; the executor MUST give up after 1s and report
     every still-running task as ``interrupted``. NFR-09: real assert.
     """
+    # NFR-03: drain timeout fires even when in-flight tasks are
+    # healthy — graceful-shutdown boundary must be deterministic and
+    # bounded by TASKQ_DRAIN_TIMEOUT.
+    # NFR-09: real assert on per-task interrupted status (no skip).
     # Inputs declared by TEST_SPEC:
     drain_timeout = DRAIN_TIMEOUT_OVERRUN      # 1.0
     in_flight_count = IN_FLIGHT_COUNT          # 3
@@ -303,6 +312,10 @@ def test_fr08_ac2_max_concurrent_cap_queues_overflow():
     NFR-09: real assert on queue depth after submitting 20 tasks with
     cap=8 (20 - 8 == 12 queued). No skip / xfail.
     """
+    # NFR-09: real assert on queue depth after submitting 20 tasks with
+    # cap=8 (20 - 8 == 12 queued). No skip / xfail. Bounded concurrency
+    # is the load-bearing invariant — submit() must not spawn unbounded
+    # coroutines past TASKQ_MAX_CONCURRENT.
     # Inputs declared by TEST_SPEC:
     max_concurrent = MAX_CONCURRENT                # 8
     submit_count = SUBMIT_COUNT                    # 20
