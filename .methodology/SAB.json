@@ -33,7 +33,9 @@
         },
         {
           "name": "taskq.api.routes.metrics"
-        }
+        },
+        "taskq.api",
+        "taskq.api.routes"
       ],
       "allowed_dependencies": [
         "service",
@@ -58,7 +60,8 @@
         },
         {
           "name": "taskq.service.metrics"
-        }
+        },
+        "taskq.service"
       ],
       "allowed_dependencies": [
         "repository",
@@ -83,7 +86,8 @@
         },
         {
           "name": "taskq.repository.rate_buckets"
-        }
+        },
+        "taskq.repository"
       ],
       "allowed_dependencies": [
         "models",
@@ -111,7 +115,8 @@
         },
         {
           "name": "taskq.models.rate_bucket"
-        }
+        },
+        "taskq.models"
       ],
       "allowed_dependencies": []
     },
@@ -123,7 +128,8 @@
         },
         {
           "name": "taskq.errors.handlers"
-        }
+        },
+        "taskq.errors"
       ],
       "allowed_dependencies": []
     },
@@ -147,7 +153,8 @@
         },
         {
           "name": "taskq.cli.key_create"
-        }
+        },
+        "taskq"
       ],
       "allowed_dependencies": [
         "service",
