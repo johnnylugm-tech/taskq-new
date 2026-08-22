@@ -1,0 +1,10 @@
+=== architecture (CRG via harness_cli.py crg-arch-check) ===
+scope: 03-development/src (55/60 delivered source files in graph; 5 unparsed)
+result: architecture_score=66.7 (threshold 80)
+command: harness_cli.py crg-arch-check --project .
+
+--- output ---
+[DEGRADED] crg:graph-scope: incremental graph covered 55 of 60 delivered source file(s) — rebuilding in full (5 file(s) missing from the graph)
+[crg-arch-check] floor 80 from gate config (phase 3)
+[crg-arch-check] architecture_score=66.7 (threshold 80)
+[crg-arch-check] FAIL: architecture 66.7 < 80

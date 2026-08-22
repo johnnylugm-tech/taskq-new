@@ -1,0 +1,24 @@
+=== mutation_testing (mutmut via harness_cli.py mutation-test-score) ===
+scope: 03-development/src (paths_to_exclude: __init__.py, base.py, settings.py, v1, v2)
+result: killed=22 survived=22 score=50.0
+command: .venv/bin/python harness_cli.py mutation-test-score --project .
+
+--- .methodology/mutation_score.json ---
+{
+  "generated_at": "2026-08-22T22:48:32.859930+00:00",
+  "tool": "mutmut",
+  "score": 50.0,
+  "killed": 22,
+  "survived": 22,
+  "paths_to_mutate": "03-development/src",
+  "paths_to_exclude": [
+    "__init__.py",
+    "base.py",
+    "settings.py",
+    "v1_initial_tasks_api_keys.py",
+    "v2_add_tags_task_tags_unique.py"
+  ],
+  "mutated_files": 42,
+  "cache_sha256": "766789a0e29edcce739ed8a3cdc6d40bacaf7acf3c1be8025e1a054dfb7c9656",
+  "enforcer_sha": "c949e647f28141be51f1c35886432529fff1b911"
+}

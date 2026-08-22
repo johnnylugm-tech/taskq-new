@@ -1,0 +1,7 @@
+=== traceability (harness compute_trace_dimension) ===
+4a (FR→code→test): 100.0% ≥ 100%
+4b (TEST_SPEC→test): 79.0% ≥ 60.0%
+4c (NFR→test): 75.0%
+merged: 75.0% PASS
+
+NFRs without test coverage: ['NFR-07', 'NFR-08', 'NFR-11']

@@ -126,7 +126,7 @@ async def _hard_kill_process(proc: asyncio.subprocess.Process) -> None:
     try:
         await proc.wait()
     except Exception:
-        pass
+        pass  # nosec B110 -- drain after kill is best-effort
 
 
 class TaskRunner:

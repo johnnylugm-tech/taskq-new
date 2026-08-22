@@ -1,1 +1,5 @@
-[]
+ruff check output
+violations: 0 found
+All checks passed!
+
+Found 0 errors.

@@ -54,13 +54,13 @@ def unit_of_work() -> Iterator[Session]:
             # Rollback itself failed — preserve the original exception
             # so the caller sees the real failure, not the rollback
             # noise.
-            pass
+            pass  # nosec B110 -- preserve original exception
         raise
     finally:
         try:
             session.close()
         except Exception:
-            pass
+            pass  # nosec B110 -- best-effort cleanup
 
 
 __all__ = ["unit_of_work"]
