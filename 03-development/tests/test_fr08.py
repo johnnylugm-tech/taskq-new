@@ -81,7 +81,14 @@ from taskq.service.runner import (  # noqa: E402,F401
     AsyncExecutor,
     MAX_CONCURRENT_DEFAULT,
     DRAIN_TIMEOUT_DEFAULT,
+    STATUS_DRAINED,
+    STATUS_INTERRUPTED,
     TASK_TIMEOUT_DEFAULT,
+    TaskRunner,
+    _decode,
+    _env_float,
+    _env_int,
+    _hard_kill_process,
 )
 
 
@@ -534,3 +541,211 @@ def test_fr08_ac4_cancelled_error_propagates():
         f"executor swallowed it (propagated={propagated}, "
         f"expected={expected_propagated})"
     )
+
+
+# =============================================================================
+# Coverage-fix tests for FR-08 — exercise paths not reached by the
+# spec-defined cases above (helpers, TaskRunner, edge branches in
+# AsyncExecutor).
+# =============================================================================
+
+
+def test_fr08_decode_empty_and_long():
+    """_decode (lines 82-89): empty stream path + tail truncation path."""
+    # None / empty bytes → "" (lines 84-85).
+    assert _decode(None) == ""
+    assert _decode(b"") == ""
+    # Short stream passes through (line 86).
+    assert _decode(b"hello") == "hello"
+    # Stream longer than TAIL_LIMIT (8000) keeps only the tail (lines 87-88).
+    long_input = b"x" * 8500
+    out = _decode(long_input)
+    assert len(out) == 8000
+    assert out == "x" * 8000
+
+
+def test_fr08_env_int_defaults(monkeypatch):
+    """_env_int (lines 92-100): missing var, invalid value, valid value."""
+    # Missing var → default (lines 95-96).
+    monkeypatch.delenv("TASKQ_TEST_INT_MISSING", raising=False)
+    assert _env_int("TASKQ_TEST_INT_MISSING", 7) == 7
+    # Invalid value → default (lines 99-100).
+    monkeypatch.setenv("TASKQ_TEST_INT_BAD", "not_a_number")
+    assert _env_int("TASKQ_TEST_INT_BAD", 7) == 7
+    # Valid value → int parse (line 98).
+    monkeypatch.setenv("TASKQ_TEST_INT_OK", "42")
+    assert _env_int("TASKQ_TEST_INT_OK", 7) == 42
+
+
+def test_fr08_env_float_defaults(monkeypatch):
+    """_env_float (lines 103-112): missing, invalid, non-positive, positive."""
+    # Missing var → default (lines 106-107).
+    monkeypatch.delenv("TASKQ_TEST_FLOAT_MISSING", raising=False)
+    assert _env_float("TASKQ_TEST_FLOAT_MISSING", 3.5) == 3.5
+    # Invalid value → default (lines 110-111).
+    monkeypatch.setenv("TASKQ_TEST_FLOAT_BAD", "not_a_float")
+    assert _env_float("TASKQ_TEST_FLOAT_BAD", 3.5) == 3.5
+    # Negative → default (line 112, else branch).
+    monkeypatch.setenv("TASKQ_TEST_FLOAT_NEG", "-1.0")
+    assert _env_float("TASKQ_TEST_FLOAT_NEG", 3.5) == 3.5
+    # Zero → default (line 112, else branch).
+    monkeypatch.setenv("TASKQ_TEST_FLOAT_ZERO", "0")
+    assert _env_float("TASKQ_TEST_FLOAT_ZERO", 3.5) == 3.5
+    # Valid positive → parsed (line 109 + line 112 positive branch).
+    monkeypatch.setenv("TASKQ_TEST_FLOAT_OK", "2.0")
+    assert _env_float("TASKQ_TEST_FLOAT_OK", 3.5) == 2.0
+
+
+def test_fr08_async_executor_env_defaults(monkeypatch):
+    """AsyncExecutor.__init__: None args fall through to env vars (lines 277, 279, 281)."""
+    monkeypatch.setenv("TASKQ_MAX_CONCURRENT", "4")
+    monkeypatch.setenv("TASKQ_DRAIN_TIMEOUT", "2.5")
+    monkeypatch.setenv("TASKQ_TASK_TIMEOUT", "1.5")
+    executor = AsyncExecutor()
+    assert executor._max_concurrent == 4
+    assert executor._drain_timeout == 2.5
+    assert executor._task_timeout == 1.5
+
+
+def test_fr08_taskrunner_run_happy_path():
+    """TaskRunner.run echo: covers _execute, _spawn, _build_result, _now_iso."""
+    runner = TaskRunner(timeout=5.0)
+    result = runner.run(task_id="tr-happy", command="echo hello-tr")
+    assert result["terminal"] == "done"
+    assert result["exit_code"] == 0
+    assert "hello-tr" in result["stdout_tail"]
+    assert result["task_id"] == "tr-happy"
+    assert result["command"] == "echo hello-tr"
+    assert result["duration_ms"] >= 0
+    assert "finished_at" in result
+
+
+def test_fr08_taskrunner_run_command_not_found():
+    """TaskRunner.run: command not on PATH → terminal=failed, exit=127 (lines 167-178)."""
+    runner = TaskRunner(timeout=5.0)
+    result = runner.run(task_id="tr-nf", command="nonexistent_xyz_abc_42")
+    assert result["terminal"] == "failed"
+    assert result["exit_code"] == 127
+    assert "command not found" in result["stderr_tail"]
+
+
+def test_fr08_taskrunner_run_timeout():
+    """TaskRunner.run: subprocess exceeds timeout → terminal=timeout (lines 184-194)."""
+    runner = TaskRunner(timeout=0.3)
+    result = runner.run(task_id="tr-to", command="sleep 5")
+    assert result["terminal"] == "timeout"
+    assert result["exit_code"] == -1
+
+
+def test_fr08_taskrunner_default_timeout(monkeypatch):
+    """TaskRunner.__init__ with timeout=None reads TASKQ_TASK_TIMEOUT env (line 142-145)."""
+    monkeypatch.setenv("TASKQ_TASK_TIMEOUT", "7.5")
+    runner = TaskRunner()
+    assert runner._timeout == 7.5
+
+
+def test_fr08_run_task_timeout():
+    """_run_task TimeoutError branch: hard-kill + STATUS_INTERRUPTED (lines 384-386)."""
+    executor = AsyncExecutor(max_concurrent=1, drain_timeout=5.0, task_timeout=0.3)
+
+    async def _scenario():
+        await executor._run_task("rt-to", "sleep 5")
+        return executor._results.get("rt-to")
+
+    assert _drive_async(_scenario()) == STATUS_INTERRUPTED
+
+
+def test_fr08_run_task_file_not_found():
+    """_run_task FileNotFoundError branch: STATUS_DRAINED (lines 392-394)."""
+    executor = AsyncExecutor(max_concurrent=1, drain_timeout=5.0, task_timeout=5.0)
+
+    async def _scenario():
+        await executor._run_task("rt-nf", "nonexistent_xyz_abc_42")
+        return executor._results.get("rt-nf")
+
+    assert _drive_async(_scenario()) == STATUS_DRAINED
+
+
+def test_fr08_run_task_other_exception():
+    """_run_task generic Exception branch: STATUS_DRAINED (lines 395-397)."""
+    executor = AsyncExecutor(max_concurrent=1, drain_timeout=5.0, task_timeout=5.0)
+
+    async def _scenario():
+        async def _fake_exec(*args, **kwargs):
+            raise OSError("mocked exec failure")
+        # Patch asyncio.create_subprocess_exec so the next _run_task call
+        # falls into the generic ``except Exception`` arm.
+        original = asyncio.create_subprocess_exec
+        asyncio.create_subprocess_exec = _fake_exec  # type: ignore[assignment]
+        try:
+            await executor._run_task("rt-err", "echo hi")
+        finally:
+            asyncio.create_subprocess_exec = original  # type: ignore[assignment]
+        return executor._results.get("rt-err")
+
+    assert _drive_async(_scenario()) == STATUS_DRAINED
+
+
+def test_fr08_run_task_cancelled_error():
+    """_run_task CancelledError branch: cleanup subprocess + re-raise (lines 387-391)."""
+    executor = AsyncExecutor(max_concurrent=1, drain_timeout=5.0, task_timeout=10.0)
+
+    async def _scenario():
+        scenario_task = asyncio.current_task()
+        assert scenario_task is not None
+
+        async def _cancel_later():
+            await asyncio.sleep(0.1)
+            scenario_task.cancel()
+
+        asyncio.create_task(_cancel_later())
+        try:
+            await executor._run_task("rt-cancel", "sleep 5")
+            return False  # did not propagate
+        except asyncio.CancelledError:
+            return True  # propagated (handler ran cleanup + re-raised)
+
+    assert _drive_async(_scenario()) is True
+
+
+def test_fr08_dispatch_safety_net():
+    """_dispatch safety net returns without spawning when already at cap (line 357)."""
+    executor = AsyncExecutor(max_concurrent=1)
+    executor._in_flight_count = 5  # simulate over-cap state
+    executor._dispatch("ignored", "echo hi")
+    assert executor._in_flight_count == 5
+    assert "ignored" not in executor._tasks
+
+
+def test_fr08_hard_kill_process_already_dead():
+    """_hard_kill_process: ProcessLookupError path (lines 124-125)."""
+    async def _scenario():
+        proc = await asyncio.create_subprocess_exec(
+            "true",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        await proc.wait()  # process is now dead
+        # proc.kill() raises ProcessLookupError → caught by handler (line 124-125).
+        await _hard_kill_process(proc)
+
+    _drive_async(_scenario())  # no exception should propagate
+
+
+def test_fr08_cancel_and_seed_interrupted_with_queued():
+    """_cancel_and_seed_interrupted: FIFO + cancel + gather paths (lines 490-491, 494-495, 504)."""
+    executor = AsyncExecutor(max_concurrent=2, drain_timeout=0.3, task_timeout=10.0)
+
+    async def _scenario():
+        # 2 dispatched, 2 queued.
+        await executor.submit("t1", "sleep 5")
+        await executor.submit("t2", "sleep 5")
+        await executor.submit("t3", "sleep 5")  # queued
+        await executor.submit("t4", "sleep 5")  # queued
+        result = await executor.run_until_drained()
+        return result
+
+    result = _drive_async(_scenario())
+    assert result["status"] == "interrupted"
+    assert len(result["tasks"]) == 4
+    assert all(s == "interrupted" for s in result["tasks"].values())
