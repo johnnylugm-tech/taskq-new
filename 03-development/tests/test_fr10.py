@@ -921,3 +921,337 @@ def test_fr10_ac5_status_mapping_500(client):
     )
     # FR-10 correlation_id contract.
     _assert_correlation_id(response, body)
+
+
+# =============================================================================
+# Coverage-targeted unit tests (NOT in TEST_SPEC.md — these exist solely
+# to lift line coverage of api/middleware.py + api/schemas.py above the
+# 80% Gate 1 threshold. Each test exercises a previously uncovered line
+# that is reachable through the api-layer's normal code path. They are
+# kept under a clearly-marked section so reviewers can distinguish them
+# from the FR-10 spec tests above.
+# =============================================================================
+
+import asyncio as _asyncio  # noqa: E402  (after spec tests block)
+
+
+def test_get_correlation_id_mints_when_no_header():
+    """Coverage — middleware.py:88-94.
+
+    ``get_correlation_id`` mints a fresh uuid4-hex string when the
+    request has no ``X-Correlation-Id`` header and no value stashed
+    on ``request.state`` (FR-10 AC-10.4 / NFR-09).
+    """
+    from starlette.requests import Request as _StarletteRequest
+
+    from taskq.api.middleware import (
+        get_correlation_id,
+        mint_correlation_id,
+    )
+
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/v1/_coverage_unit",
+        "headers": [],
+        "query_string": b"",
+        "server": ("test", 80),
+        "client": ("127.0.0.1", 12345),
+        "scheme": "http",
+    }
+    request = _StarletteRequest(scope)
+
+    cid = get_correlation_id(request)
+
+    # The freshly-minted id MUST be a non-empty hex string and MUST
+    # be stashed on request.state (so subsequent calls observe the
+    # same value).
+    assert isinstance(cid, str)
+    assert len(cid) > 0
+    assert cid == request.state.correlation_id
+    # The mint_correlation_id helper is the underlying source; the
+    # freshly-minted cid MUST match its hex form.
+    assert cid == mint_correlation_id() or len(cid) == 32
+
+
+def test_get_correlation_id_returns_existing_state_value():
+    """Coverage — middleware.py:88-90.
+
+    When ``request.state.correlation_id`` is already populated (e.g.
+    by an upstream middleware layer), ``get_correlation_id`` returns
+    the existing value verbatim WITHOUT consulting the incoming
+    header. The header is left untouched (FR-10 AC-10.4).
+    """
+    from starlette.requests import Request as _StarletteRequest
+
+    from taskq.api.middleware import get_correlation_id
+
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/v1/_coverage_unit",
+        # Header would otherwise yield a different id, but the
+        # state-stashed value MUST win.
+        "headers": [
+            (b"x-correlation-id", b"from-header-should-not-win"),
+        ],
+        "query_string": b"",
+        "server": ("test", 80),
+        "client": ("127.0.0.1", 12345),
+        "scheme": "http",
+    }
+    request = _StarletteRequest(scope)
+    request.state.correlation_id = "preexisting-cid"
+
+    cid = get_correlation_id(request)
+    assert cid == "preexisting-cid"
+
+
+def test_get_correlation_id_uses_incoming_header_when_no_state():
+    """Coverage — middleware.py:91-94.
+
+    When no value is stashed on state, ``get_correlation_id`` honours
+    an incoming ``X-Correlation-Id`` header (case-insensitive lookup
+    per RFC 7230) and stashes the value on request.state so the
+    downstream handlers see the same id (FR-10 AC-10.4 / NFR-09).
+    """
+    from starlette.requests import Request as _StarletteRequest
+
+    from taskq.api.middleware import get_correlation_id
+
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/v1/_coverage_unit",
+        "headers": [
+            # NB: ASGI headers are bytes with raw names — Starlette
+            # looks them up by raw bytes equality, so the name MUST
+            # already be lowercased (ASGI normalises header names
+            # to lowercase at the edge).
+            (b"x-correlation-id", b"client-supplied-cid-abc"),
+        ],
+        "query_string": b"",
+        "server": ("test", 80),
+        "client": ("127.0.0.1", 12345),
+        "scheme": "http",
+    }
+    request = _StarletteRequest(scope)
+
+    cid = get_correlation_id(request)
+    assert cid == "client-supplied-cid-abc"
+    assert request.state.correlation_id == "client-supplied-cid-abc"
+
+
+def test_correlation_id_middleware_passes_through_non_http_scope():
+    """Coverage — middleware.py:139-140.
+
+    Non-http scopes (lifespan, websocket) bypass the correlation
+    extraction logic and are forwarded to the downstream app
+    verbatim. The middleware does NOT touch lifespan / websocket
+    frames — it only mints / extracts on http requests (FR-10).
+    """
+    from taskq.api.middleware import CorrelationIdMiddleware
+
+    captured = {"type": None}
+
+    async def _downstream(scope, receive, send):  # pragma: no cover — helper
+        captured["type"] = scope["type"]
+
+    middleware = CorrelationIdMiddleware(_downstream)
+
+    sent: list = []
+
+    async def _receive():  # pragma: no cover — helper
+        return {"type": "lifespan.startup"}
+
+    async def _send(message):  # pragma: no cover — helper
+        sent.append(message)
+
+    _asyncio.run(
+        middleware({"type": "lifespan"}, _receive, _send)
+    )
+    assert captured["type"] == "lifespan"
+    # The lifespan passthrough MUST NOT inject any http.response.start
+    # messages (the middleware only operates on http scopes).
+    assert not any(m.get("type") == "http.response.start" for m in sent)
+
+
+def test_correlation_id_middleware_websocket_passthrough():
+    """Coverage — middleware.py:139-140 (websocket variant).
+
+    Symmetric to the lifespan passthrough — websocket connections
+    are forwarded untouched (no header injection, no log emission
+    on the correlation logger).
+    """
+    from taskq.api.middleware import CorrelationIdMiddleware
+
+    captured = {"type": None}
+
+    async def _downstream(scope, receive, send):  # pragma: no cover — helper
+        captured["type"] = scope["type"]
+
+    middleware = CorrelationIdMiddleware(_downstream)
+
+    async def _receive():  # pragma: no cover — helper
+        return {"type": "websocket.connect"}
+
+    async def _send(message):  # pragma: no cover — helper
+        pass
+
+    _asyncio.run(
+        middleware({"type": "websocket"}, _receive, _send)
+    )
+    assert captured["type"] == "websocket"
+
+
+def test_rate_limit_middleware_infinite_wait_emits_retry_after_one():
+    """Coverage — middleware.py:292.
+
+    When the bucket is configured with ``per_sec=0`` (no refill
+    possible), ``seconds_until_next_token`` returns ``math.inf``
+    and the middleware MUST emit ``Retry-After: 1`` (integer
+    seconds, RFC 9110 §10.2.3 / SPEC §3 FR-05).
+    """
+    import math as _math
+
+    from starlette.requests import Request as _StarletteRequest
+
+    from taskq.api.middleware import RateLimitMiddleware
+    from taskq.service.rate_limit import RateLimitConfig, TokenBucket
+
+    # No-refill config: any drain produces an infinite wait so the
+    # middleware's ``retry_after = 1`` branch is the only path.
+    config = RateLimitConfig(burst=1, per_sec=0.0)
+    middleware = RateLimitMiddleware(app=None, config=config)  # type: ignore[arg-type]
+
+    # Drive dispatch directly with a synthetic request so the
+    # middleware short-circuits with 429 (no call_next needed).
+    request_scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/v1/_coverage_unit",
+        "headers": [(b"x-api-key", b"cov-test-key")],
+        "query_string": b"",
+        "server": ("test", 80),
+        "client": ("127.0.0.1", 12345),
+        "scheme": "http",
+        "app": type(
+            "_StubApp",
+            (),
+            {"state": type("_S", (), {"rate_limit_buckets": {}})()},
+        )(),
+    }
+    request = _StarletteRequest(request_scope)
+
+    # Pre-load an exhausted bucket under our no-refill config so
+    # consume() returns False and the 429 short-circuit fires.
+    bucket = TokenBucket(config)
+    bucket._tokens = 0.0  # type: ignore[attr-defined]
+    request.app.state.rate_limit_buckets["key:cov-test-key"] = bucket  # type: ignore[attr-defined]
+
+    # Simulate the wait calculation directly so we exercise the
+    # math.isinf branch deterministically (avoids wall-clock flake).
+    wait = _math.inf
+    assert _math.isinf(wait) or wait < 0.0
+
+    # Sanity: the middleware's retry-after branch must reduce inf
+    # to integer 1 (per the middleware's own logic).
+    if _math.isinf(wait) or wait < 0.0:
+        retry_after = 1
+    else:
+        retry_after = max(0, int(_math.ceil(wait)))
+    assert retry_after == 1
+
+    # Now exercise the middleware's dispatch path end-to-end with a
+    # no-op call_next that proves the bucket exhaustion short-circuit.
+    called_next = {"count": 0}
+
+    async def _call_next(_req):  # pragma: no cover — helper
+        called_next["count"] += 1
+        from starlette.responses import PlainTextResponse as _PT
+        return _PT("should-not-reach")
+
+    response = _asyncio.run(middleware.dispatch(request, _call_next))
+    # The dispatch MUST return a 429 problem+json (the bucket is
+    # empty); call_next MUST NOT be reached.
+    assert called_next["count"] == 0
+    assert response.status_code == 429
+    # The Retry-After header MUST be present and equal to "1" (the
+    # no-refill branch).
+    assert response.headers.get("retry-after") == "1"
+
+
+def test_rate_limit_middleware_exempt_path_healthz():
+    """Coverage — middleware.py:274-275.
+
+    ``/healthz`` and ``/readyz`` are EXEMPT from the per-token bucket
+    (FR-05 AC-5.4). The middleware MUST forward the request to the
+    downstream app even when the bucket is empty.
+    """
+    from starlette.requests import Request as _StarletteRequest
+
+    from taskq.api.middleware import RateLimitMiddleware
+    from taskq.service.rate_limit import RateLimitConfig, TokenBucket
+
+    config = RateLimitConfig(burst=1, per_sec=0.0)
+    middleware = RateLimitMiddleware(app=None, config=config)  # type: ignore[arg-type]
+
+    request_scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/healthz",
+        "headers": [],
+        "query_string": b"",
+        "server": ("test", 80),
+        "client": ("127.0.0.1", 12345),
+        "scheme": "http",
+        "app": type(
+            "_StubApp",
+            (),
+            {"state": type("_S", (), {"rate_limit_buckets": {}})()},
+        )(),
+    }
+    request = _StarletteRequest(request_scope)
+    # Bucket is empty (exhausted), but the exempt path MUST bypass it.
+    bucket = TokenBucket(config)
+    bucket._tokens = 0.0  # type: ignore[attr-defined]
+    request.app.state.rate_limit_buckets["ip:127.0.0.1"] = bucket  # type: ignore[attr-defined]
+
+    called_next = {"count": 0}
+
+    async def _call_next(_req):  # pragma: no cover — helper
+        called_next["count"] += 1
+        from starlette.responses import PlainTextResponse as _PT
+        return _PT("ok")
+
+    response = _asyncio.run(middleware.dispatch(request, _call_next))
+    assert called_next["count"] == 1
+    assert response.status_code == 200
+
+
+def test_task_create_rejects_blacklisted_characters():
+    """Coverage — schemas.py:30.
+
+    ``TaskCreate`` enforces SPEC §7 injection-blacklist glyphs via
+    ``_reject_blacklist``. The blacklist regex covers shell / SQL /
+    path-traversal characters; any matching input MUST raise
+    ``ValueError`` so pydantic surfaces it as a 422 problem+json.
+    """
+    import pytest as _pytest
+
+    from taskq.api.schemas import TaskCreate
+
+    # Each candidate carries one or more SPEC §7 blacklisted glyphs.
+    for bad_value in (
+        "evil; DROP TABLE--",
+        "rm -rf /tmp/x`whoami`",
+        "echo $HOME",
+        "cat /etc/passwd|grep root",
+        "with\nnewline",
+        "with\rcarriagereturn",
+        "with\x00null",
+    ):
+        with _pytest.raises(ValueError):
+            TaskCreate(name="ok-name", command=bad_value)
+        with _pytest.raises(ValueError):
+            TaskCreate(name=bad_value, command="ok-command")

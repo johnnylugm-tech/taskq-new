@@ -141,14 +141,16 @@ class CorrelationIdMiddleware:
 
         # Extract incoming X-Correlation-Id (case-insensitive per RFC 7230)
         # or mint a fresh uuid4 hex.
+        # NB: ASGI normalises header names to lowercase bytes at the edge,
+        # so the lookup below uses raw byte equality. ``value.decode("latin-1")``
+        # cannot fail (latin-1 maps all 256 byte values 1:1), so no
+        # try/except is needed.
         headers = scope.get("headers") or []
         cid: Optional[str] = None
+        cid_header_name = CORRELATION_HEADER.lower().encode("latin-1")
         for name, value in headers:
-            if name.lower() == CORRELATION_HEADER.lower().encode("latin-1"):
-                try:
-                    cid = value.decode("latin-1")
-                except Exception:
-                    cid = None
+            if name == cid_header_name:
+                cid = value.decode("latin-1")
                 break
         if not cid:
             cid = mint_correlation_id()
