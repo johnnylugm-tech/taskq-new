@@ -94,11 +94,14 @@ def _encode_cursor(payload: Dict[str, Any]) -> str:
 
 
 def _decode_cursor(token: str) -> Optional[Dict[str, Any]]:
+    """Decode an opaque cursor; return None if it cannot be parsed."""
     try:
         padding = "=" * (-len(token) % 4)
         raw = base64.urlsafe_b64decode(token + padding)
         return json.loads(raw.decode("utf-8"))
-    except Exception:
+    except (ValueError, UnicodeDecodeError):
+        # ValueError covers binascii.Error (bad base64 padding/length)
+        # and json.JSONDecodeError (which subclasses ValueError).
         return None
 
 
@@ -223,13 +226,7 @@ class TaskRepository:
             session.add(row)
             session.commit()
             session.refresh(row)
-            return {
-                "id": row.id,
-                "task_id": row.task_id,
-                "command": row.command,
-                "status": row.status,
-                "created_at": row.created_at.isoformat(),
-            }
+            return self._result_to_dict(row)
         finally:
             session.close()
 
@@ -244,16 +241,7 @@ class TaskRepository:
                 .scalars()
                 .all()
             )
-            return [
-                {
-                    "id": r.id,
-                    "task_id": r.task_id,
-                    "command": r.command,
-                    "status": r.status,
-                    "created_at": r.created_at.isoformat(),
-                }
-                for r in rows
-            ]
+            return [self._result_to_dict(r) for r in rows]
         finally:
             session.close()
 
@@ -267,6 +255,16 @@ class TaskRepository:
             "command": task.command,
             "status": task.status,
             "created_at": task.created_at.isoformat(),
+        }
+
+    @staticmethod
+    def _result_to_dict(row: TaskResult) -> Dict[str, Any]:
+        return {
+            "id": row.id,
+            "task_id": row.task_id,
+            "command": row.command,
+            "status": row.status,
+            "created_at": row.created_at.isoformat(),
         }
 
 

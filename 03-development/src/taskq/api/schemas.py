@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import re
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -21,15 +20,12 @@ MAX_FIELD_LENGTH = 1000
 _INJECTION_BLACKLIST = re.compile(r"[;'\"`\\$|&<>\n\r\x00]")
 
 
-def _validate_text(value: str) -> str:
-    if value is None:
-        raise ValueError("must not be empty")
-    if not isinstance(value, str):
-        raise ValueError("must be a string")
-    if len(value) == 0:
-        raise ValueError("must not be empty")
-    if len(value) > MAX_FIELD_LENGTH:
-        raise ValueError(f"exceeds {MAX_FIELD_LENGTH} characters")
+def _reject_blacklist(value: str) -> str:
+    """Reject any string containing a SPEC §7 injection-blacklist glyph.
+
+    Type and length are enforced by TaskCreate's Field constraints above;
+    this validator only has to handle the character-blacklist rule.
+    """
     if _INJECTION_BLACKLIST.search(value):
         raise ValueError("contains blacklisted characters")
     return value
@@ -51,19 +47,18 @@ class TaskCreate(BaseModel):
 
     @field_validator("name", "command")
     @classmethod
-    def _check_text(cls, v: str) -> str:  # noqa: D401
-        return _validate_text(v)
+    def _check_text(cls, v: str) -> str:
+        return _reject_blacklist(v)
 
 
 class TaskRead(BaseModel):
-    """Response body for POST /v1/tasks and GET /v1/tasks/{id}."""
+    """Response projection for POST /v1/tasks and GET /v1/tasks/{id}."""
 
     id: str
     name: str
     command: str
     status: str
     created_at: datetime
-    task_id: Optional[str] = None  # for compatibility with body.get("task_id")
 
 
 __all__ = ["TaskCreate", "TaskRead", "MAX_FIELD_LENGTH"]

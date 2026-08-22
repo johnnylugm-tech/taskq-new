@@ -7,7 +7,6 @@ SPEC.md §3 FR-01; SAD.md §4 service layer; NFR-06 layer contract.
 """
 from __future__ import annotations
 
-import uuid
 from typing import Any, Dict, List, Optional
 
 from taskq.repository.tasks import (
@@ -31,10 +30,7 @@ class TaskService:
 
     def create_task(self, name: str, command: str) -> Dict[str, Any]:
         """Create a task. Raises DuplicateTaskName (mapped to HTTP 409)."""
-        try:
-            return self._repo.create(name=name, command=command)
-        except DuplicateTaskName:
-            raise
+        return self._repo.create(name=name, command=command)
 
     def get_task(self, task_id: Any) -> Dict[str, Any]:
         """Fetch a single task. Raises TaskNotFound (mapped to HTTP 404)."""
@@ -51,8 +47,6 @@ class TaskService:
         status: Optional[str] = None,
     ) -> Dict[str, Any]:
         """List tasks with cursor pagination. Raises on invalid limit."""
-        if limit is None:
-            limit = DEFAULT_LIMIT
         if limit < 1:
             raise ValueError("limit must be >= 1")
         if limit > MAX_LIMIT:
