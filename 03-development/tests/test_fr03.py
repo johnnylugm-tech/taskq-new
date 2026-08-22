@@ -142,6 +142,9 @@ def test_fr03_ac1_missing_or_invalid_key_returns_401(client):
     problem document, not a stack trace.
     NFR-10 (integration coverage via ASGITransport): end-to-end through
     the FastAPI app boundary.
+    # NFR-02
+    # NFR-09
+    # NFR-10
     """
     # Sub-assertion AC3.1-status-401: 401 (no api_keys row matches).
     response = client.get(
@@ -173,6 +176,9 @@ def test_fr03_ac2_key_hash_sha256_64hex_no_plaintext():
 
     GREEN TODO: taskq.repository.keys.hash_api_key(plaintext: str) -> str
     must call hashlib.sha256(plaintext.encode("utf-8")).hexdigest().
+    # NFR-02
+    # NFR-04
+    # NFR-09
     """
     sample_key = SAMPLE_KEY  # "taskq-test-key-abc123"
 
@@ -216,6 +222,8 @@ def test_fr03_ac3_compare_digest_constant_time(monkeypatch):
     We do NOT replace the function — we wrap it so real comparison still
     happens — but we record the call so the test can assert GREEN routed
     the comparison through hmac.compare_digest (NOT ``==``).
+    # NFR-02
+    # NFR-09
     """
     # Spy that records arguments and forwards to the real compare_digest.
     captured: Dict[str, Any] = {}
@@ -287,6 +295,9 @@ def test_fr03_ac4_create_prints_plaintext_once(monkeypatch):
     capture stdout via contextlib.redirect_stdout + io.StringIO. monkeypatch
     APIKeyRepository.create so we can observe exactly what the CLI persists
     WITHOUT touching a real DB.
+    # NFR-04
+    # NFR-05
+    # NFR-09
     """
     # Capture every payload the CLI hands to the repository. The plaintext
     # must NEVER appear in any of these dicts (AC-3.4 / NFR-04).
@@ -373,6 +384,9 @@ def test_fr03_ac5_revoked_key_invalid(client, monkeypatch):
     GREEN TODO: taskq.service.auth.verify_api_key must look up by
     sha256(candidate), find the row, observe revoked_at is non-null,
     and raise InvalidAPIKey (mapped to 401 + problem+json).
+    # NFR-02
+    # NFR-04
+    # NFR-09
     """
     revoked_plaintext = REVOKED_KEY  # "revoked-key"
     revoked_hash = hash_api_key(revoked_plaintext)
@@ -416,6 +430,8 @@ def test_fr03_ac6_healthz_readyz_no_auth(client):
     Implementation choice (in_process): httpx.ASGITransport, no auth
     header. GREEN TODO: taskq.api.app.create_app must mount /healthz
     and /readyz under the root prefix with NO auth dependency.
+    # NFR-09
+    # NFR-10
     """
     # /healthz with NO X-API-Key header.
     response = client.get("/healthz")
