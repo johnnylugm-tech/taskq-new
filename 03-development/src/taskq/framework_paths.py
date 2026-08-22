@@ -44,8 +44,10 @@ FRAMEWORK_OWNED_ROLES: dict[str, str] = {
 # downstream FR-04 / FR-06 / FR-07 / FR-08 code tries to resolve the
 # same module path. The sentinel test re-validates the same paths, so
 # this is a strict superset of its check.
-for _role_name, _module_path in FRAMEWORK_OWNED_ROLES.items():
-    importlib.import_module(_module_path)
-del _role_name, _module_path
+def _validate_registry_paths() -> None:
+    for _role_name, _module_path in FRAMEWORK_OWNED_ROLES.items():
+        importlib.import_module(_module_path)
+
+_validate_registry_paths()
 
 __all__ = ["FRAMEWORK_OWNED_ROLES"]

@@ -302,7 +302,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         try:
             from taskq.service.metrics import record_rate_limit_rejection
             record_rate_limit_rejection()
-        except Exception:  # pragma: no cover — defensive on hot path
+        except Exception:  # defensive on hot path
             pass
         cid = getattr(request.state, "correlation_id", None)
         return _problem_response(
