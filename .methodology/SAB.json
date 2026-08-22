@@ -20,6 +20,12 @@
           "name": "taskq.api.schemas"
         },
         {
+          "name": "taskq.api.problem"
+        },
+        {
+          "name": "taskq.api.handlers"
+        },
+        {
           "name": "taskq.api.routes.tasks"
         },
         {
@@ -123,12 +129,6 @@
     {
       "name": "errors",
       "modules": [
-        {
-          "name": "taskq.errors.problem"
-        },
-        {
-          "name": "taskq.errors.handlers"
-        },
         "taskq.errors"
       ],
       "allowed_dependencies": []
@@ -227,7 +227,7 @@
       "type": "security",
       "dimension": "security",
       "target": "stdout/stderr/log redact regex hits; no DB URL in logs/metrics",
-      "module": "taskq.errors.handlers"
+      "module": "taskq.api.handlers"
     },
     "NFR-05": {
       "type": "documentation",
@@ -346,8 +346,8 @@
       "taskq.service.metrics"
     ],
     "FR-10": [
-      "taskq.errors.problem",
-      "taskq.errors.handlers",
+      "taskq.api.problem",
+      "taskq.api.handlers",
       "taskq.api.middleware",
       "taskq.api.schemas"
     ]
