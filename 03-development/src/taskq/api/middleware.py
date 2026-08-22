@@ -146,6 +146,15 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         else:
             # Integer seconds per RFC 9110 §10.2.3 / SPEC §3 FR-05.
             retry_after = max(0, int(math.ceil(wait)))
+        # FR-09 — record the rejection so /v1/metrics can surface a
+        # cumulative counter to the operator. Best-effort: the counter
+        # import is wrapped so the middleware never raises on the hot
+        # path even if the metrics module is somehow unavailable.
+        try:
+            from taskq.service.metrics import record_rate_limit_rejection
+            record_rate_limit_rejection()
+        except Exception:  # pragma: no cover — defensive on hot path
+            pass
         return _problem_response(
             status=429,
             title="Too Many Requests",

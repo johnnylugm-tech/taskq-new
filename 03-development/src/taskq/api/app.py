@@ -42,10 +42,13 @@ from __future__ import annotations
 
 from typing import Callable, List, Tuple
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 
+from taskq.api.deps import require_scope
 from taskq.api.handlers import register_exception_handlers
 from taskq.api.middleware import RateLimitMiddleware
+from taskq.api.routes.health import healthz, readyz
+from taskq.api.routes.metrics import metrics
 from taskq.api.routes.runs import list_runs, trigger_run
 from taskq.api.routes.tasks import (
     create_task,
@@ -118,16 +121,29 @@ def create_app() -> FastAPI:
     # ---- FR-03 AC-3.6 / FR-09: unauthenticated health endpoints ----
     # Mounted directly on the app (no router prefix, no auth dependency)
     # so that /healthz and /readyz respond 200 regardless of whether
-    # the api_keys table is reachable. SPEC §3 FR-09 / AC-3.6.
-    @app.get("/healthz", include_in_schema=False)
-    def healthz() -> dict:
-        """Liveness probe — returns 200 with no body work."""
-        return {"status": "ok"}
+    # the api_keys table is reachable. SPEC §3 FR-09 / AC-3.6. FR-09
+    # consolidates the handler bodies under ``taskq.api.routes.health``
+    # so a single canonical import path owns both probes (SAD §4
+    # api/routes/health).
+    app.add_api_route("/healthz", healthz, methods=["GET"], status_code=200,
+                      include_in_schema=False)
+    app.add_api_route("/readyz", readyz, methods=["GET"], status_code=200,
+                      include_in_schema=False)
 
-    @app.get("/readyz", include_in_schema=False)
-    def readyz() -> dict:
-        """Readiness probe — returns 200 (process up, app wired)."""
-        return {"status": "ok"}
+    # ---- FR-09 AC-9.3: admin-scoped metrics endpoint ----
+    # Registered with the canonical ``require_scope("admin")``
+    # dependency so the FR-04 AC-4.3 single-dep invariant holds for
+    # /v1/* handlers. Mounted directly on the app (NOT through
+    # ``include_router``) for the same reason as the /v1/tasks
+    # handlers above — the AC-4.3 audit walks ``app.routes`` looking
+    # for paths starting with /v1/.
+    app.add_api_route(
+        "/v1/metrics",
+        metrics,
+        methods=["GET"],
+        status_code=200,
+        dependencies=[Depends(require_scope("admin"))],
+    )
 
     return app
 
