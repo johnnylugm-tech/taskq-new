@@ -2,8 +2,8 @@
 # returncode: 0
 # agent_score: 100.0 | threshold: 80.0
 
-........................................................................ [ 66%]
-....................................                                     [100%]
+........................................................................ [ 54%]
+...........................................................              [100%]
 ================================ tests coverage ================================
 ______________ coverage: platform darwin, python 3.11.15-final-0 _______________
 
@@ -44,8 +44,8 @@ Name                                                                            
 03-development/src/taskq/service/__init__.py                                               0      0   100%
 03-development/src/taskq/service/auth.py                                                  28      0   100%
 03-development/src/taskq/service/rate_limit.py                                            50      0   100%
-03-development/src/taskq/service/runner.py                                                69      0   100%
+03-development/src/taskq/service/runner.py                                               174      0   100%
 03-development/src/taskq/service/tasks.py                                                 36      0   100%
 --------------------------------------------------------------------------------------------------------------------
-TOTAL                                                                                    997     12    99%
-108 passed in 6.38s
+TOTAL                                                                                   1102     12    99%
+131 passed in 9.84s
