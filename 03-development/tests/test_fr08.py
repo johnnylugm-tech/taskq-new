@@ -749,3 +749,57 @@ def test_fr08_cancel_and_seed_interrupted_with_queued():
     assert result["status"] == "interrupted"
     assert len(result["tasks"]) == 4
     assert all(s == "interrupted" for s in result["tasks"].values())
+
+
+def test_fr08_cancel_and_seed_interrupted_with_live_tasks():
+    """_cancel_and_seed_interrupted: in_flight_snapshot has not-done tasks →
+    ``task.cancel()`` branch (lines 503-504) and the reap ``gather`` (line 513)
+    execute.
+
+    The wait_for cancellation cascade in ``run_until_drained`` empties
+    ``self._tasks`` BEFORE ``_cancel_and_seed_interrupted`` runs (per-task
+    finally clauses pop on CancelledError), so the cancel branch is
+    unreachable through the public path. Drive it directly with live tasks
+    in flight.
+    """
+    executor = AsyncExecutor(max_concurrent=2, drain_timeout=5.0, task_timeout=10.0)
+
+    async def _scenario():
+        await executor.submit("lt1", "sleep 5")
+        await executor.submit("lt2", "sleep 5")
+        # Tasks are still in ``self._tasks`` (not cancelled yet); invoke the
+        # private helper directly so the cancel + gather branches fire.
+        await executor._cancel_and_seed_interrupted()
+        return executor._results
+
+    results = _drive_async(_scenario())
+    assert results == {"lt1": STATUS_INTERRUPTED, "lt2": STATUS_INTERRUPTED}
+
+
+def test_fr08_wait_all_drains_fifo_when_idle():
+    """_wait_all: FIFO dispatch (lines 474-475) fires when slots free up.
+
+    ``_in_flight_count`` is a high-water mark that only resets in
+    ``_finalize_wave``, so the ``while _pending and _in_flight_count <
+    _max_concurrent`` branch is unreachable through the public
+    ``submit`` / ``run_until_drained`` cycle (after the first cap-filling
+    submit, ``_in_flight_count`` stays at the cap until the wave ends).
+    Seed the executor state directly and invoke ``_wait_all`` to cover
+    the FIFO-drain loop body.
+    """
+    executor = AsyncExecutor(max_concurrent=2, drain_timeout=5.0, task_timeout=5.0)
+
+    async def _scenario():
+        # Pre-seed the executor: nothing dispatched yet, but two items in
+        # the FIFO and zero in-flight, so the first iteration of _wait_all
+        # MUST hit lines 473-475 to advance.
+        executor._in_flight_count = 0
+        executor._pending.append(("fifo-a", "echo fifo-a"))
+        executor._pending.append(("fifo-b", "echo fifo-b"))
+        executor._submitted.add("fifo-a")
+        executor._submitted.add("fifo-b")
+        await executor._wait_all()
+        return executor._results
+
+    results = _drive_async(_scenario())
+    assert results == {"fifo-a": STATUS_DRAINED, "fifo-b": STATUS_DRAINED}

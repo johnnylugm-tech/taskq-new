@@ -243,6 +243,15 @@ class TaskRunner:
             "finished_at": _now_iso(),
         }
 
+    # Backward-compat shim for FR-02 test surface:
+    # ``TaskRunner._hard_kill`` (static) was the original FR-02 name before
+    # FR-08 promoted the helper to module-level ``_hard_kill_process`` so
+    # ``AsyncExecutor`` could reuse it without importing a private
+    # staticmethod. Tests written against FR-02's locked-in contract
+    # (test_fr02.py lines 781-816) call ``TaskRunner._hard_kill`` directly;
+    # delegate to preserve their surface.
+    _hard_kill = staticmethod(_hard_kill_process)
+
 
 class AsyncExecutor:
     """Background subprocess executor for FR-08.
