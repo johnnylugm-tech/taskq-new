@@ -1,0 +1,12 @@
+# Harness-executed: pytest-cov (re-scored per FR)
+# dimension: test_coverage
+# fr_id: FR-09
+# scope: this FR's own modules, per fr_module_traceability
+# executed/coverable: 82/82
+# per-fr coverage: 100.0%
+# whole-project coverage: 99.0% (see .methodology/gate_evidence/harness_verification/test_coverage_harness.txt)
+#
+# files in scope:
+#   03-development/src/taskq/api/routes/health.py
+#   03-development/src/taskq/api/routes/metrics.py
+#   03-development/src/taskq/service/metrics.py
