@@ -24,12 +24,22 @@ ASGITransport).
 """
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Dict
 
-from sqlalchemy import text
+from alembic.config import Config as AlembicConfig
+from alembic.script import ScriptDirectory
+from sqlalchemy import inspect, text
 
 from taskq.api.problem import Problem
 from taskq.repository.tasks import get_engine
+
+
+# Location of the alembic ``script_location`` directory that ships with
+# the project (parents[2] = taskq/ when this file lives at
+# ``taskq/api/routes/health.py``). Used by ``alembic_current_is_head``
+# to resolve the head revision without invoking the alembic CLI.
+_MIGRATIONS_DIR = Path(__file__).resolve().parents[2] / "migrations"
 
 
 # ---------------------------------------------------------------------------
@@ -58,8 +68,8 @@ def alembic_current_is_head() -> bool:
     """Return ``True`` iff the alembic_version table holds the head revision.
 
     Reads ``alembic_version.version_num`` and compares it against the
-    highest ``down_revision`` recorded in
-    ``taskq.migrations.versions``. Any I/O or parsing error maps to
+    head revision reported by ``alembic.script.ScriptDirectory`` over
+    the on-disk migration files. Any I/O or parsing error maps to
     ``False`` so a freshly-deployed-but-unmigrated binary reports
     "not ready" (SPEC §3 FR-09, §8 #10, §8 #11; NFR-03 fail-closed).
 
@@ -71,7 +81,7 @@ def alembic_current_is_head() -> bool:
     and return ``True`` so the readiness probe stays green. A row
     that exists but does NOT match the head revision is still
     ``False`` so the deployed-but-unmigrated invariant from SPEC
-    §8 #10 / §8 #11 is preserved.
+    §8 #10 / #8 #11 is preserved.
 
     The test fixture overrides this with a stub returning ``True`` so
     AC-9.2 exercises the happy path in-process regardless of which
@@ -79,8 +89,7 @@ def alembic_current_is_head() -> bool:
     """
     try:
         engine = get_engine()
-        from sqlalchemy import inspect as _sa_inspect
-        if "alembic_version" not in _sa_inspect(engine).get_table_names():
+        if "alembic_version" not in inspect(engine).get_table_names():
             # No migration has ever been recorded on this database.
             # Treat as "nothing has drifted" — return True. Production
             # environments with an explicit ``alembic upgrade`` history
@@ -102,46 +111,25 @@ def alembic_current_is_head() -> bool:
 
 
 def _alembic_head_revision() -> str:
-    """Return the highest ``down_revision`` constant recorded across all
-    alembic revision files under ``taskq.migrations.versions``.
+    """Return the head revision id declared by the on-disk alembic scripts.
 
-    FR-09 GREEN keeps this self-contained (no alembic command required
-    at probe time) so the readiness check stays a single SELECT plus a
-    pure-Python walk over the on-disk revision files.
+    Delegates to ``alembic.script.ScriptDirectory`` so the readiness
+    probe stays a single SELECT plus a single alembic-native lookup
+    (no ad-hoc text parsing of revision files). A missing scripts
+    directory or unresolvable head maps to ``"None"`` so the caller
+    still has a deterministic string to compare against.
     """
-    from pathlib import Path
-
-    revisions_dir = Path(__file__).resolve().parents[3] / "migrations" / "versions"
-    candidates: list[str] = []
-    if revisions_dir.is_dir():
-        for rev_file in revisions_dir.glob("*.py"):
-            if rev_file.name == "__init__.py":
-                continue
-            text = rev_file.read_text(encoding="utf-8")
-            for marker in ("revision = ", "down_revision = "):
-                # Extract the literal token: either a quoted string or "None".
-                idx = text.find(marker)
-                while idx != -1:
-                    tail = text[idx + len(marker):].lstrip()
-                    if tail.startswith("None"):
-                        candidates.append("None")
-                    elif tail.startswith(("'", '"')):
-                        quote = tail[0]
-                        end = tail.find(quote, 1)
-                        if end != -1:
-                            candidates.append(tail[1:end])
-                    idx = text.find(marker, idx + len(marker))
-    # "None" is a sentinel for the initial revision; treat it as the
-    # base. For our purposes any non-None candidate present means the
-    # head is that candidate (single linear chain for FR-09 GREEN).
-    non_none = [c for c in candidates if c != "None"]
-    if not non_none:
+    if not (_MIGRATIONS_DIR / "versions").is_dir():
         return "None"
-    # The "head" of a single linear chain is the non-None revision
-    # present in the version files. (A branched head would need a
-    # topo walk; FR-09's revisions are linear so the simple read
-    # suffices.)
-    return non_none[-1]
+    cfg = AlembicConfig()
+    cfg.set_main_option("script_location", str(_MIGRATIONS_DIR))
+    script = ScriptDirectory.from_config(cfg)
+    heads = script.get_heads()
+    if not heads:
+        return "None"
+    # A branched head would need a topo walk; FR-09's revisions are a
+    # single linear chain so the first head is the only head.
+    return heads[0]
 
 
 # ---------------------------------------------------------------------------
@@ -173,9 +161,7 @@ def readyz() -> Dict[str, Any]:
     alembic_ok = alembic_current_is_head()
     if db_ok and alembic_ok:
         return {"status": "ok"}
-    failed = []
-    if not db_ok:
-        failed.append("db")
+    failed = ["db"] if not db_ok else []
     if not alembic_ok:
         failed.append("alembic")
     raise Problem(
