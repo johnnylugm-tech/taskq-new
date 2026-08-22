@@ -1,10 +1,11 @@
-"""FastAPI exception handlers — convert exceptions to problem+json.
+"""FastAPI exception handlers — Problem → application/problem+json.
 
-[FR-01] Maps Problem + pydantic validation + everything else to
-application/problem+json. Citations: SPEC.md §3 FR-01 (FR-10 contract);
-NFR-02 (no stack/SQL/path leak); NFR-03 (CancelledError naturally
-propagates in asyncio — we do not register a handler that could swallow
-it); SAD.md §4 errors layer.
+[FR-01] Maps Problem + pydantic validation + unhandled exceptions to
+application/problem+json. Lives in the api layer to honour the NFR-06
+independence constraint between ``taskq.api`` and ``taskq.errors``.
+Citations: SPEC.md §3 FR-01 (FR-10 contract); NFR-02 (no stack/SQL/
+path leak); NFR-03 (CancelledError naturally propagates in asyncio —
+we do not register a handler that could swallow it); SAD.md §4.
 """
 from __future__ import annotations
 
@@ -15,9 +16,9 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from taskq.errors.problem import Problem
+from taskq.api.problem import Problem
 
-logger = logging.getLogger("taskq.errors")
+logger = logging.getLogger("taskq.api.handlers")
 
 CONTENT_TYPE = "application/problem+json"
 
@@ -61,3 +62,6 @@ def register_exception_handlers(app: FastAPI) -> None:
         return _problem_response(
             Problem(status=500, title="Internal server error", detail="An unexpected error occurred.")
         )
+
+
+__all__ = ["register_exception_handlers", "CONTENT_TYPE"]

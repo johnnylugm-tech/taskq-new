@@ -1,9 +1,14 @@
-"""Problem exception — RFC 7807 surface for all non-2xx responses.
+"""RFC 7807 Problem exception — FR-01/FR-10 error surface.
 
-[FR-01] Every non-2xx in FR-01 must surface as application/problem+json
-without leaking stack / SQL / path / schema. The body is a strict whitelist
-of fields. Citations: SPEC.md §3 FR-01, §8 #4, §8 #5, §8 #6, §8 #7, §8 #8;
+[FR-01] Every non-2xx response surfaces as application/problem+json
+without leaking stack / SQL / path / schema. The body is a strict
+whitelist of fields. Citations: SPEC.md §3 FR-01, §8 #4-#8, §10 FR-10;
 RFC 7807.
+
+This module lives in the api layer (NOT taskq.errors) to honour the
+NFR-06 architecture constraint that ``taskq.api`` and ``taskq.errors``
+are independent — the api raises Problems; errors is a leaf module
+with no dependents in the upward-import direction.
 """
 from __future__ import annotations
 
@@ -11,7 +16,7 @@ from typing import Any, Dict, Optional
 
 
 class Problem(Exception):
-    """RFC 7807 problem document raised from anywhere in the stack.
+    """RFC 7807 problem document raised from anywhere in the api stack.
 
     Fields:
         type     — URI reference identifying the problem type
@@ -52,3 +57,6 @@ class Problem(Exception):
             if key not in out:
                 out[key] = value
         return out
+
+
+__all__ = ["Problem"]

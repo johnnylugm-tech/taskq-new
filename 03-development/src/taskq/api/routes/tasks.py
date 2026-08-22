@@ -11,8 +11,8 @@ from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, Header, Query, Request, status
 
+from taskq.api.problem import Problem
 from taskq.api.schemas import TaskCreate
-from taskq.errors.problem import Problem
 from taskq.repository.tasks import DuplicateTaskName, TaskNotFound
 from taskq.service.auth import (
     InsufficientScope,

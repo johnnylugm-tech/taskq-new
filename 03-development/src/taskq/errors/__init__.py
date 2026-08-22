@@ -1,7 +1,9 @@
-"""taskq.errors — RFC 7807 problem+json error contract.
+"""taskq.errors — RFC 7807 error contract (leaf module).
 
-[FR-01] Provides the Problem exception class + FastAPI exception handlers
-that surface non-2xx responses as application/problem+json (SPEC.md §10
-FR-10). Citations: SPEC.md §3 FR-01, §8 #4, §8 #5, §8 #6, §8 #7, §8 #8;
-SAD.md §4 errors layer.
+[FR-01] Reserved as an independent leaf module under NFR-06: the
+``taskq.api`` and ``taskq.errors`` package must not import each other
+(see ``.importlinter`` contract ``fr01-config-errors-independence``).
+The concrete Problem class and FastAPI exception handlers live in
+``taskq.api.problem`` / ``taskq.api.handlers`` — this package stays
+empty by design so the layer boundary is enforceable.
 """

@@ -11,8 +11,8 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
+from taskq.api.handlers import register_exception_handlers
 from taskq.api.routes.tasks import router as tasks_router
-from taskq.errors.handlers import register_exception_handlers
 
 
 def create_app() -> FastAPI:
