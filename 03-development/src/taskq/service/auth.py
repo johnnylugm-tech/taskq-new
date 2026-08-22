@@ -30,8 +30,6 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-from sqlalchemy.exc import SQLAlchemyError
-
 from taskq.repository.keys import APIKeyRepository
 
 
@@ -75,13 +73,15 @@ _SCOPE_RANK: Dict[str, int] = {
 def _lookup_scope(key: str) -> Optional[str]:
     """Return the scope for ``key`` from the api_keys table, else None.
 
-    DB errors are swallowed so a transient storage failure does not
-    open the API; the legacy mapping still gives the call a chance
-    to resolve.
+    [FR-06] AC-6.1 — the service layer MUST NOT import or hold a
+    SQLAlchemy primitive (NFR-06 layering). DB errors therefore surface
+    as a generic ``Exception``-class instance; we catch broadly so a
+    transient storage failure does not open the API (the legacy
+    mapping still gives the call a chance to resolve).
     """
     try:
         row = APIKeyRepository().lookup_active(key)
-    except SQLAlchemyError:
+    except Exception:
         return None
     if row is None:
         return None

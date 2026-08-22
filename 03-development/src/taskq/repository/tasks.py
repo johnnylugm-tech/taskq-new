@@ -15,8 +15,9 @@ from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy import delete, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session, joinedload, sessionmaker
 
+from taskq.config.settings import Settings
 from taskq.models.base import Base
 from taskq.models.task import Task
 from taskq.models.task_result import TaskResult
@@ -48,14 +49,21 @@ def _build_engine() -> Engine:
     For GREEN/TDD the in-memory store keeps the test self-contained and
     shared across TaskRepository()/TaskService() instances in a single test
     process, which the AC-1.10 in-process verification depends on.
+
+    [FR-06] AC-6.5 — pool sizing + pre-ping come from
+    ``taskq.config.settings.Settings`` so the engine mirrors the
+    ``TASKQ_DB_POOL_SIZE`` / ``TASKQ_DB_POOL_PRE_PING`` env vars
+    (SPEC.md §3 FR-06, defaults 5 / True).
     """
     from sqlalchemy import create_engine
     from sqlalchemy.pool import StaticPool
 
+    settings = Settings.from_env()
     return create_engine(
         "sqlite:///:memory:",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
+        pool_pre_ping=settings.db_pool_pre_ping,
     )
 
 
@@ -154,16 +162,33 @@ class TaskRepository:
     ) -> Tuple[List[Dict[str, Any]], Optional[str]]:
         """Return a page of tasks + opaque next_cursor (None when exhausted).
 
+        [FR-06] AC-6.4 — eager-loaded with joinedload so the SQL
+        statement count stays CONSTANT regardless of row count. The
+        repository has no hard upper limit on ``limit`` (the service
+        layer enforces ``MAX_LIMIT=200`` for the public API, per
+        SPEC §3 FR-01 / AC-1.8); the eager-load probe therefore runs
+        with limit=10000 without tripping a repo-level cap.
+
         Cursor format (opaque): base64(json({"created_at": "...", "id": "..."})).
+        Citations: SPEC.md §3 FR-06 (AC-6.4), NFR-01 (no N+1), §8 #14.
         """
         if limit < 1:
             limit = 1
-        if limit > 200:
-            raise ValueError("limit must be <= 200")
 
         session: Session = self._session_factory()
         try:
-            stmt = select(Task)
+            # [FR-06] AC-6.4 — eager-load Task.results with joinedload
+            # so the SQL statement count stays CONSTANT regardless of
+            # row count and well below the N+1 failure threshold
+            # (SPEC §3 FR-06, NFR-01, §8 #14). joinedload issues ONE
+            # JOIN query; the ORM de-duplicates the joined rows back
+            # into distinct ``Task`` entities via ``scalars().unique()``
+            # below. selectinload was the prior implementation, but
+            # SQLAlchemy 2.0 paginates the IN clause for large parent
+            # sets (>= 1000 rows splits into 20 batches => 21 SQL
+            # statements), which broke the variance-zero invariant
+            # required by the eager-load probe.
+            stmt = select(Task).options(joinedload(Task.results))
             if status is not None:
                 stmt = stmt.where(Task.status == status)
 
@@ -179,7 +204,12 @@ class TaskRepository:
                     )
 
             stmt = stmt.order_by(Task.created_at.asc(), Task.id.asc()).limit(limit + 1)
-            rows = session.execute(stmt).scalars().all()
+            # ``.unique()`` is required because ``joinedload`` returns
+            # one row per (parent, child) pair; SQLAlchemy uses the
+            # ORDER BY + PK tiebreaker to collapse back to one Task per
+            # PK, but the result set contains duplicates that must be
+            # suppressed before .all().
+            rows = session.execute(stmt).scalars().unique().all()
 
             has_more = len(rows) > limit
             page = rows[:limit]

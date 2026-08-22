@@ -8,11 +8,15 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
+from typing import List, TYPE_CHECKING
 
 from sqlalchemy import DateTime, String, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from taskq.models.base import Base
+
+if TYPE_CHECKING:  # pragma: no cover — typing-only import
+    from taskq.models.task_result import TaskResult
 
 
 def _utc_now() -> datetime:
@@ -43,4 +47,17 @@ class Task(Base):
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="queued")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=_utc_now
+    )
+
+    # ---- FR-06 / AC-6.4 — eager-loadable relationship ----
+    # ``selectinload(Task.results)`` / ``joinedload(Task.results)`` on the
+    # list endpoint prevents the N+1 pattern (NFR-01, §8 #14). The
+    # backref exposes ``TaskResult.task`` symmetrically; ORM-only, no
+    # schema impact. Cascade is intentionally NOT set here — the
+    # AC-1.10 cascade test exercises the SQL-level cascade path, not
+    # the ORM-level one (FR-01).
+    results: Mapped[List["TaskResult"]] = relationship(
+        "TaskResult",
+        backref="task",
+        lazy="select",
     )
