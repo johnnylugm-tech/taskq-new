@@ -14,9 +14,8 @@ GREEN TODO summary (declarations per SAB.json fr_module_traceability.FR-01):
 """
 
 import json
-import re
 import uuid
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, List, Optional
 
 import httpx
 import pytest
@@ -31,7 +30,7 @@ from taskq.api.app import create_app  # noqa: E402
 
 # GREEN TODO: taskq.api.schemas must export TaskCreate (with name + command + max 1000 chars
 # validation + injection-blacklist) and TaskRead (id + name + status + created_at + ...).
-from taskq.api.schemas import TaskCreate, TaskRead  # noqa: E402
+from taskq.api.schemas import TaskCreate  # noqa: E402
 
 # GREEN TODO: taskq.service.tasks must expose the business logic the routes will call.
 from taskq.service.tasks import TaskService  # noqa: E402
@@ -499,3 +498,115 @@ def test_fr01_inprocess_delete_admin_calls_cascade_in_one_transaction(monkeypatc
     assert seen["delete_results_calls"] == 1, (
         "result rows must be deleted (cascade) in the same transaction"
     )
+
+
+# ---------- FR-01 coverage-padding tests (Gate 1 test_coverage → 100%) ----------
+#
+# These are NOT new ACs — they exercise branches of FR-01-owned code paths that
+# the HTTP/in-process AC tests above don't reach. Each test names the source
+# lines it covers in a comment so future readers can delete tests surgically
+# if branches become unreachable.
+
+
+def test_fr01_inprocess_list_limit_zero_raises():
+    """TaskService.list_tasks(limit=0) raises ValueError.
+
+    Covers src/taskq/service/tasks.py:50 (limit<1 input guard).
+    NFR-09: real assert (no skip).
+    """
+    service = TaskService()
+    with pytest.raises(ValueError):
+        service.list_tasks(limit=0, cursor=None)
+
+
+def test_fr01_inprocess_repository_list_limit_clamped_and_limit_over_200_raises():
+    """TaskRepository.list guards against limit<1 (clamp) and limit>200 (raise).
+
+    Covers src/taskq/repository/tasks.py:160 (limit<1 clamp),
+    and src/taskq/repository/tasks.py:162 (limit>200 raise) — these are the
+    defense-in-depth checks that the service layer ALSO enforces, so they
+    must be reachable directly to satisfy the 100% line-coverage gate.
+    NFR-09: real asserts (no skip).
+    """
+    repo = TaskRepository()
+    # Create at least one row so the clamp path returns a non-empty page.
+    repo.create(name="clamp-target-a", command=COMMAND_HAPPY)
+    page, _ = repo.list(limit=0, cursor=None, status=None)
+    assert len(page) <= 1, "limit=0 must clamp to 1"
+    with pytest.raises(ValueError):
+        repo.list(limit=201, cursor=None, status=None)
+
+
+def test_fr01_inprocess_list_filter_by_queued_status_returns_only_queued_rows():
+    """TaskService.list_tasks(status='queued') must return rows where status='queued'.
+
+    Covers src/taskq/repository/tasks.py:168 (status WHERE clause). Status
+    defaults to 'queued' at insert time (see taskq.models.task.Task.status);
+    we use a unique name and assert it appears in the filtered set while
+    an unrelated name (created under status='queued' too, but filtered by
+    status='never-existed') is absent — using a non-existent status proves
+    the WHERE clause ran (otherwise the unrelated row would show up).
+    NFR-09: real assert on filtered set (no skip).
+    """
+    service = TaskService()
+    service.create_task(name="status-queued-marker-1", command=COMMAND_HAPPY)
+    out_queued = service.list_tasks(limit=200, cursor=None, status="queued")
+    names_queued = {item.get("name") for item in out_queued.get("items", [])}
+    assert "status-queued-marker-1" in names_queued
+    out_unknown = service.list_tasks(limit=200, cursor=None, status="this-status-does-not-exist")
+    assert len(out_unknown.get("items", [])) == 0
+
+
+def test_fr01_inprocess_list_with_cursor_decodes_token_and_resumes():
+    """list_tasks(cursor=<opaque>) decodes the cursor token and resumes after it.
+
+    Covers src/taskq/repository/tasks.py:172-176 (cursor decoded branch).
+    NFR-09: real assert on cursor pagination contract (no skip).
+    """
+    service = TaskService()
+    # Seed a few rows so a single-page result has has_more=True.
+    for i in range(3):
+        service.create_task(name=f"cursor-pickup-{i}", command=COMMAND_HAPPY)
+    page1 = service.list_tasks(limit=2, cursor=None, status=None)
+    next_cursor = page1.get("next_cursor")
+    assert isinstance(next_cursor, str) and next_cursor, (
+        f"expected an opaque next_cursor, got {page1!r}"
+    )
+    assert len(page1.get("items", [])) == 2
+    # Decode + resume: passing the opaque cursor back must succeed and return
+    # an items list (possibly empty when the store is small). The mere fact
+    # that the call does not raise and that the cursor token survived proves
+    # the decoded branch in repository.list was exercised.
+    page2 = service.list_tasks(limit=10, cursor=next_cursor, status=None)
+    assert "items" in page2
+    page1_ids = {row.get("id") for row in page1.get("items", [])}
+    page2_ids = {row.get("id") for row in page2.get("items", [])}
+    # Decoded cursor resumes strictly AFTER the cursor position, so page2
+    # must not re-return the pinned row from page1.
+    assert page1_ids.isdisjoint(page2_ids) or len(page2_ids) == 0
+
+
+def test_fr01_inprocess_list_has_more_emits_next_cursor_token():
+    """List with limit=1 over ≥2 rows emits a non-empty next_cursor.
+
+    Covers src/taskq/repository/tasks.py:188-189 (next_cursor encode call),
+    which in turn exercises src/taskq/repository/tasks.py:91-92 (_encode_cursor body).
+    NFR-09: real assert on cursor presence + format (no skip).
+    """
+    service = TaskService()
+    service.create_task(name="hasmore-a", command=COMMAND_HAPPY)
+    service.create_task(name="hasmore-b", command=COMMAND_HAPPY)
+    page = service.list_tasks(limit=1, cursor=None, status=None)
+    next_cursor = page.get("next_cursor")
+    assert isinstance(next_cursor, str) and len(next_cursor) > 0
+
+
+def test_fr01_inprocess_taskcreate_blacklist_char_raises_value_error():
+    """TaskCreate rejects command/name with characters in the injection blacklist.
+
+    Covers src/taskq/api/schemas.py:30 (blacklist validator raise).
+    NFR-09: real assert on ValueError raised by the validator (no skip).
+    """
+    with pytest.raises(ValueError):
+        TaskCreate(name="ok-name", command="echo a; rm -rf /")
+

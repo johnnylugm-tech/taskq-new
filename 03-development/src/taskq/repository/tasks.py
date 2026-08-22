@@ -211,7 +211,10 @@ class TaskRepository:
                 delete(TaskResult).where(TaskResult.task_id == task_id)
             )
             session.commit()
-            return int(result.rowcount or 0)
+            # ``rowcount`` is an attribute of the underlying ``CursorResult``;
+            # use ``getattr`` to keep type-checkers happy without compromising
+            # the runtime value (``delete`` statements always populate it).
+            return int(getattr(result, "rowcount", 0) or 0)
         finally:
             session.close()
 
