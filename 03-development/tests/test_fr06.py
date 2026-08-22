@@ -116,6 +116,7 @@ def _isolate_db():
 
 
 # ---------- AC-6.1: service layer MUST NOT import sqlalchemy directly ----------
+# NFR-06 — Architecture layer contract (sqlalchemy forbidden outside repository / models)
 
 def test_fr06_ac1_repository_only_data_access():
     """AC-6.1 — All data access goes through the repository layer; the
@@ -226,6 +227,7 @@ def test_fr06_ac1_repository_only_data_access():
 
 
 # ---------- AC-6.2: one Session per request, ctx mgr commit/rollback ----------
+# NFR-03 — Error handling + txn (per-request context manager commit/rollback)
 
 def test_fr06_ac2_one_session_per_request_context_manager():
     """AC-6.2 — Each API request gets EXACTLY one ``Session``; the
@@ -353,6 +355,7 @@ def test_fr06_ac2_one_session_per_request_context_manager():
 
 
 # ---------- AC-6.3: grep gate for string-concatenated SQL in src/ ----------
+# NFR-02 — HTTP + data-layer security (no SQL string concatenation)
 
 def test_fr06_ac3_no_string_concat_sql_grep_gate():
     """AC-6.3 — No string-concatenated SQL appears in ``src/``; a grep
@@ -460,6 +463,7 @@ def test_fr06_ac3_no_string_concat_sql_grep_gate():
 
 
 # ---------- AC-6.4: eager-load, SQL count constant ≤ 4 across row counts ----------
+# NFR-01 — Performance + query efficiency (no N+1)
 
 def test_fr06_ac4_eager_load_sql_count_constant_le_4():
     """AC-6.4 — Relationship loads use ``selectinload`` / ``joinedload``
@@ -615,6 +619,8 @@ def test_fr06_ac4_eager_load_sql_count_constant_le_4():
 
 
 # ---------- AC-6.5: connection pool pool_size + pool_pre_ping ----------
+# NFR-09 — Verification honesty (real assert on configured pool values)
+# NFR-03 — Error handling + txn (engine handles failures correctly via pool_pre_ping)
 
 def test_fr06_ac5_pool_size_and_pre_ping():
     """AC-6.5 — The connection pool uses ``pool_size=TASKQ_DB_POOL_SIZE``
