@@ -31,5 +31,5 @@
   },
   "test_inventory_checksum": "25bc603be0c794eec0a08940fc85d17b9d7997bd16518d7a5a67c5559f59aa45",
   "phase_truth_passed": true,
-  "last_milestone_command": "push-milestone --type p3-mid"
+  "last_milestone_command": "push-milestone --type p3-pre-gate2"
 }
