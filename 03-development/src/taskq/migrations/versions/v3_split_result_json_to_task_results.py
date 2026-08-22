@@ -62,10 +62,12 @@ NFR-09 (real SQLite file); NFR-12 (verify-system: PASS).
 from __future__ import annotations
 
 import json
-from typing import Sequence, Union
+from typing import Any, Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.engine import Connection
+from sqlalchemy.engine.row import Row
 
 revision: str = "v3"
 down_revision: Union[str, None] = "v2_head_marker"
@@ -122,7 +124,7 @@ def upgrade() -> None:
     op.drop_column("tasks", "result_json")
 
 
-def _serialize_task_result_to_json(row: "object") -> str:
+def _serialize_task_result_to_json(row: Row) -> str:
     """Build the JSON envelope that round-trips through ``tasks.result_json``.
 
     Each key mirrors the ``json_extract`` paths v3's upgrade reads
@@ -142,7 +144,7 @@ def _serialize_task_result_to_json(row: "object") -> str:
     )
 
 
-def _task_row_exists(bind: "object", task_id: str) -> bool:
+def _task_row_exists(bind: Connection, task_id: str) -> bool:
     """Return True iff a ``tasks`` row with the given id is present."""
     return (
         bind.execute(
@@ -154,7 +156,7 @@ def _task_row_exists(bind: "object", task_id: str) -> bool:
 
 
 def _update_task_result_json(
-    bind: "object", task_id: str, payload: str
+    bind: Connection, task_id: str, payload: str
 ) -> None:
     """Overwrite an existing tasks row's ``result_json`` with the JSON envelope."""
     bind.execute(
@@ -164,7 +166,7 @@ def _update_task_result_json(
 
 
 def _back_create_task_row(
-    bind: "object", task_id: str, command: "object", payload: str
+    bind: Connection, task_id: str, command: Any, payload: str
 ) -> None:
     """INSERT a minimal tasks row so the next ``upgrade head`` finds
     the JSON envelope in place.
@@ -214,7 +216,7 @@ def downgrade() -> None:
     #    UPDATE the existing tasks row when one is present; otherwise
     #    back-create a placeholder row (AC-7.5 round-trip test seeds
     #    only task_results, so this branch is the common case).
-    rows = bind.execute(
+    rows: Sequence[Row] = bind.execute(
         sa.text(
             "SELECT id, task_id, command, exit_code, stdout_tail "
             "FROM task_results"
