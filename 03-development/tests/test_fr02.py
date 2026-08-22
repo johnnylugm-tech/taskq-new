@@ -219,8 +219,8 @@ def test_fr02_ac2_subprocess_exec_no_shell_true():
     # NFR-02: forbidden pattern; covered by grep-zero-hits assertion.
     # Sub-assertion AC2.2-pattern-shell-true: the literal pattern we forbid.
     grep_pattern = "shell=True"
-    # Inputs declare src_path="src"; we resolve relative to 03-development/.
-    src_root = _THIS_DIR / "src"
+    # Inputs declare src_path="src"; resolve relative to 03-development/ (parent of tests/).
+    src_root = _THIS_DIR.parent / "src"
     assert src_root.is_dir(), f"expected src root at {src_root}, not found"
 
     hits: List[str] = []
@@ -325,7 +325,9 @@ def test_fr02_ac3_state_machine_timeout():
     # (test_fr02_ac3_state_machine_done / _failed) already cover the in-process
     # branches via TaskRunner.
     env = os.environ.copy()
-    src_root = _SRC_DIR
+    # Resolve the actual src root (parent of tests/, not the tests/src alias
+    # the bootstrap inserted into sys.path).
+    src_root = _THIS_DIR.parent / "src"
     env["PYTHONPATH"] = str(src_root) + os.pathsep + env.get("PYTHONPATH", "")
     env["TASKQ_TASK_TIMEOUT"] = str(timeout_seconds)
 
