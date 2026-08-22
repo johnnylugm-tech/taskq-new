@@ -732,6 +732,28 @@ def test_fr08_hard_kill_process_already_dead():
     _drive_async(_scenario())  # no exception should propagate
 
 
+def test_fr08_hard_kill_process_wait_raises():
+    """_hard_kill_process: ``await proc.wait()`` raises Exception
+    (lines 128-129).
+
+    The cleanup handler swallows any Exception raised by ``proc.wait()``
+    so the hard-kill contract remains best-effort even if the OS handle
+    has been corrupted or the asyncio transport fails during reap.
+    """
+    class _FakeProc:
+        def kill(self):
+            pass
+
+        async def wait(self):
+            raise RuntimeError("mocked wait failure")
+
+    async def _scenario():
+        # Should NOT propagate the RuntimeError — handler swallows it.
+        await _hard_kill_process(_FakeProc())
+
+    _drive_async(_scenario())  # no exception should propagate
+
+
 def test_fr08_cancel_and_seed_interrupted_with_queued():
     """_cancel_and_seed_interrupted: FIFO + cancel + gather paths (lines 490-491, 494-495, 504)."""
     executor = AsyncExecutor(max_concurrent=2, drain_timeout=0.3, task_timeout=10.0)
