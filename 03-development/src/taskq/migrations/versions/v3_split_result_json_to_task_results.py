@@ -122,6 +122,75 @@ def upgrade() -> None:
     op.drop_column("tasks", "result_json")
 
 
+def _serialize_task_result_to_json(row: "object") -> str:
+    """Build the JSON envelope that round-trips through ``tasks.result_json``.
+
+    Each key mirrors the ``json_extract`` paths v3's upgrade reads
+    back out of ``tasks.result_json``; the byte-identical round-trip
+    (AC-7.5) requires every column on the source ``task_results``
+    row to survive the downgrade-then-upgrade cycle.
+    """
+    return json.dumps(
+        {
+            "id": row.id,
+            "task_id": row.task_id,
+            "command": row.command,
+            "exit_code": row.exit_code,
+            "stdout_tail": row.stdout_tail,
+        },
+        ensure_ascii=False,
+    )
+
+
+def _task_row_exists(bind: "object", task_id: str) -> bool:
+    """Return True iff a ``tasks`` row with the given id is present."""
+    return (
+        bind.execute(
+            sa.text("SELECT 1 FROM tasks WHERE id = :tid"),
+            {"tid": task_id},
+        ).fetchone()
+        is not None
+    )
+
+
+def _update_task_result_json(
+    bind: "object", task_id: str, payload: str
+) -> None:
+    """Overwrite an existing tasks row's ``result_json`` with the JSON envelope."""
+    bind.execute(
+        sa.text("UPDATE tasks SET result_json = :rj WHERE id = :tid"),
+        {"rj": payload, "tid": task_id},
+    )
+
+
+def _back_create_task_row(
+    bind: "object", task_id: str, command: "object", payload: str
+) -> None:
+    """INSERT a minimal tasks row so the next ``upgrade head`` finds
+    the JSON envelope in place.
+
+    The AC-7.5 round-trip test seeds only ``task_results`` (not
+    ``tasks``), so the downgrade must back-create a placeholder
+    tasks row keyed by ``task_results.task_id`` to keep the cycle
+    reversible.
+    """
+    bind.execute(
+        sa.text(
+            "INSERT INTO tasks "
+            "(id, name, command, status, created_at, result_json) "
+            "VALUES (:id, :name, :command, :status, :created_at, :rj)"
+        ),
+        {
+            "id": task_id,
+            "name": str(task_id),
+            "command": str(command) if command is not None else "",
+            "status": "migrated",
+            "created_at": None,
+            "rj": payload,
+        },
+    )
+
+
 def downgrade() -> None:
     """Reverse the split — re-add ``tasks.result_json``, back-fill it
     from every ``task_results`` row, drop ``task_results``.
@@ -141,60 +210,22 @@ def downgrade() -> None:
         sa.Column("result_json", sa.Text(), nullable=True),
     )
 
-    # 2. Read every task_results row and write the JSON envelope back
-    #    into tasks (UPDATE if the task row exists, INSERT a
-    #    placeholder otherwise — the AC-7.5 round-trip test seeds
-    #    only task_results, so we must back-create tasks rows to
-    #    keep the cycle reversible).
+    # 2. Back-fill tasks.result_json from every task_results row.
+    #    UPDATE the existing tasks row when one is present; otherwise
+    #    back-create a placeholder row (AC-7.5 round-trip test seeds
+    #    only task_results, so this branch is the common case).
     rows = bind.execute(
         sa.text(
             "SELECT id, task_id, command, exit_code, stdout_tail "
             "FROM task_results"
         )
     ).fetchall()
-
-    for r in rows:
-        payload = json.dumps(
-            {
-                "id": r.id,
-                "task_id": r.task_id,
-                "command": r.command,
-                "exit_code": r.exit_code,
-                "stdout_tail": r.stdout_tail,
-            },
-            ensure_ascii=False,
-        )
-        existing = bind.execute(
-            sa.text("SELECT 1 FROM tasks WHERE id = :tid"),
-            {"tid": r.task_id},
-        ).fetchone()
-        if existing is not None:
-            bind.execute(
-                sa.text(
-                    "UPDATE tasks SET result_json = :rj WHERE id = :tid"
-                ),
-                {"rj": payload, "tid": r.task_id},
-            )
+    for row in rows:
+        payload = _serialize_task_result_to_json(row)
+        if _task_row_exists(bind, row.task_id):
+            _update_task_result_json(bind, row.task_id, payload)
         else:
-            # Back-create a minimal tasks row so the next round of
-            # ``upgrade head`` finds the JSON envelope in place.
-            bind.execute(
-                sa.text(
-                    "INSERT INTO tasks "
-                    "(id, name, command, status, created_at, result_json) "
-                    "VALUES (:id, :name, :command, :status, :created_at, :rj)"
-                ),
-                {
-                    "id": r.task_id,
-                    "name": str(r.task_id),
-                    "command": (
-                        str(r.command) if r.command is not None else ""
-                    ),
-                    "status": "migrated",
-                    "created_at": None,
-                    "rj": payload,
-                },
-            )
+            _back_create_task_row(bind, row.task_id, row.command, payload)
 
     # 3. Drop task_results.
     op.drop_table("task_results")
