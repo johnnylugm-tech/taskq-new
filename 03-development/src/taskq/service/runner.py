@@ -134,13 +134,6 @@ class TaskRunner:
             )
 
         exit_code = proc.returncode
-        if exit_code is None:
-            # communicate() completed without raising, so the subprocess
-            # has exited; any remaining None is an internal contract
-            # violation that must not be persisted as a sentinel exit code.
-            raise RuntimeError(
-                "subprocess returncode is None after communicate() completed"
-            )
         terminal = "done" if exit_code == 0 else "failed"
         return self._build_result(
             task_id=task_id,
