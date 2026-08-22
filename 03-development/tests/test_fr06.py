@@ -1154,3 +1154,105 @@ def test_coverage_session_scope_helper():
         with _session_scope(factory) as session:
             assert session is not None
             raise _Sentinel("forced exit")
+
+
+# ---------- Coverage tests for FR-06 source modules ----------
+#
+# The TEST_SPEC.md-named tests above (ac1..ac5) cover the FR-06 contract.
+# The tests below target specific source lines in
+# ``taskq.config.settings`` (and adjacent modules) so per-FR coverage
+# reaches 100% on the modules in fr_module_traceability.FR-06 without
+# invoking the pragma:no-cover escape hatch on reachable code.
+
+
+def test_coverage_settings_env_bool_and_int_paths():
+    """Cover ``taskq.config.settings._env_bool`` + ``_env_int`` every branch.
+
+    AC-6.5 contract: ``TASKQ_DB_POOL_SIZE`` and ``TASKQ_DB_POOL_PRE_PING``
+    env vars drive the engine factory. The ``_env_bool`` helper
+    recognises "1"/"true"/"yes"/"on" (case-insensitive) and the
+    ``_env_int`` helper falls back to the default on invalid input.
+    """
+    import os
+
+    from taskq.config.settings import Settings, _env_bool, _env_int
+
+    saved_pool_size = os.environ.pop("TASKQ_DB_POOL_SIZE", None)
+    saved_pool_pre = os.environ.pop("TASKQ_DB_POOL_PRE_PING", None)
+    try:
+        # _env_bool: unset -> default
+        os.environ.pop("TASKQ_DB_POOL_PRE_PING", None)
+        assert _env_bool("TASKQ_DB_POOL_PRE_PING", True) is True
+        assert _env_bool("TASKQ_DB_POOL_PRE_PING", False) is False
+
+        # _env_bool: explicit truthy / falsy forms
+        for truthy in ("1", "true", "TRUE", "True", "yes", "YES", "on", "ON"):
+            os.environ["TASKQ_DB_POOL_PRE_PING"] = truthy
+            assert _env_bool("TASKQ_DB_POOL_PRE_PING", False) is True, (
+                f"_env_bool must treat {truthy!r} as True"
+            )
+        for falsy in ("0", "false", "no", "off", ""):
+            os.environ["TASKQ_DB_POOL_PRE_PING"] = falsy
+            assert _env_bool("TASKQ_DB_POOL_PRE_PING", True) is False, (
+                f"_env_bool must treat {falsy!r} as False"
+            )
+
+        # _env_int: unset -> default
+        os.environ.pop("TASKQ_DB_POOL_SIZE", None)
+        assert _env_int("TASKQ_DB_POOL_SIZE", 5) == 5
+
+        # _env_int: set -> parsed
+        os.environ["TASKQ_DB_POOL_SIZE"] = "13"
+        assert _env_int("TASKQ_DB_POOL_SIZE", 5) == 13
+
+        # _env_int: invalid -> default (ValueError branch)
+        os.environ["TASKQ_DB_POOL_SIZE"] = "not-a-number"
+        assert _env_int("TASKQ_DB_POOL_SIZE", 7) == 7
+
+        # Settings.from_env() honours both helpers.
+        os.environ["TASKQ_DB_POOL_SIZE"] = "9"
+        os.environ["TASKQ_DB_POOL_PRE_PING"] = "false"
+        s = Settings.from_env()
+        assert s.db_pool_size == 9
+        assert s.db_pool_pre_ping is False
+    finally:
+        if saved_pool_size is None:
+            os.environ.pop("TASKQ_DB_POOL_SIZE", None)
+        else:
+            os.environ["TASKQ_DB_POOL_SIZE"] = saved_pool_size
+        if saved_pool_pre is None:
+            os.environ.pop("TASKQ_DB_POOL_PRE_PING", None)
+        else:
+            os.environ["TASKQ_DB_POOL_PRE_PING"] = saved_pool_pre
+
+
+def test_coverage_settings_default_values_are_documented():
+    """Cover the dataclass default-field branch.
+
+    The dataclass stores default values for ``db_pool_size`` and
+    ``db_pool_pre_ping``. A bare ``Settings()`` instantiation exercises
+    the ``default=5`` and ``default=True`` factory paths.
+    """
+    from taskq.config.settings import Settings
+
+    s = Settings()
+    assert s.db_pool_size == 5
+    assert s.db_pool_pre_ping is True
+
+    # And ``Settings.from_env`` with no env vars returns the defaults
+    # too — the helpers' "unset" branch is the same as the dataclass
+    # defaults, but pinning it down catches a future refactor that
+    # drifts one without the other.
+    import os
+
+    saved_size = os.environ.pop("TASKQ_DB_POOL_SIZE", None)
+    saved_pre = os.environ.pop("TASKQ_DB_POOL_PRE_PING", None)
+    try:
+        from_env = Settings.from_env()
+        assert from_env.db_pool_size == 5
+        assert from_env.db_pool_pre_ping is True
+    finally:
+        if saved_size is not None:
+            os.environ["TASKQ_DB_POOL_SIZE"] = saved_size
+        if saved_pre is not None:
+            os.environ["TASKQ_DB_POOL_PRE_PING"] = saved_pre
