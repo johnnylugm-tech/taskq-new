@@ -25,18 +25,16 @@ swallow it); SAD.md §4 api/handlers.
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from taskq.api.middleware import CORRELATION_HEADER
-from taskq.api.problem import Problem
+from taskq.api.problem import CONTENT_TYPE, Problem
 
 logger = logging.getLogger("taskq.api.handlers")
-
-CONTENT_TYPE = "application/problem+json"
 
 
 def _enrich_problem(request: Request, exc: Problem) -> Problem:
@@ -62,14 +60,16 @@ def _enrich_problem(request: Request, exc: Problem) -> Problem:
 
 def _problem_response(request: Request, problem: Problem) -> JSONResponse:
     enriched = _enrich_problem(request, problem)
-    headers: Optional[Dict[str, str]] = None
-    if enriched.correlation_id:
-        # AC-10.4 — mirror the correlation id on the response header so
-        # the operator can stitch client + server timelines even when
-        # the final response is synthesised by Starlette's
-        # ``ServerErrorMiddleware`` after an unhandled exception
-        # bubbles past ``ExceptionMiddleware`` (NFR-09).
-        headers = {CORRELATION_HEADER: enriched.correlation_id}
+    # AC-10.4 — mirror the correlation id on the response header so
+    # the operator can stitch client + server timelines even when
+    # the final response is synthesised by Starlette's
+    # ``ServerErrorMiddleware`` after an unhandled exception
+    # bubbles past ``ExceptionMiddleware`` (NFR-09).
+    headers = (
+        {CORRELATION_HEADER: enriched.correlation_id}
+        if enriched.correlation_id
+        else None
+    )
     return JSONResponse(
         status_code=enriched.status,
         content=enriched.to_dict(),

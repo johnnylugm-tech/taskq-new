@@ -36,14 +36,14 @@ from __future__ import annotations
 import logging
 import math
 import uuid
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from starlette.responses import JSONResponse, Response
+from starlette.responses import JSONResponse
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-from taskq.api.problem import Problem
+from taskq.api.problem import CONTENT_TYPE, Problem
 from taskq.service.rate_limit import (
     RateLimitConfig,
     TokenBucket,
@@ -59,8 +59,6 @@ CORRELATION_HEADER = "X-Correlation-Id"
 # api_keys table or an exhausted per-token bucket cannot take liveness
 # / readiness probes down (SPEC.md §3 FR-09).
 EXEMPT_PATHS = ("/healthz", "/readyz")
-
-PROBLEM_CONTENT_TYPE = "application/problem+json"
 
 logger = logging.getLogger("taskq.api.correlation")
 
@@ -216,14 +214,17 @@ def _problem_response(
         instance=instance,
         correlation_id=correlation_id,
     )
-    headers: Optional[Dict[str, str]] = None
-    if retry_after is not None:
-        headers = {"Retry-After": str(int(retry_after))}
+    # Retry-After is integer seconds per RFC 9110 §10.2.3 (SPEC §3 FR-05).
+    headers = (
+        {"Retry-After": str(int(retry_after))}
+        if retry_after is not None
+        else None
+    )
     return JSONResponse(
         status_code=status,
         content=problem.to_dict(),
         headers=headers,
-        media_type=PROBLEM_CONTENT_TYPE,
+        media_type=CONTENT_TYPE,
     )
 
 

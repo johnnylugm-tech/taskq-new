@@ -23,6 +23,17 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
+# RFC 7807 §3 reserves ``application/problem+json`` as the canonical
+# media type for problem documents. Both the exception-handler layer
+# and the rate-limit middleware build JSONResponses with this type;
+# the constant lives here (next to ``Problem``) so there is exactly
+# one place to change it if the spec evolves.
+CONTENT_TYPE = "application/problem+json"
+
+# Optional body fields. Empty strings / None mean "omit the field"
+# so the contract surface stays a clean whitelist (NFR-02).
+_OPTIONAL_BODY_FIELDS = ("detail", "instance", "correlation_id")
+
 
 class Problem(Exception):
     """RFC 7807 problem document raised from anywhere in the api stack.
@@ -57,21 +68,22 @@ class Problem(Exception):
         super().__init__(f"{status} {title}: {detail}")
 
     def to_dict(self) -> Dict[str, Any]:
+        """Serialise to the FR-10 / RFC 7807 body shape."""
         out: Dict[str, Any] = {
             "type": self.type,
             "title": self.title,
             "status": self.status,
+            "detail": self.detail,
+            "instance": self.instance,
+            "correlation_id": self.correlation_id,
         }
-        if self.detail:
-            out["detail"] = self.detail
-        if self.instance:
-            out["instance"] = self.instance
-        if self.correlation_id:
-            out["correlation_id"] = self.correlation_id
-        for key, value in self.extra.items():
-            if key not in out:
-                out[key] = value
-        return out
+        # Drop empty optional fields; merge ``extra`` last so the
+        # canonical whitelist cannot be silently overridden.
+        return {
+            key: value
+            for key, value in out.items()
+            if value or key not in _OPTIONAL_BODY_FIELDS
+        } | {key: value for key, value in self.extra.items() if key not in out}
 
 
-__all__ = ["Problem"]
+__all__ = ["Problem", "CONTENT_TYPE"]
