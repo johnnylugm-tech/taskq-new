@@ -359,6 +359,9 @@
       "taskq.api.handlers",
       "taskq.api.middleware",
       "taskq.api.schemas"
+    ],
+    "FR-99": [
+      "taskq.framework_paths"
     ]
   },
   "architecture_constraints": [
