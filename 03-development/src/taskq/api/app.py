@@ -33,6 +33,8 @@ api/app.
 """
 from __future__ import annotations
 
+from typing import Callable, List, Tuple
+
 from fastapi import FastAPI
 
 from taskq.api.handlers import register_exception_handlers
@@ -42,6 +44,22 @@ from taskq.api.routes.tasks import (
     delete_task,
     get_task,
     list_tasks,
+)
+
+
+# (path, http_methods, success_status_code, handler). Registered
+# directly via ``app.add_api_route`` (NOT ``include_router``) so the
+# routes surface in ``app.routes`` as ``APIRoute`` entries; the
+# FR-04 AC-4.3 audit walks ``app.routes`` for paths starting with
+# ``/v1/`` — see module docstring for the FastAPI 0.141 routing
+# wrapper rationale.
+_V1_ROUTES: Tuple[Tuple[str, List[str], int, Callable], ...] = (
+    ("/v1/tasks",                ["POST"],   201, create_task),
+    ("/v1/tasks/{task_id}",      ["GET"],    200, get_task),
+    ("/v1/tasks",                ["GET"],    200, list_tasks),
+    ("/v1/tasks/{task_id}",      ["DELETE"], 200, delete_task),
+    ("/v1/tasks/{task_id}/run",  ["POST"],   202, trigger_run),
+    ("/v1/tasks/{task_id}/runs", ["GET"],    200, list_runs),
 )
 
 
@@ -57,48 +75,14 @@ def create_app() -> FastAPI:
     )
     register_exception_handlers(app)
 
-    # ---- FR-01 + FR-04: register /v1 handlers directly on the app ----
-    # Direct registration (not via ``include_router``) so the routes
-    # surface in ``app.routes`` as ``APIRoute`` entries with their
-    # full paths; the AC-4.3 audit walks ``app.routes`` looking for
-    # paths starting with ``/v1/``. See module docstring for the
-    # FastAPI 0.141 routing-wrapper rationale.
-    app.add_api_route(
-        "/v1/tasks",
-        create_task,
-        methods=["POST"],
-        status_code=201,
-        dependencies=[],
-    )
-    app.add_api_route(
-        "/v1/tasks/{task_id}",
-        get_task,
-        methods=["GET"],
-    )
-    app.add_api_route(
-        "/v1/tasks",
-        list_tasks,
-        methods=["GET"],
-    )
-    app.add_api_route(
-        "/v1/tasks/{task_id}",
-        delete_task,
-        methods=["DELETE"],
-        status_code=200,
-    )
-
-    # ---- FR-02 + FR-04: register /v1 run handlers directly on app ----
-    app.add_api_route(
-        "/v1/tasks/{task_id}/run",
-        trigger_run,
-        methods=["POST"],
-        status_code=202,
-    )
-    app.add_api_route(
-        "/v1/tasks/{task_id}/runs",
-        list_runs,
-        methods=["GET"],
-    )
+    # ---- FR-01 / FR-02 / FR-04: register /v1 handlers ----
+    for path, methods, status_code, handler in _V1_ROUTES:
+        app.add_api_route(
+            path,
+            handler,
+            methods=methods,
+            status_code=status_code,
+        )
 
     # ---- FR-03 AC-3.6 / FR-09: unauthenticated health endpoints ----
     # Mounted directly on the app (no router prefix, no auth dependency)
