@@ -6,22 +6,32 @@ v3-schema columns (``exit_code`` / ``stdout_tail`` / ``stderr_tail`` /
 layer (NFR-06) — service / route callers see only plain dicts or domain
 exceptions.
 
-Two write paths share this repository:
+Write paths:
 
-  * ``record_result`` — single-insert with the 5 columns populated. Used
-    by the AC-2.4 in-process test and as a fire-and-forget persistence
-    option for the runner.
-  * ``create_pending_result`` + ``update_result`` — POST ``/v1/tasks/{id}/run``
-    inserts a pending row at trigger time (so the GET endpoint can list
-    runs newest-first by ``created_at`` even before the subprocess
-    completes), and the background runner UPDATEs the same row on exit.
+  * ``record_result``            — single-insert with the 5 columns
+                                   populated (used by the AC-2.4 in-process
+                                   test and as a fire-and-forget option).
+  * ``create_pending_result``    — inserts a ``pending`` row at run-trigger
+                                   time so ``GET /v1/tasks/{id}/runs`` can
+                                   list runs newest-first by ``created_at``
+                                   even before the subprocess completes.
+  * ``update_result``            — UPDATEs the same row on subprocess exit;
+                                   the terminal status (``done`` / ``failed``
+                                   / ``timeout``) is supplied by the caller
+                                   because the runner is the authoritative
+                                   source of the state-machine transition.
+
+The terminal status is NOT derived from ``exit_code`` here: the runner
+emits ``"timeout"`` with exit_code ``-1`` as a sentinel, and collapsing
+that to ``"failed"`` would silently drop the AC-2.3 timeout state.
 
 Citations: SPEC.md §3 FR-02, §5.2; SAD.md §4 repository/results; NFR-06.
 """
 from __future__ import annotations
 
+from contextlib import contextmanager
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterator, List, Optional
 
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
@@ -53,11 +63,20 @@ def _parse_finished_at(value: Any) -> datetime:
     raise ValueError(f"unsupported finished_at value: {value!r}")
 
 
-def _terminal_status(exit_code: Optional[int]) -> str:
-    """Map a process exit code to a row-level ``status`` string."""
-    if exit_code == 0:
-        return "done"
-    return "failed"
+@contextmanager
+def _session_scope(session_factory: Any) -> Iterator[Session]:
+    """Yield a session, committing on success and always closing on exit.
+
+    The repository never holds onto a session across calls — each method
+    opens one, commits, refreshes if needed, and closes. This context
+    manager ensures the close path runs even when the caller raises.
+    """
+    session: Session = session_factory()
+    try:
+        yield session
+        session.commit()
+    finally:
+        session.close()
 
 
 # ---------------------------------------------------------------------------
@@ -87,6 +106,7 @@ class TaskResultRepository:
         stderr_tail: str,
         duration_ms: int,
         finished_at: Any,
+        status: str = "done",
     ) -> Dict[str, Any]:
         """Insert a row populated with the v3-schema 5 columns.
 
@@ -99,21 +119,20 @@ class TaskResultRepository:
         row = TaskResult(
             task_id=task_id,
             command=command,
-            status=_terminal_status(exit_code),
+            status=status,
             exit_code=exit_code,
             stdout_tail=stdout_tail or "",
             stderr_tail=stderr_tail or "",
             duration_ms=duration_ms,
             finished_at=finished_dt,
         )
-        session: Session = self._session_factory()
-        try:
+        with _session_scope(self._session_factory) as session:
             session.add(row)
-            session.commit()
-            session.refresh(row)
+            # Flush so the Python-side ``created_at`` default fires and
+            # is reflected on the in-memory instance before we serialise.
+            # The outer context manager commits on exit.
+            session.flush()
             return self._to_dict(row)
-        finally:
-            session.close()
 
     def create_pending_result(
         self,
@@ -134,13 +153,12 @@ class TaskResultRepository:
             command=command,
             status="pending",
         )
-        session: Session = self._session_factory()
-        try:
+        with _session_scope(self._session_factory) as session:
             session.add(row)
-            session.commit()
+            # Flush so the Python-side ``created_at`` default fires and
+            # is reflected on the in-memory instance before we serialise.
+            session.flush()
             return self._to_dict(row)
-        finally:
-            session.close()
 
     def update_result(
         self,
@@ -150,15 +168,16 @@ class TaskResultRepository:
         stderr_tail: str,
         duration_ms: Optional[int],
         finished_at: Any,
+        status: str,
     ) -> Dict[str, Any]:
         """Update the pending row (created by ``create_pending_result``) with the outcome.
 
-        Used by the route's background task: the subprocess finished, the
-        captured tail / exit code / duration are now known.
+        ``status`` is supplied by the runner (``"done"`` / ``"failed"`` /
+        ``"timeout"``) — the repository never derives it from
+        ``exit_code`` so the AC-2.3 ``timeout`` state is preserved.
         """
         finished_dt = _parse_finished_at(finished_at)
-        session: Session = self._session_factory()
-        try:
+        with _session_scope(self._session_factory) as session:
             session.execute(
                 update(TaskResult)
                 .where(TaskResult.id == run_id)
@@ -168,16 +187,13 @@ class TaskResultRepository:
                     stderr_tail=stderr_tail or "",
                     duration_ms=duration_ms,
                     finished_at=finished_dt,
-                    status=_terminal_status(exit_code),
+                    status=status,
                 )
             )
-            session.commit()
             row = session.get(TaskResult, run_id)
             if row is None:
                 raise ValueError(f"task_result row not found: {run_id}")
             return self._to_dict(row)
-        finally:
-            session.close()
 
     # ---- reads ----
 
@@ -188,8 +204,7 @@ class TaskResultRepository:
         run-trigger time (POST ``/run``), so insertion order is preserved
         even when subprocesses complete out of order.
         """
-        session: Session = self._session_factory()
-        try:
+        with _session_scope(self._session_factory) as session:
             rows = (
                 session.execute(
                     select(TaskResult)
@@ -200,8 +215,6 @@ class TaskResultRepository:
                 .all()
             )
             return [self._to_dict(r) for r in rows]
-        finally:
-            session.close()
 
     # ---- helpers ----
 

@@ -135,7 +135,13 @@ def trigger_run(
     )
 
     def _run_and_persist() -> None:
-        """Background-thread body: execute + persist outcome to the same row."""
+        """Background-thread body: execute + persist outcome to the same row.
+
+        The runner's ``terminal`` string (``done`` / ``failed`` / ``timeout``)
+        is forwarded as the persisted ``status`` so AC-2.3's ``timeout``
+        terminal state is preserved in ``task_results`` instead of being
+        collapsed to ``failed`` by an exit-code heuristic.
+        """
         result = TaskRunner().run(task_id=task_id, command=command)
         results_repo.update_result(
             run_id=run_id,
@@ -144,6 +150,7 @@ def trigger_run(
             stderr_tail=result["stderr_tail"],
             duration_ms=result["duration_ms"],
             finished_at=result["finished_at"],
+            status=result["terminal"],
         )
 
     background_tasks.add_task(_run_and_persist)
