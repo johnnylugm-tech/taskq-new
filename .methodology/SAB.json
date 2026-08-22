@@ -93,7 +93,8 @@
         {
           "name": "taskq.repository.rate_buckets"
         },
-        "taskq.repository"
+        "taskq.repository",
+        "taskq.repository.metrics"
       ],
       "allowed_dependencies": [
         "models",
