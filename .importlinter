@@ -1,0 +1,18 @@
+[importlinter]
+root_package = taskq
+
+[importlinter:contract:fr01-layers]
+type = layers
+name = fr01-layers
+layers =
+    taskq.api.routes
+    taskq.api.schemas
+    taskq.service
+    taskq.repository
+
+[importlinter:contract:fr01-config-errors-independence]
+type = independence
+name = fr01-config-errors-independence
+modules =
+    taskq.api
+    taskq.errors
