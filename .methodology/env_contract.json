@@ -1,0 +1,55 @@
+{
+  "classified_at": "2026-08-22T07:48:44Z",
+  "cli_tools": [
+    "alembic",
+    "bandit",
+    "fastapi",
+    "httpx",
+    "importlinter",
+    "lint-imports",
+    "mutmut",
+    "pip",
+    "pip-licenses",
+    "piplicenses",
+    "pydantic",
+    "pytest",
+    "pytest_benchmark",
+    "pytest_cov",
+    "python3.11",
+    "sqlalchemy",
+    "uvicorn"
+  ],
+  "enforcer_sha": "1e9128422be41299ec6c250fe23d2cbf60ecb229",
+  "env_vars": {
+    "dev_opt_in": [],
+    "has_default": [
+      "TASKQ_CORS_ORIGINS",
+      "TASKQ_DB_POOL_SIZE",
+      "TASKQ_DB_URL",
+      "TASKQ_DRAIN_TIMEOUT",
+      "TASKQ_HOST",
+      "TASKQ_LOG_FORMAT",
+      "TASKQ_LOG_LEVEL",
+      "TASKQ_MAX_CONCURRENT",
+      "TASKQ_PORT",
+      "TASKQ_RATE_BURST",
+      "TASKQ_RATE_PER_SEC",
+      "TASKQ_TASK_TIMEOUT"
+    ],
+    "mandatory": []
+  },
+  "infra_services": {
+    "docker_compose_services": [],
+    "required": [
+      {
+        "checked_via": "python -c 'import sqlite3; print(sqlite3.sqlite_version)' → 3.50.4; temp-file write succeeded (default DB_URL = sqlite:///./taskq.db per SPEC §5.1)",
+        "fix": "SQLite is part of CPython 3.11 stdlib; nothing to install. To use PostgreSQL in production set TASKQ_DB_URL=postgresql://... (out of scope for dev/test verification per SPEC §2.1).",
+        "name": "sqlite",
+        "reachable": true,
+        "type": "SQLite 3 (file-based, stdlib)"
+      }
+    ]
+  },
+  "schema_version": 1,
+  "source_sha256": "b2f9ba0bd6df5b5dc792d8951785599731c395f23c19bfa9df12bb3e23282dc6"
+}

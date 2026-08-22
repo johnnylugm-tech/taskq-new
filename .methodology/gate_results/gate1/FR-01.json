@@ -1,0 +1,95 @@
+{
+  "gate": 1,
+  "phase": 3,
+  "fr_id": "FR-01",
+  "overall_score": 100.0,
+  "quality_complete": true,
+  "rounds_used": 1,
+  "breakdown": {
+    "linting": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "All checks passed! (ruff exit 0, 0 violations in 03-development/src/)",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/linting_harness.txt"
+    },
+    "type_safety": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "{\n    \"version\": \"1.1.409\",\n    \"time\": \"1787389571160\",\n    \"generalDiagnostics\": [],\n    \"summary\": {\n        \"filesAnalyzed\": 18,\n        \"errorCount\": 0,\n        \"warningCount\": 0,\n        \"informationCount\": 0,\n        \"timeInSec\": 0.892\n    }\n}",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
+    },
+    "test_coverage": {
+      "score": 100.0,
+      "threshold": 100,
+      "tests_passed": 24,
+      "tests_failed": 0,
+      "tests_skipped": 0,
+      "tool_evidence": "24 passed in 0.24s; coverage 100% on all 4 FR-01 source files (routes/tasks.py, service/tasks.py, repository/tasks.py, api/schemas.py)",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-01.txt",
+      "coverage_scope": "per_fr",
+      "coverage_scope_fr": "FR-01",
+      "score_source": "framework"
+    },
+    "architecture_constraints": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "lint-imports exit 0; Analyzed 18 files, 14 dependencies; Contracts: 3 kept, 0 broken (fr01-layers, fr01-config-errors-independence, fr01-root-independence)",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
+    }
+  },
+  "enforcer_sha": "17f5f448162c66feb47b08e7cf0796425faeb93e",
+  "enforcer_surface": {
+    "core/quality_gate": "c0626e4209d4e24d3d1a571ed53ea5e1386a3856",
+    "harness/harness_bridge.py": "c36e31d5615cb32c775141bff38a1a44384da8f9",
+    "harness/gate_configs": "92d5728b783841baed6e1beeb57d5e7fbe56c71e"
+  },
+  "evidence_digest": {
+    "linting": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "1f0d3bd0c855b2ab3eac3836d6850a985060f7240a356f027db91452ef429bf8",
+      "bytes": 69,
+      "head": "All checks passed! (ruff exit 0, 0 violations in 03-development/src/)"
+    },
+    "type_safety": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "e1ad04ba4acd5187991c96b9ef4ba843325605ddfca4c9286a0faf3a6e35017a",
+      "bytes": 250,
+      "head": "{\n    \"version\": \"1.1.409\",\n    \"time\": \"1787389571160\",\n    \"generalDiagnostics\": [],\n    \"summary\": {\n        \"filesAnalyzed\": 18,\n        \"errorCount\": 0,\n        \"warningCount\": 0,\n        \"informationCount\": 0,\n        \"timeInSec\": 0.892\n    }\n}"
+    },
+    "test_coverage": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "e4bf1f84e8ec5c471254a324e99c458e4c3bf7ec1d5c7b288461b49588381d88",
+      "bytes": 134,
+      "head": "24 passed in 0.24s; coverage 100% on all 4 FR-01 source files (routes/tasks.py, service/tasks.py, repository/tasks.py, api/schemas.py)"
+    },
+    "architecture_constraints": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "07d68580f7320f2294cd6dddae3850b70a4809a45740e6794917d4154a1e9e85",
+      "bytes": 155,
+      "head": "lint-imports exit 0; Analyzed 18 files, 14 dependencies; Contracts: 3 kept, 0 broken (fr01-layers, fr01-config-errors-independence, fr01-root-independence)"
+    }
+  },
+  "composite_score": 100.0,
+  "verdict": "PASS",
+  "passed": true,
+  "spec_undelivered": [],
+  "spec_declared": 0,
+  "measurement_scope": {
+    "weight_covered": 1.0,
+    "weight_total": 1.0,
+    "dimensions_scored": [
+      "architecture_constraints",
+      "linting",
+      "test_coverage",
+      "type_safety"
+    ],
+    "dimensions_unscored": []
+  }
+}

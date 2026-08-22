@@ -1,9 +1,9 @@
 {
   "state": "RUNNING",
   "current_phase": 3,
-  "last_gate": null,
-  "last_fr": null,
-  "last_update": "2026-08-22T07:46:03.708695+00:00",
+  "last_gate": 1,
+  "last_fr": "FR-01",
+  "last_update": "2026-08-22T09:07:33.320594+00:00",
   "language": "python",
   "phase_completed": {
     "1": {
@@ -18,8 +18,15 @@
       "delivered_tree_sha256": "a5c974fb358f7ab8418aaa131f5b4b1672f066c1a51b08de5e07b214a4a5c881"
     },
     "2": {
-      "sha": "fdcd928c80002b3c094e8ab09f62174a02db5e8e",
-      "timestamp": "2026-08-22T07:43:38.158511+00:00"
+      "sha": "94ee34d121e9fb90103062a5874c08eba11c268c",
+      "timestamp": "2026-08-22T07:46:04.158589+00:00",
+      "enforcer_sha": "1e9128422be41299ec6c250fe23d2cbf60ecb229",
+      "enforcer_surface": {
+        "core/quality_gate": "c0626e4209d4e24d3d1a571ed53ea5e1386a3856",
+        "harness/harness_bridge.py": "c36e31d5615cb32c775141bff38a1a44384da8f9",
+        "harness/gate_configs": "92d5728b783841baed6e1beeb57d5e7fbe56c71e"
+      },
+      "delivered_tree_sha256": "18eb8a581104312a3b56229901ebe38b10120def4ac82714655918b48a9fc882"
     }
   },
   "test_inventory_checksum": "25bc603be0c794eec0a08940fc85d17b9d7997bd16518d7a5a67c5559f59aa45",
