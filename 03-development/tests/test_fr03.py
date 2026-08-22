@@ -492,3 +492,224 @@ def test_fr03_ac6_healthz_readyz_no_auth(client):
         f"/readyz returned {response_ready.status_code} (expected 200, no auth). "
         f"body={response_ready.text!r}"
     )
+
+
+# ---------- Coverage: ORM default factory (_new_uuid) ----------
+
+def test_fr03_cov_api_key_default_uuid_factory():
+    """COVERAGE — APIKey() without an explicit ``id`` invokes the
+    ``_new_uuid`` default factory (models/api_key.py line 36) when the
+    row is flushed to the DB (SQLAlchemy applies column defaults on flush).
+    # NFR-09
+    """
+    row = APIKey(
+        key_hash=hash_api_key("coverage-default-uuid"),
+        scope="read",
+    )
+    # No ``id`` was provided → SQLAlchemy must invoke the column default
+    # factory at flush time, producing a UUID-shaped string.
+    APIKeyRepository().create(
+        key_hash=row.key_hash,
+        scope=row.scope,
+    )
+    # Re-fetch to ensure the row was persisted with the auto-generated id.
+    persisted = APIKeyRepository().lookup_active("coverage-default-uuid")
+    assert persisted is not None, "auto-id row not persisted"
+    assert isinstance(persisted["id"], str) and len(persisted["id"]) >= 32, (
+        f"APIKey default id factory did not produce a uuid-shaped string: "
+        f"id={persisted['id']!r}"
+    )
+
+
+# ---------- Coverage: APIKeyRepository.create kwargs branch + TypeError guard ----------
+
+def test_fr03_cov_repo_create_via_kwargs_direct():
+    """COVERAGE — APIKeyRepository.create with column kwargs (no model=)
+    exercises the ``row = APIKey(**kwargs)`` branch (repository/keys.py line 111).
+    # NFR-09
+    """
+    # Force a fresh repository against the autouse-reset DB.
+    persisted = APIKeyRepository().create(
+        key_hash=hash_api_key("coverage-kwargs-create"),
+        scope="read",
+    )
+    assert persisted["scope"] == "read"
+    assert persisted["key_hash"] == hash_api_key("coverage-kwargs-create")
+    # The repo must populate ``id`` from the column default factory.
+    assert persisted["id"] and isinstance(persisted["id"], str)
+
+
+def test_fr03_cov_repo_create_model_typeerror_guard():
+    """COVERAGE — APIKeyRepository.create rejects a non-APIKey ``model=``
+    with TypeError (repository/keys.py line 108).
+    # NFR-09
+    """
+    repo = APIKeyRepository()
+    # ``model=`` must be an APIKey; pass a plain dict → guard fires.
+    with pytest.raises(TypeError) as exc_info:
+        repo.create(model={"not": "an api key"})  # type: ignore[arg-type]
+    assert "model=" in str(exc_info.value)
+
+
+# ---------- Coverage: APIKeyRepository.create rollback on commit failure ----------
+
+def test_fr03_cov_repo_create_rollback_on_commit_error(monkeypatch):
+    """COVERAGE — APIKeyRepository.create rolls back + re-raises when
+    ``session.commit()`` raises (repository/keys.py lines 119-121).
+    # NFR-09
+    """
+    from taskq.repository import keys as repo_keys
+
+    class _BoomCommitSession:
+        """Stand-in Session whose commit() always raises."""
+
+        def __init__(self) -> None:
+            self.added = []
+            self.rolled_back = False
+            self.closed = False
+
+        def add(self, obj: Any) -> None:
+            self.added.append(obj)
+
+        def commit(self) -> None:
+            raise RuntimeError("synthetic commit failure")
+
+        def rollback(self) -> None:
+            self.rolled_back = True
+
+        def close(self) -> None:
+            self.closed = True
+
+        def refresh(self, _obj: Any) -> None:
+            pass
+
+    fake = _BoomCommitSession()
+
+    class _FakeFactory:
+        def __call__(self) -> _BoomCommitSession:  # pragma: no cover - trivial
+            return fake
+
+    monkeypatch.setattr(repo_keys, "get_session_factory", lambda: _FakeFactory())
+
+    repo = repo_keys.APIKeyRepository()
+    with pytest.raises(RuntimeError, match="synthetic commit failure"):
+        repo.create(key_hash=hash_api_key("cov-commit-boom"), scope="read")
+
+    # The repo MUST have rolled back AND closed the failed session.
+    assert fake.rolled_back is True, "commit failure did not roll back"
+    assert fake.closed is True, "commit failure did not close the session"
+
+
+# ---------- Coverage: APIKeyRepository.lookup_active success path ----------
+
+def test_fr03_cov_repo_lookup_active_success_returns_dict():
+    """COVERAGE — APIKeyRepository.lookup_active returns the row dict when
+    a matching active key exists (repository/keys.py line 142).
+    # NFR-09
+    """
+    repo = APIKeyRepository()
+    plaintext = "coverage-lookup-success"
+    repo.create(key_hash=hash_api_key(plaintext), scope="write")
+
+    row = repo.lookup_active(plaintext)
+    assert row is not None, "lookup_active returned None for an inserted key"
+    assert row["scope"] == "write"
+    assert row["key_hash"] == hash_api_key(plaintext)
+    assert row["revoked_at"] is None
+
+
+# ---------- Coverage: AuthService SQLAlchemyError swallow + DB success ----------
+
+def test_fr03_cov_auth_lookup_swallows_sqlalchemy_error(monkeypatch):
+    """COVERAGE — AuthService._lookup_scope swallows SQLAlchemyError and
+    returns None so a transient DB failure does not deny the legacy key
+    (service/auth.py lines 64-65).
+    # NFR-09
+    """
+    from sqlalchemy.exc import SQLAlchemyError
+
+    from taskq.service import auth as auth_mod
+
+    def _boom_lookup(self, _key: str) -> None:  # bound method → self + key
+        raise SQLAlchemyError("synthetic db outage")
+
+    monkeypatch.setattr(auth_mod.APIKeyRepository, "lookup_active", _boom_lookup)
+
+    # Even with the DB failing, a legacy key resolves via the legacy map.
+    legacy_key = "taskq-write-test-key-abc123"
+    result = auth_mod.verify_api_key(legacy_key)
+    assert result == {"scope": "write", "key_id": legacy_key}
+
+
+def test_fr03_cov_auth_lookup_returns_row_scope(monkeypatch):
+    """COVERAGE — AuthService._lookup_scope returns ``row["scope"]`` when
+    the DB has a matching active key (service/auth.py line 68).
+    # NFR-09
+    """
+    from taskq.service import auth as auth_mod
+
+    def _fake_lookup(self, _key: str) -> Dict[str, str]:  # bound method
+        return {"scope": "admin", "key_hash": "x"}
+
+    monkeypatch.setattr(auth_mod.APIKeyRepository, "lookup_active", _fake_lookup)
+
+    # DB-resolved scope wins over the legacy map for this key.
+    db_key = "db-resolved-key"
+    result = auth_mod.verify_api_key(db_key)
+    assert result == {"scope": "admin", "key_id": db_key}
+
+
+# ---------- Coverage: AuthService missing-key and admin-scope branches ----------
+
+def test_fr03_cov_auth_verify_rejects_missing_key_none():
+    """COVERAGE — verify_api_key raises InvalidAPIKey when called with
+    a None key (service/auth.py line 79).
+    # NFR-09
+    """
+    from taskq.service.auth import InvalidAPIKey
+
+    with pytest.raises(InvalidAPIKey):
+        service_verify(None)
+
+
+def test_fr03_cov_auth_verify_rejects_missing_key_empty():
+    """COVERAGE — verify_api_key raises InvalidAPIKey when called with
+    an empty-string key (service/auth.py line 79).
+    # NFR-09
+    """
+    from taskq.service.auth import InvalidAPIKey
+
+    with pytest.raises(InvalidAPIKey):
+        service_verify("")
+
+
+def test_fr03_cov_auth_verify_insufficient_admin_scope(monkeypatch):
+    """COVERAGE — verify_api_key raises InsufficientScope when a non-admin
+    key is asked for admin scope (service/auth.py lines 87-88).
+    # NFR-09
+    """
+    from taskq.service.auth import InsufficientScope
+
+    # Stub out the DB so the legacy-map path decides scope resolution.
+    monkeypatch.setattr(
+        "taskq.service.auth.APIKeyRepository.lookup_active",
+        lambda self, _key: None,
+    )
+
+    # A write-scoped legacy key asked for admin scope must 403.
+    with pytest.raises(InsufficientScope):
+        service_verify("taskq-write-test-key-abc123", scope_required="admin")
+
+
+def test_fr03_cov_auth_verify_happy_path_returns_scope_key_id_dict(monkeypatch):
+    """COVERAGE — verify_api_key returns ``{"scope": <scope>, "key_id": <key>}``
+    on the happy path (service/auth.py line 90).
+    # NFR-09
+    """
+    monkeypatch.setattr(
+        "taskq.service.auth.APIKeyRepository.lookup_active",
+        lambda self, _key: None,
+    )
+    # Legacy read-scope key, no required scope → returns the dict.
+    result = service_verify("taskq-read-test-key-abc456")
+    assert result == {"scope": "read", "key_id": "taskq-read-test-key-abc456"}
