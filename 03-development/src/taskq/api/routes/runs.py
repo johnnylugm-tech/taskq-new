@@ -35,9 +35,9 @@ NFR-06 (layer contract).
 from __future__ import annotations
 
 import uuid
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Header, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Request
 
 from taskq.api.deps import require_scope
 from taskq.api.problem import Problem
