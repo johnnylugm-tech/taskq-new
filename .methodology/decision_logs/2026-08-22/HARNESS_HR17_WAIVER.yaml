@@ -1,0 +1,42 @@
+---
+ctx:
+  agent_id: HUMAN_DECISION
+  phase: 3
+  fr_id: FR-99
+  trace_id: hr17-waiver-2026-08-23
+  timestamp: '2026-08-23T04:55:00+00:00'
+decision: WAIVER_GRANTED
+reasoning: >
+  phase3_plan.md HR-17 ("NEVER modify files inside harness/ — debug the
+  framework, never hot-patch the submodule") is WAIVED for the [HARNESS-FIX]
+  scope on 2026-08-23 by explicit user approval (chat reply "放寬 HR-17,
+  改 harness/").
+
+  Rationale: the bug surface (dispatch-loop non-convergence when manifest
+  qc=false but evaluator qc=true) lives entirely inside harness/. Boundary-
+  preserving alternatives (wrapper scripts in .sessi-work/, manual operator
+  bypass) were rejected as either correct-fix-violating (workaround, not
+  fix) or generality-breaking (per-FR one-off patches). The surgical
+  edits made are:
+    - harness/cli/fr_cmds.py::_detect_evaluator_passed_but_commit_uncommitted
+      (new helper, ~50 lines, defensive reads of gate1_result.json + manifest)
+    - harness/cli/fr_cmds.py::_abort_no_progress_with_self_doubt
+      (banner emission after existing print, no change to existing logic)
+    - harness/cli/gate_cmds.py::_finalize_gate_preflight
+      (honor args.force in sentinel check, single-line guard change)
+
+  Original HR-17 text retained in phase3_plan.md with // waived
+  annotation. HR-17 remains in force for all OTHER harness/ edits not
+  under this [HARNESS-FIX] commit scope.
+
+  Cross-references:
+    - .methodology/decision_logs/2026-08-22/HARNESS_FIX_BANNER_EMIT.yaml
+    - .methodology/decision_logs/2026-08-22/HARNESS_FIX_FORCE_FINALIZE.yaml
+    - .methodology/lessons/2026-08-23-fr99-finalization.md
+scores: {}
+metadata:
+  category: human-decision
+  waiver_scope: '[HARNESS-FIX] on 2026-08-23'
+  files_in_scope:
+    - harness/cli/fr_cmds.py
+    - harness/cli/gate_cmds.py

@@ -1,0 +1,48 @@
+---
+ctx:
+  agent_id: HARNESS_FIX
+  phase: 3
+  fr_id: FR-99
+  trace_id: hfix-banner-2026-08-23
+  timestamp: '2026-08-23T04:55:00+00:00'
+decision: HARNESS_FIX_ACCEPT
+reasoning: >
+  FR-99 dispatch-loop non-convergence root cause confirmed: the
+  .methodology/quality_manifest.json shows gate_results.gate1.FR-99 =
+  {score: 100.0, quality_complete: false} not because a commit failed and
+  was rolled back by _mark_gate_commit_failed, but because finalize-gate was
+  NEVER called for FR-99 at all (qc=false is the default; sentinel
+  .sessi-work/sentinels/g1_p3_fr99.flag exists but .finalized does not; git
+  reflog shows no feat(FR-99): Gate1 PASS attempt). The dispatch loop only
+  re-runs run-gate (--step GATE1) and never converges to a state that
+  triggers finalize-gate. _abort_no_progress_with_self_doubt printed a
+  stderr SELF-CHECK hint but no harness-routeable [HARNESS-BUG] banner.
+
+  Surgical fix (Fix B): add _detect_evaluator_passed_but_commit_uncommitted
+  helper in harness/cli/fr_cmds.py; emit [HARNESS-BUG] This is a bug in
+  harness-methodology itself banner to STDOUT when (a) the ephemeral
+  .sessi-work/gate1_result.json shows quality_complete=true at score>=100
+  AND (b) the manifest stamp shows quality_complete=false despite
+  score>=100. The two-source AND-conjunction does NOT bypass the verifier
+  contract (verify_gate1_qc.py still reads only the manifest); it merely
+  detects the "evaluator-passed-but-commit-uncommitted" condition so
+  run-all.js's in-loop regex can route the failure to harness-repair.
+
+  OUT OF SCOPE (refuted by verification): reading .sessi-work/gate1_result.json
+  as a PASS condition is DANGEROUS (it would defeat _mark_gate_commit_failed);
+  adding --cov to _capture_tool_snapshot is REDUNDANT (_classify_snapshot_failure
+  does not consume coverage numbers and the SSOT validate_fr_coverage_immediate
+  is already called by COVERAGE-FIX inline fallback).
+
+  HR-17 ("NEVER modify files inside harness/") waived for this fix; see
+  .methodology/decision_logs/2026-08-22/HARNESS_HR17_WAIVER.yaml.
+scores: {}
+metadata:
+  category: harness-fix
+  files_changed:
+    - harness/cli/fr_cmds.py
+    - harness/cli/gate_cmds.py  # auxiliary Fix A wire-up
+  regression: 153 harness tests passed; verify_gate1_qc.py unchanged output for FR-01..FR-10 (all PASS) and FR-99 (still FAIL — recovery requires manual finalize-gate invocation).
+  cross_refs:
+    - .methodology/lessons/2026-08-23-fr99-finalization.md
+    - .methodology/decision_logs/2026-08-22/HARNESS_FIX_FORCE_FINALIZE.yaml

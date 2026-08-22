@@ -1,0 +1,40 @@
+---
+ctx:
+  agent_id: HARNESS_FIX
+  phase: 3
+  fr_id: FR-99
+  trace_id: hfix-force-2026-08-23
+  timestamp: '2026-08-23T04:55:00+00:00'
+decision: HARNESS_FIX_ACCEPT
+reasoning: >
+  finalize-gate's --force flag was defined (argparse action="store_true",
+  dest="force" at harness/cli/gate_cmds.py:2913) but never read anywhere
+  in _cmd_finalize_gate_impl — vestigial. Wire-up (Fix A): make
+  _finalize_gate_preflight honor --force by skipping the run-gate sentinel
+  check (so an operator can re-finalize when the sentinel was lost or
+  rolled back, but the gate evidence is still on disk). Semantic matches
+  the existing argparse help string "operator escape hatch".
+
+  OUT OF SCOPE: NOT wired to override _mark_gate_commit_failed. Preserving
+  qc=true on commit failure would defeat the durability contract the
+  manifest stamp encodes (see verify_gate1_qc.py docstring lines 34-39
+  for the symmetric warning about a free-form manifest-trust failure).
+  Operators wanting commit-tolerance should investigate the underlying
+  commit failure (prepare-commit-msg hook, trace-attestation, etc.).
+
+  Recovery command for the FR-99 situation (operator-run, NOT auto-run
+  per user constraint "do not modify taskq-new files" / "do not break
+  generality"):
+    python harness_cli.py finalize-gate --gate 1 --phase 3 \
+      --fr-id FR-99 --project /Users/johnny/projects/taskq-new
+  This works WITHOUT --force because the sentinel g1_p3_fr99.flag
+  exists; --force bypass exists for future runs where the sentinel is
+  gone.
+scores: {}
+metadata:
+  category: harness-fix
+  files_changed:
+    - harness/cli/gate_cmds.py
+  regression: argparse layer parses --force unchanged; preflight sentinel check still enforces when --force is absent; ruff + 153 harness tests pass.
+  cross_refs:
+    - .methodology/decision_logs/2026-08-22/HARNESS_FIX_BANNER_EMIT.yaml
