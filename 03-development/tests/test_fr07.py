@@ -342,13 +342,14 @@ def test_fr07_ac2_v2_adds_tags_task_tags_unique_index(tmp_path: Path):
         f"unique_constraints={unique_constraints!r}"
     )
 
-    # Downgrade one step (v3 -> v2) — v2 data is preserved by v3's
-    # downgrade, so this just exercises v3's downgrade path; then
-    # downgrade base to verify v2's own downgrade actually drops its
-    # own additions without touching v1 tables.
+    # Downgrade two steps (v3 -> v2 -> v1) so v2's own downgrade
+    # actually drops its own additions without touching v1 tables.
+    # Going all the way to base would also drop v1's tables (which
+    # v1's downgrade correctly drops per SPEC §3 FR-07 v1 row), so
+    # we stop at v1 to verify v2's reversibility on v1 data.
     buf = io.StringIO()
     with redirect_stdout(buf):
-        command.downgrade(cfg, "base")
+        command.downgrade(cfg, "v1")
     buf.getvalue()
 
     engine, insp = _reflection_inspector(db_url)
@@ -365,7 +366,7 @@ def test_fr07_ac2_v2_adds_tags_task_tags_unique_index(tmp_path: Path):
     for t in tables_added.split(","):
         assert t not in table_names_after, (
             f"AC-7.2 violated: v2 table {t!r} still present after "
-            f"alembic downgrade base. tables={sorted(table_names_after)!r}"
+            f"alembic downgrade to v1. tables={sorted(table_names_after)!r}"
         )
 
 
