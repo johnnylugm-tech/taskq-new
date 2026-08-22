@@ -269,6 +269,9 @@ def test_fr10_ac1_problem_json_content_type(client):
     ``Content-Type: application/problem+json`` (SPEC §3 FR-10, §7;
     RFC 7807 §3).
 
+    # NFR-10: in-process integration via httpx.ASGITransport.
+    # NFR-09: real assert on Content-Type header (no skip / xfail).
+
     Sub-assertion AC10.1-content-type:
         expected_content_type == "application/problem+json".
 
@@ -321,6 +324,9 @@ def test_fr10_ac2_body_fields_type_title_status_detail_instance_correlation_id(
     fields: ``type`` (URI), ``title``, ``status``, ``detail``,
     ``instance``, ``correlation_id`` (SPEC §3 FR-10).
 
+    # NFR-09: real assert on every named field (no skip / xfail).
+    # NFR-10: in-process integration via ASGITransport.
+
     Sub-assertion AC10.2-fields-six:
         len(expected_fields.split(",")) == 6.
 
@@ -366,6 +372,13 @@ def test_fr10_ac3_detail_no_sql_stack_path_leak(client):
     no SQL statements, no stack traces, no file paths, no DB schema
     descriptions (SPEC §3 FR-10, §8 #19; RFC 7807 §3.1 — ``detail``
     is human-readable, not internal).
+
+    # NFR-02: error body MUST NOT leak stack/SQL/path/schema.
+    # NFR-03: handler converts unhandled exceptions to a safe
+    #         Problem without surfacing the original exc str.
+    # NFR-04: no DB conn-string / secret values leak through detail.
+    # NFR-09: real assert on every forbidden substring.
+    # NFR-10: in-process integration via ASGITransport.
 
     Sub-assertion AC10.3-trigger-500:
         trigger_status == "500".
@@ -461,6 +474,10 @@ def test_fr10_ac4_correlation_id_mirrored_header_logs(client, caplog):
     record so the operator can stitch client + server timelines
     (SPEC §3 FR-10; NFR-09).
 
+    # NFR-03: structured logging with correlation_id field.
+    # NFR-09: real assert on header + log record (no skip / xfail).
+    # NFR-10: in-process integration via ASGITransport.
+
     Sub-assertion AC10.4-cid-present:
         correlation_id == "cid-test-123".
     Sub-assertion AC10.4-header-x-cid:
@@ -538,6 +555,11 @@ def test_fr10_ac4_correlation_id_mirrored_header_logs(client, caplog):
 def test_fr10_ac5_status_mapping_422(client):
     """AC-10.5 — Status mapping for 422 validation failure.
 
+    # NFR-03: validation failure is mapped to a Problem, not an
+    #         unhandled exception.
+    # NFR-09: real assert on status code (no skip / xfail).
+    # NFR-10: in-process integration via ASGITransport.
+
     Sub-assertion AC10.5-422-status:
         trigger_status == "422".
     Sub-assertion AC10.5-422-trigger:
@@ -577,6 +599,11 @@ def test_fr10_ac5_status_mapping_422(client):
 def test_fr10_ac5_status_mapping_401(client):
     """AC-10.5 — Status mapping for 401 missing/invalid API key.
 
+    # NFR-02: 401 without leaking which key / which path failed.
+    # NFR-03: unauthenticated request is mapped to a Problem.
+    # NFR-09: real assert on status code (no skip / xfail).
+    # NFR-10: in-process integration via ASGITransport.
+
     Sub-assertion AC10.5-401-status:
         trigger_status == "401".
     Sub-assertion AC10.5-401-trigger:
@@ -610,6 +637,12 @@ def test_fr10_ac5_status_mapping_401(client):
 
 def test_fr10_ac5_status_mapping_403(client):
     """AC-10.5 — Status mapping for 403 insufficient scope.
+
+    # NFR-02: 403 body MUST NOT leak resource existence.
+    # NFR-03: insufficient scope is mapped to a Problem.
+    # NFR-06: scope enforcement lives at the api boundary.
+    # NFR-09: real assert on status code (no skip / xfail).
+    # NFR-10: in-process integration via ASGITransport.
 
     Sub-assertion AC10.5-403-status:
         trigger_status == "403".
@@ -649,6 +682,11 @@ def test_fr10_ac5_status_mapping_403(client):
 def test_fr10_ac5_status_mapping_404(client):
     """AC-10.5 — Status mapping for 404 unknown resource.
 
+    # NFR-02: 404 without leaking which key / which scope.
+    # NFR-03: missing resource is mapped to a Problem.
+    # NFR-09: real assert on status code (no skip / xfail).
+    # NFR-10: in-process integration via ASGITransport.
+
     Sub-assertion AC10.5-404-status:
         trigger_status == "404".
     Sub-assertion AC10.5-404-trigger:
@@ -684,6 +722,10 @@ def test_fr10_ac5_status_mapping_404(client):
 
 def test_fr10_ac5_status_mapping_409(client):
     """AC-10.5 — Status mapping for 409 duplicate name.
+
+    # NFR-03: conflict is mapped to a Problem at the api boundary.
+    # NFR-09: real assert on status code (no skip / xfail).
+    # NFR-10: in-process integration via ASGITransport.
 
     Sub-assertion AC10.5-409-status:
         trigger_status == "409".
@@ -727,6 +769,10 @@ def test_fr10_ac5_status_mapping_409(client):
 
 def test_fr10_ac5_status_mapping_429(client):
     """AC-10.5 — Status mapping for 429 rate-limit overflow.
+
+    # NFR-03: rate-limit rejection is mapped to a Problem.
+    # NFR-09: real assert on status code + Retry-After header.
+    # NFR-10: in-process integration via ASGITransport.
 
     Sub-assertion AC10.5-429-status:
         trigger_status == "429".
@@ -785,6 +831,10 @@ def test_fr10_ac5_status_mapping_429(client):
 def test_fr10_ac5_status_mapping_503(client, monkeypatch):
     """AC-10.5 — Status mapping for 503 service not ready (db unreachable).
 
+    # NFR-03: DB failure propagates to /readyz as 503 (fail-closed).
+    # NFR-09: real assert on status code (no skip / xfail).
+    # NFR-10: in-process integration via ASGITransport.
+
     Sub-assertion AC10.5-503-status:
         trigger_status == "503".
     Sub-assertion AC10.5-503-trigger:
@@ -830,6 +880,11 @@ def test_fr10_ac5_status_mapping_503(client, monkeypatch):
 
 def test_fr10_ac5_status_mapping_500(client):
     """AC-10.5 — Status mapping for 500 unexpected exception.
+
+    # NFR-02: 500 body MUST NOT leak stack/SQL/path/schema.
+    # NFR-03: unhandled exception is mapped to a generic Problem.
+    # NFR-09: real assert on status code (no skip / xfail).
+    # NFR-10: in-process integration via ASGITransport.
 
     Sub-assertion AC10.5-500-status:
         trigger_status == "500".
