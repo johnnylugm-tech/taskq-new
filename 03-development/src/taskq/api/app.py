@@ -23,13 +23,20 @@ registered handlers. The single canonical
 ``taskq.api.deps.require_scope`` dependency is wired into every
 /handler so the single-dep invariant (AC-4.3) holds.
 
+[FR-05] Installs the ``taskq.api.middleware.RateLimitMiddleware`` so
+every ``/v1/*`` request is gated by the per-token token bucket
+(AC-5.2). ``/healthz`` and ``/readyz`` are EXEMPT (AC-5.4) and never
+touch the bucket. The middleware short-circuits with HTTP 429 +
+``Retry-After`` + ``application/problem+json`` when the bucket is
+empty (SPEC.md §3 FR-05, §8 #9).
+
 The test fixture calls ``create_app()`` per test to get a fresh ASGI
 app, while the underlying in-memory DB is reset between tests by the
 conftest fixture (see 03-development/conftest.py).
 
 Citations: SPEC.md §3 FR-01, §3 FR-02, §3 FR-03 (AC-3.6), §3 FR-04,
-FR-09; NFR-10 (integration coverage via ASGITransport); SAD.md §4
-api/app.
+§3 FR-05, FR-09; NFR-10 (integration coverage via ASGITransport);
+SAD.md §4 api/app.
 """
 from __future__ import annotations
 
@@ -38,6 +45,7 @@ from typing import Callable, List, Tuple
 from fastapi import FastAPI
 
 from taskq.api.handlers import register_exception_handlers
+from taskq.api.middleware import RateLimitMiddleware
 from taskq.api.routes.runs import list_runs, trigger_run
 from taskq.api.routes.tasks import (
     create_task,
@@ -45,6 +53,11 @@ from taskq.api.routes.tasks import (
     get_task,
     list_tasks,
 )
+from taskq.repository.rate_buckets import (
+    DEFAULT_BURST,
+    DEFAULT_PER_SEC,
+)
+from taskq.service.rate_limit import RateLimitConfig
 
 
 # (path, http_methods, success_status_code, handler). Registered
@@ -64,7 +77,7 @@ _V1_ROUTES: Tuple[Tuple[str, List[str], int, Callable], ...] = (
 
 
 def create_app() -> FastAPI:
-    """Build a fresh FastAPI app for FR-01 + FR-02 + FR-03 + FR-04."""
+    """Build a fresh FastAPI app for FR-01 + FR-02 + FR-03 + FR-04 + FR-05."""
     app = FastAPI(
         title="taskq API",
         version="0.1.0",
@@ -73,6 +86,24 @@ def create_app() -> FastAPI:
         # would break the problem+json contract from SPEC §10 / FR-10).
         redirect_slashes=False,
     )
+
+    # ---- FR-05 AC-5.2 / AC-5.4: per-token rate-limit middleware ----
+    # Installed BEFORE the exception handlers so the middleware can
+    # short-circuit with a 429 + Retry-After + problem+json response
+    # without ever reaching the application stack. ``/healthz`` and
+    # ``/readyz`` are exempted inside the middleware itself (SPEC §3
+    # FR-05 / FR-09). The bucket capacity + refill rate come from the
+    # shared ``RateBucketRepository`` defaults so the same numbers
+    # are visible from unit test, repository, and HTTP-edge code
+    # paths (NFR-03).
+    app.add_middleware(
+        RateLimitMiddleware,
+        config=RateLimitConfig(
+            burst=int(DEFAULT_BURST),
+            per_sec=float(DEFAULT_PER_SEC),
+        ),
+    )
+
     register_exception_handlers(app)
 
     # ---- FR-01 / FR-02 / FR-04: register /v1 handlers ----
