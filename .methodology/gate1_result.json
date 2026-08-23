@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 4,
-  "fr_id": "FR-01",
+  "fr_id": "FR-99",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -9,33 +9,33 @@
     "linting": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "All checks passed!",
+      "tool_evidence": "$ python3 -m ruff check 03-development/src/ --extend-ignore RUF001,RUF002,RUF003\nAll checks passed!\n",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/linting_harness.txt"
     },
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\": \"1.1.409\", \"time\": \"1787452469290\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 42, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.2}}",
+      "tool_evidence": "{\"version\":\"1.1.409\",\"summary\":{\"filesAnalyzed\":42,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.192},\"generalDiagnostics\":[]}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 64,
+      "tests_passed": 2,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "============================== test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2, pluggy-1.6.0\nrootdir: /Users/johnny/projects/taskq-new\ncollected 64 items\n\n03-development/tests/test_fr01.py ........................               [ 37%]\n03-development/tests/test_fr06.py ....................                   [ 68%]\n03-development/tests/test_fr10.py ....................                   [100%]\n\n============================== 64 passed, 0 failed, 0 skipped in 1.64s ==============================",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-01.txt",
+      "tool_evidence": "collected 2 items\n03-development/tests/test_fr99.py ..                                     [100%]\n============================== 2 passed in 0.14s ===============================\nCoverage: {\"totals\":{\"covered_lines\":8,\"num_statements\":8,\"percent_covered\":100.0,\"missing_lines\":0}}",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-02.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-01",
+      "coverage_scope_fr": "FR-02",
       "score_source": "framework"
     },
     "architecture_constraints": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "Import Linter\n=============\n\nContracts\n---------\n\nAnalyzed 41 files, 55 dependencies.\n-----------------------------------\n\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\n\nContracts: 3 kept, 0 broken.",
+      "tool_evidence": "Import Linter — Analyzed 41 files, 55 dependencies.\nContracts: 3 kept, 0 broken.\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\n",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
     }
@@ -50,9 +50,9 @@
     "secrets_scanning::.gitleaksignore": {
       "source": ".gitleaksignore (score-altering exclusions)",
       "kind": "file",
-      "sha256": "576278515fcf12e4ee7c69810c39f7a6dc643d57be2fc07882b4001dfb05c26e",
-      "bytes": 112,
-      "head": "f9c31a90388e293c794c2affe055ade5464a4a4f:.methodology/lessons/2026-08-23-fr99-finalization.md:generic-api-key:2"
+      "sha256": "51017a8e343e94c0a30ccf5f11990fb9e4e8123e35803d917df91dc9f6a845d3",
+      "bytes": 319,
+      "head": "f9c31a90388e293c794c2affe055ade5464a4a4f:.methodology/lessons/2026-08-23-fr99-finalization.md:generic-api-key:2\n\n# test_fr99 redact fixtures - synthetic sk- prefixed tokens used to verify the redaction system\n03-development/tests/test_redact.py:generic-api-key:31\n03-development/tests/test_redact.py:generic-api-key:86"
     },
     "mutation_testing::setup.cfg": {
       "source": "setup.cfg (score-altering exclusions)",
@@ -60,6 +60,13 @@
       "sha256": "e708c4e0384ad5266ca6f3ecb04b67d702ff5b0e4451b4e7d5ae71f46b8d965d",
       "bytes": 191,
       "head": "[mutmut]\npaths_to_mutate=03-development/src/taskq/repository,03-development/src/taskq/service\nbackup=False\nrunner=python -m pytest -x -q 03-development/tests/\ntests_dir=03-development/tests/"
+    },
+    "test_coverage::pyproject.toml": {
+      "source": "pyproject.toml (score-altering exclusions)",
+      "kind": "file",
+      "sha256": "8f6d3b129d04cb0a08c85293ccc7f7bb83a7da7f183a35a1f4c7418a9354ebc6",
+      "bytes": 2198,
+      "head": "# taskq-new — pyproject.toml\n#\n# Pin pytest discovery to the project test directory so the harness-side\n# pytest-cov and pytest-benchmark invocations do NOT collect\n# `harness/tests/*` (the vendored harness method library) from the project\n# root. Without this, `pytest` invoked bare from `/Users/johnny/projects/taskq-new`\n# collects the harness test suite alongside the project's own, and either\n# times out (pytest-cov at 120s) or fails collection (pytest-benchmark trips\n# on a harness test referencing fixtures that do not exist in this layout).\n#\n# See harness/core/quality_gate/cross_artifact.py:481 and the tool_runners\n# pytest invocation paths for why this matters at the gate level.\n#\n# `[tool.coverage.run]` scopes coverage measurement to the project's own\n# source tree. The harness invokes `pytest --cov=.` from the project root\n# (harness/core/quality_gate/cross_artifact.py:481); without a `source`\n# constraint that would measure everything under `.` — including the\n# vendored harness/, all of `.methodology/`, etc. — and blow past the\n# 120s budget on a 1000+ file tree. With `source = [\"03-development/src\"]`\n# coverage only instruments the project's actual source, so the run"
     },
     "test_coverage::setup.cfg": {
       "source": "setup.cfg (score-altering exclusions)",
@@ -71,30 +78,30 @@
     "linting": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "f0d0b1081d9d3ebb26c4c93543053ecdc0a58998f22c071dc4ddb26021b57645",
-      "bytes": 18,
-      "head": "All checks passed!"
+      "sha256": "fad7bf8fec552781f58e1c0ffeca42f9112045994a8b691d1b407d6151442b6f",
+      "bytes": 99,
+      "head": "$ python3 -m ruff check 03-development/src/ --extend-ignore RUF001,RUF002,RUF003\nAll checks passed!"
     },
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "c966e1e77e87edd29f86c742ab6f6e6f4faac0f1526ca8be9788a2f652e3f2e5",
-      "bytes": 184,
-      "head": "{\"version\": \"1.1.409\", \"time\": \"1787452469290\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 42, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.2}}"
+      "sha256": "9121c34f9fc97a8f121133cdf5ccf21c1059b84050b0d1cf8c59fc3177265ce0",
+      "bytes": 147,
+      "head": "{\"version\":\"1.1.409\",\"summary\":{\"filesAnalyzed\":42,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.192},\"generalDiagnostics\":[]}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "a598d53ca23a1fe9df5ec0a7b405c856ccfadc0902af96743c3435f3df49ee34",
-      "bytes": 548,
-      "head": "============================== test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2, pluggy-1.6.0\nrootdir: /Users/johnny/projects/taskq-new\ncollected 64 items\n\n03-development/tests/test_fr01.py ........................               [ 37%]\n03-development/tests/test_fr06.py ....................                   [ 68%]\n03-development/tests/test_fr10.py ....................                   [100%]\n\n============================== 64 passed, 0 failed, 0 skipped in 1.64s =============================="
+      "sha256": "17f7d7b03e7f48b19a71ff1fd395f2ac762d5cd156d4af76b3956ba349bf7cda",
+      "bytes": 280,
+      "head": "collected 2 items\n03-development/tests/test_fr99.py ..                                     [100%]\n============================== 2 passed in 0.14s ===============================\nCoverage: {\"totals\":{\"covered_lines\":8,\"num_statements\":8,\"percent_covered\":100.0,\"missing_lines\":0}}"
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "127d6be640dd8687bee4cca9207d67dbfc593b9fd1a6b343f4429650cbc6124e",
-      "bytes": 234,
-      "head": "Import Linter\n=============\n\nContracts\n---------\n\nAnalyzed 41 files, 55 dependencies.\n-----------------------------------\n\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\n\nContracts: 3 kept, 0 broken."
+      "sha256": "b5e261ff1fb6c472c90a87e8d2c2eceaed0e8651f926b3fce81a7b91b8a7df06",
+      "bytes": 164,
+      "head": "Import Linter — Analyzed 41 files, 55 dependencies.\nContracts: 3 kept, 0 broken.\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT"
     }
   },
   "composite_score": 100.0,

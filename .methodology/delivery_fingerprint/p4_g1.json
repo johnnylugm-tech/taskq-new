@@ -20,10 +20,8 @@
   "gate": 1,
   "phase": 4,
   "stubbed_boundaries": {
-    "count": 1,
-    "modules": [
-      "taskq.api.deps"
-    ]
+    "count": 0,
+    "modules": []
   },
   "verify_system": {
     "obligations_unmet": [],
