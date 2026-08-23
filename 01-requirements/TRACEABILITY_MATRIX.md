@@ -53,10 +53,10 @@
 | NFR-04 | test_integration_fr03.py, test_integration_fr09.py, test_integration_fr10.py, test_fr02.py, test_fr03.py, test_fr09.py, test_fr10.py, test_nfr_spec_coverage.py, test_redact.py, test_sec_threats.py | VERIFIED |
 | NFR-05 | test_integration_fr01.py, test_integration_fr03.py, test_fr01.py, test_fr03.py | VERIFIED |
 | NFR-06 | test_integration_fr01.py, test_integration_fr04.py, test_integration_fr09.py, test_integration_fr10.py, test_fr01.py, test_fr02.py, test_fr04.py, test_fr06.py, test_fr09.py, test_fr10.py | VERIFIED |
-| NFR-07 | test_nfr07_08_11_lint.py — absent: 03-development/tests/test_nfr07_08_11_lint.py::test_nfr07_ac2_license_allowlist_mit_bsd_apache_psf (skipped), 03-development/tests/test_nfr07_08_11_lint.py::test_nfr07_ac3_pip_licenses_full_tree_with_system (skipped), 03-development/tests/test_nfr07_08_11_lint.py::test_nfr07_ac4_sbom_artifact_name_version_license_direct_transitive (skipped) | PARTIAL |
+| NFR-07 | test_nfr07_08_11_lint.py | VERIFIED |
 | NFR-08 | test_nfr07_08_11_lint.py | VERIFIED |
 | NFR-09 | test_integration_fr01.py, test_integration_fr03.py, test_integration_fr04.py, test_integration_fr05.py, test_integration_fr09.py, test_integration_fr10.py, test_fr01.py, test_fr02.py, test_fr03.py, test_fr04.py, test_fr05.py, test_fr06.py, test_fr07.py, test_fr08.py, test_fr09.py, test_fr10.py, test_nfr_spec_coverage.py | VERIFIED |
 | NFR-10 | test_integration_fr01.py, test_integration_fr03.py, test_integration_fr04.py, test_integration_fr05.py, test_integration_fr09.py, test_integration_fr10.py, test_fr01.py, test_fr02.py, test_fr03.py, test_fr04.py, test_fr05.py, test_fr06.py, test_fr07.py, test_fr09.py, test_fr10.py | VERIFIED |
-| NFR-11 | test_nfr07_08_11_lint.py — absent: 03-development/tests/test_nfr07_08_11_lint.py::test_nfr11_ac1_project_mi_ge_80_cc_le_10 (skipped) | PARTIAL |
+| NFR-11 | test_nfr07_08_11_lint.py | VERIFIED |
 | NFR-12 | test_fr07.py, test_nfr_spec_coverage.py | VERIFIED |
 | NFR-99 | — | PENDING |
