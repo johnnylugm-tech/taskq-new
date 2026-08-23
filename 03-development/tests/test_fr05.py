@@ -978,3 +978,168 @@ def test_coverage_seconds_until_next_token_zero_rate_returns_inf():
         f"seconds_until_next_token must return math.inf when rate<0, "
         f"got {wait_neg!r}"
     )
+
+
+def test_coverage_get_correlation_id_returns_existing_state():
+    """Cover middleware.py lines 88-90 (get_correlation_id existing-state path).
+
+    When ``request.state.correlation_id`` is already populated (e.g.
+    set by an upstream middleware before our ASGI wrapper runs), the
+    helper MUST short-circuit and return that value WITHOUT reading
+    any incoming header. NFR-09 / SPEC §3 FR-10: the same id is
+    preserved across the middleware stack so the operator can stitch
+    the trace.
+    """
+    from starlette.requests import Request
+
+    from taskq.api.middleware import get_correlation_id
+
+    # Pre-populate ``state`` with a known correlation id and send an
+    # incoming X-Correlation-Id header that DIFFERS from it. The
+    # helper MUST ignore the header and return the state value.
+    preexisting_cid = "pre-existing-cid-aaaa-bbbb"
+    scope = {
+        "type": "http",
+        "headers": [
+            (b"x-correlation-id", b"incoming-cid-cccc-dddd"),
+        ],
+        "state": {"correlation_id": preexisting_cid},
+    }
+    req = Request(scope)
+    cid = get_correlation_id(req)
+    assert cid == preexisting_cid, (
+        f"get_correlation_id must return state.correlation_id when "
+        f"present, got {cid!r}"
+    )
+
+
+def test_coverage_get_correlation_id_uses_incoming_header():
+    """Cover middleware.py lines 91-92 (get_correlation_id incoming header path).
+
+    When ``request.state.correlation_id`` is absent but the request
+    carries an ``X-Correlation-Id`` header, the helper MUST return the
+    incoming value (case-insensitive per RFC 7230) AND stash it on
+    ``request.state`` so downstream handlers see the same id.
+    """
+    from starlette.requests import Request
+
+    from taskq.api.middleware import get_correlation_id
+
+    incoming_cid = "incoming-cid-1111-2222-3333"
+    scope = {
+        "type": "http",
+        "headers": [
+            (b"x-correlation-id", incoming_cid.encode("latin-1")),
+        ],
+    }
+    req = Request(scope)
+    cid = get_correlation_id(req)
+    assert cid == incoming_cid, (
+        f"get_correlation_id must return the incoming X-Correlation-Id "
+        f"header value, got {cid!r}"
+    )
+    # The helper MUST stash the incoming id on state so downstream
+    # handlers (and the rate-limit middleware's 429 short-circuit)
+    # see the same id.
+    assert getattr(req.state, "correlation_id", None) == incoming_cid, (
+        f"get_correlation_id must stash the incoming id on "
+        f"request.state, got {getattr(req.state, 'correlation_id', None)!r}"
+    )
+
+
+def test_coverage_correlation_id_middleware_passes_through_non_http():
+    """Cover middleware.py lines 139-140 (CorrelationIdMiddleware non-http scope).
+
+    When the ASGI scope type is NOT ``http`` (e.g. ``websocket`` or
+    ``lifespan``), the correlation-id middleware MUST delegate to the
+    downstream app without minting or attaching a header — the
+    correlation contract is an HTTP-only concern (NFR-09 / SPEC §3
+    FR-10).
+    """
+    from taskq.api.middleware import CorrelationIdMiddleware
+
+    seen: Dict[str, Any] = {}
+
+    async def downstream_app(scope, receive, send):
+        seen["scope_type"] = scope.get("type")
+        seen["called"] = True
+
+    mw = CorrelationIdMiddleware(downstream_app)
+
+    import asyncio
+
+    async def _drive():
+        await mw(
+            {"type": "websocket", "headers": [], "path": "/ws"},
+            receive=lambda: {"type": "websocket.connect"},
+            send=lambda message: None,
+        )
+
+    asyncio.run(_drive())
+    assert seen.get("called") is True, (
+        "non-http scope MUST be passed through to the downstream app"
+    )
+    assert seen.get("scope_type") == "websocket", (
+        f"downstream app must receive the original scope type, got "
+        f"{seen.get('scope_type')!r}"
+    )
+
+    # Lifespan scope (startup/shutdown) takes the same branch — covered
+    # by the same test.
+    seen.clear()
+
+    async def _drive_lifespan():
+        await mw(
+            {"type": "lifespan", "headers": []},
+            receive=lambda: {"type": "lifespan.startup"},
+            send=lambda message: None,
+        )
+
+    asyncio.run(_drive_lifespan())
+    assert seen.get("called") is True, (
+        "lifespan scope MUST be passed through to the downstream app"
+    )
+    assert seen.get("scope_type") == "lifespan", (
+        f"downstream app must receive the original lifespan scope type, "
+        f"got {seen.get('scope_type')!r}"
+    )
+
+
+def test_coverage_correlation_id_middleware_uses_incoming_header(client):
+    """Cover middleware.py lines 153-154 (header-matching branch).
+
+    When an ``X-Correlation-Id`` header is supplied on the incoming
+    request, the ASGI middleware MUST extract that exact value (rather
+    than minting a fresh one) AND echo it on the response header so
+    the client can stitch the trace.
+    """
+    incoming_cid = "client-supplied-cid-abcdef0123456789"
+    response = client.get(
+        "/v1/tasks",
+        headers={
+            "X-API-Key": VALID_READ_KEY,
+            "X-Correlation-Id": incoming_cid,
+        },
+    )
+    # The response MUST echo the incoming correlation id — even when
+    # the request is gated by the rate-limit middleware or hits an
+    # error path. We don't pin the status code (it depends on bucket
+    # state); we only pin the response header.
+    echo = response.headers.get("X-Correlation-Id", "")
+    assert echo == incoming_cid, (
+        f"CorrelationIdMiddleware must echo the incoming "
+        f"X-Correlation-Id on the response, expected {incoming_cid!r}, "
+        f"got {echo!r}"
+    )
+
+    # The body / problem document (when present) MUST carry the same
+    # id so the operator can correlate logs to client traces.
+    if response.status_code >= 400:
+        try:
+            payload = response.json()
+        except Exception:
+            payload = {}
+        assert payload.get("correlation_id") == incoming_cid, (
+            f"problem+json body must carry the incoming correlation_id "
+            f"in `correlation_id`, got {payload!r}"
+        )
