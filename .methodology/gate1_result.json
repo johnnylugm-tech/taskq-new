@@ -27,9 +27,9 @@
       "tests_failed": 0,
       "tests_skipped": 0,
       "tool_evidence": "collected 2 items\n03-development/tests/test_fr99.py ..                                     [100%]\n============================== 2 passed in 0.14s ===============================\nCoverage: {\"totals\":{\"covered_lines\":8,\"num_statements\":8,\"percent_covered\":100.0,\"missing_lines\":0}}",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-06.txt",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-07.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-06",
+      "coverage_scope_fr": "FR-07",
       "score_source": "framework"
     },
     "architecture_constraints": {
