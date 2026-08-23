@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 8,
-  "fr_id": "FR-10",
+  "fr_id": "FR-99",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -16,26 +16,26 @@
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0}}",
+      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.181}}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 62,
+      "tests_passed": 2,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "62 passed in 4.20s; coverage 100% on middleware.py & schemas.py (124/124 statements); 12/12 spec tests required, all present and passing",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-10.txt",
+      "tool_evidence": "2 passed in 0.13s. coverage 100% (8/8 statements, 0 missing)",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-99.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-10",
+      "coverage_scope_fr": "FR-99",
       "score_source": "framework"
     },
     "architecture_constraints": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers, fr01-config-errors-independence, fr01-root-independence)",
+      "tool_evidence": "Contracts: 3 kept, 0 broken. fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
     }
@@ -85,23 +85,23 @@
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "de7a934988399367a305e4de9a70e12f5fbb2b230a734b4e4fbb0f588f571031",
-      "bytes": 115,
-      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0}}"
+      "sha256": "1c65d763990f09eb3137940b1d612953c56cc52dc475b660cbbc71cdc9cfe658",
+      "bytes": 135,
+      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.181}}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "8013c3a3214a44f59cf811160aedc7075e5d107ccdc68d8062cfef86e94aa985",
-      "bytes": 136,
-      "head": "62 passed in 4.20s; coverage 100% on middleware.py & schemas.py (124/124 statements); 12/12 spec tests required, all present and passing"
+      "sha256": "66685e9d1ba4c9ac6732ae0bb3c7a4f318d87016b624acbfe870979c1c4c5653",
+      "bytes": 60,
+      "head": "2 passed in 0.13s. coverage 100% (8/8 statements, 0 missing)"
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "6acd6348155a67ec7b600a170311bb7e0b6d24c8d51be2d4ac09f41d9b4f7a1f",
-      "bytes": 135,
-      "head": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers, fr01-config-errors-independence, fr01-root-independence)"
+      "sha256": "f1ddc794ca6cceab552729de6cb53e7c3e1f07fa29f6bb50bda1f3909246bdf5",
+      "bytes": 112,
+      "head": "Contracts: 3 kept, 0 broken. fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT"
     }
   },
   "composite_score": 100.0,
