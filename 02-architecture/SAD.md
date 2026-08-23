@@ -560,7 +560,6 @@ sab:
 
   high_risk_modules:
     - "taskq.service.runner"              # FR-08 async subprocess + timeout + drain
-    - "taskq.api.deps"                    # FR-04 single auth/scope dependency
     - "taskq.repository.units_of_work"    # FR-06 transaction boundary
     - "taskq.migrations.versions"         # FR-07 v3 data migration (round-trip)
 ```
