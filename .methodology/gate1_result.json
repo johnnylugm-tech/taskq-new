@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 8,
-  "fr_id": "FR-08",
+  "fr_id": "FR-09",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -9,27 +9,27 @@
     "linting": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "All checks passed!\n",
+      "tool_evidence": "All checks passed!",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/linting_harness.txt"
     },
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.192}}",
+      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.194}}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 45,
+      "tests_passed": 21,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "45 passed in 5.07s. Coverage: percent_covered=100.0 (runner.py: 86/86 statements). All required FR-08 tests present (5/5).",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-08.txt",
+      "tool_evidence": "21 passed in 0.23s. Coverage: percent_covered=100.0 (health.py: 51/51, metrics.py routes: 8/8, metrics.py service: 21/21). All required FR-09 tests present (3/3): test_fr09_ac1_healthz_returns_200_status_ok, test_fr09_ac2_readyz_db_and_alembic_head_check, test_fr09_ac3_metrics_admin_scope.",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-09.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-08",
+      "coverage_scope_fr": "FR-09",
       "score_source": "framework"
     },
     "architecture_constraints": {
@@ -85,16 +85,16 @@
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "ba17a5973bffaba2a69cd428722261e75c5e78aa5a0a0ba81189e64f99d8657d",
+      "sha256": "90769808c8c73733c36625ac3abbd486577938abfb6390260a57a5b8aa3219bb",
       "bytes": 135,
-      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.192}}"
+      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.194}}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "98c18d387364b9424cc087b3dd92fd480ff1e865a30722e1248a091b984a1eb8",
-      "bytes": 122,
-      "head": "45 passed in 5.07s. Coverage: percent_covered=100.0 (runner.py: 86/86 statements). All required FR-08 tests present (5/5)."
+      "sha256": "d1a7f878406520f6b38ca8fe3892ea6e0e974f83a5c2c543f608d3a0434daaaf",
+      "bytes": 290,
+      "head": "21 passed in 0.23s. Coverage: percent_covered=100.0 (health.py: 51/51, metrics.py routes: 8/8, metrics.py service: 21/21). All required FR-09 tests present (3/3): test_fr09_ac1_healthz_returns_200_status_ok, test_fr09_ac2_readyz_db_and_alembic_head_check, test_fr09_ac3_metrics_admin_scope."
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
