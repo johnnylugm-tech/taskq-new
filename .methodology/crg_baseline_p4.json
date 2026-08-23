@@ -3,8 +3,8 @@
     "score": 83.3,
     "healthy": 10,
     "total": 12,
-    "total_all": 44,
-    "excluded_test_communities": 32,
+    "total_all": 46,
+    "excluded_test_communities": 34,
     "unhealthy": [
       {
         "name": "api-task",
@@ -35,10 +35,10 @@
   "large_functions_penalty": 0,
   "architecture_score": 83.3,
   "_source": "framework-independent",
-  "_graph_files": 72,
-  "_source_files": 72,
+  "_graph_files": 74,
+  "_source_files": 74,
   "_unparsed_files": [],
   "_build_type": "update",
-  "_baseline_sha": "824ad13bedd42ff96f1b791fb41c619a48aab4e8",
+  "_baseline_sha": "ad598949ae1f759d10adec90c8d9ed7c3b5b6dbd",
   "_baseline_phase": 4
 }

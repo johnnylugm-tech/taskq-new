@@ -64,8 +64,8 @@
       "calibration": {
         "cohesion_healthy": 0.15,
         "community_oversized": 50,
-        "graph_files": 72,
-        "source_files": 72
+        "graph_files": 74,
+        "source_files": 74
       }
     },
     "readability": {
@@ -138,16 +138,16 @@
     "secrets_scanning::.gitleaksignore": {
       "source": ".gitleaksignore (score-altering exclusions)",
       "kind": "file",
-      "sha256": "51017a8e343e94c0a30ccf5f11990fb9e4e8123e35803d917df91dc9f6a845d3",
-      "bytes": 319,
-      "head": "f9c31a90388e293c794c2affe055ade5464a4a4f:.methodology/lessons/2026-08-23-fr99-finalization.md:generic-api-key:2\n\n# test_fr99 redact fixtures - synthetic sk- prefixed tokens used to verify the redaction system\n03-development/tests/test_redact.py:generic-api-key:31\n03-development/tests/test_redact.py:generic-api-key:86"
+      "sha256": "b4149a873b57f3f6c89f6fd0cb87e1fa8b1b8930ce5ef613944fc0a2cfc2e1e9",
+      "bytes": 539,
+      "head": "f9c31a90388e293c794c2affe055ade5464a4a4f:.methodology/lessons/2026-08-23-fr99-finalization.md:generic-api-key:2\n\n# test_fr99 redact fixtures - synthetic sk- prefixed tokens used to verify the redaction system\n03-development/tests/test_redact.py:generic-api-key:31\n03-development/tests/test_redact.py:generic-api-key:86\n\n# test_sec_threats synthetic secrets - exercise redaction contract (sk-, postgres://, password=)\n03-development/tests/test_sec_threats.py:generic-api-key:411\n03-development/tests/test_sec_threats.py:generic-api-key:508"
     },
     "mutation_testing::setup.cfg": {
       "source": "setup.cfg (score-altering exclusions)",
       "kind": "file",
-      "sha256": "e708c4e0384ad5266ca6f3ecb04b67d702ff5b0e4451b4e7d5ae71f46b8d965d",
-      "bytes": 191,
-      "head": "[mutmut]\npaths_to_mutate=03-development/src/taskq/repository,03-development/src/taskq/service\nbackup=False\nrunner=python -m pytest -x -q 03-development/tests/\ntests_dir=03-development/tests/"
+      "sha256": "20cdcdc0ae30dc9dc9709df5b5c198948d871e6865b1b8a07894383e8d560ed4",
+      "bytes": 550,
+      "head": "[mutmut]\npaths_to_mutate=03-development/src/taskq/repository/keys,03-development/src/taskq/repository/rate_buckets,03-development/src/taskq/repository/results,03-development/src/taskq/repository/tasks,03-development/src/taskq/repository/units_of_work,03-development/src/taskq/service/auth,03-development/src/taskq/service/metrics,03-development/src/taskq/service/rate_limit,03-development/src/taskq/service/runner,03-development/src/taskq/service/tasks\nbackup=False\nrunner=python -m pytest -x -q 03-development/tests/\ntests_dir=03-development/tests/"
     },
     "test_coverage::pyproject.toml": {
       "source": "pyproject.toml (score-altering exclusions)",
@@ -159,9 +159,9 @@
     "test_coverage::setup.cfg": {
       "source": "setup.cfg (score-altering exclusions)",
       "kind": "file",
-      "sha256": "e708c4e0384ad5266ca6f3ecb04b67d702ff5b0e4451b4e7d5ae71f46b8d965d",
-      "bytes": 191,
-      "head": "[mutmut]\npaths_to_mutate=03-development/src/taskq/repository,03-development/src/taskq/service\nbackup=False\nrunner=python -m pytest -x -q 03-development/tests/\ntests_dir=03-development/tests/"
+      "sha256": "20cdcdc0ae30dc9dc9709df5b5c198948d871e6865b1b8a07894383e8d560ed4",
+      "bytes": 550,
+      "head": "[mutmut]\npaths_to_mutate=03-development/src/taskq/repository/keys,03-development/src/taskq/repository/rate_buckets,03-development/src/taskq/repository/results,03-development/src/taskq/repository/tasks,03-development/src/taskq/repository/units_of_work,03-development/src/taskq/service/auth,03-development/src/taskq/service/metrics,03-development/src/taskq/service/rate_limit,03-development/src/taskq/service/runner,03-development/src/taskq/service/tasks\nbackup=False\nrunner=python -m pytest -x -q 03-development/tests/\ntests_dir=03-development/tests/"
     },
     "linting": {
       "source": ".methodology/gate_evidence/gate3/linting.txt",
