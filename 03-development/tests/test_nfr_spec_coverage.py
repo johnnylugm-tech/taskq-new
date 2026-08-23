@@ -33,10 +33,16 @@ from pathlib import Path
 import pytest
 
 
+# Resolve paths from the project root, not from the mutmut workdir's cwd.
+# See test_nfr07_08_11_lint.py for the same rationale — mutmut invokes
+# pytest from a temp workdir that has no Makefile, alembic dir, etc.
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
+
 # ─── NFR-01: performance budgets ──────────────────────────────────────────
 
 
-def test_nfr01_ac1_get_p95_under_30ms(benchmark):
+def test_nfr01_ac1_get_p95_under_30ms(benchmark, monkeypatch):
     """[NFR-01 AC1] ``GET /v1/tasks/{id}`` p95 < 30 ms over 200 iterations."""
     from fastapi.testclient import TestClient
 
@@ -60,13 +66,21 @@ def test_nfr01_ac1_get_p95_under_30ms(benchmark):
     # request. The benchmark loop exhausts DEFAULT_BURST=20 well before
     # 200 iterations, so without this the test sees 429 instead of 200.
     # The AC under test is GET p95 latency, not rate-limit behaviour.
+    # ``monkeypatch.setattr`` auto-restores on teardown so a subsequent
+    # test (``test_concurrent_rate_bucket_no_overshoot``) sees the real
+    # ``consume(now=now)`` signature and does not crash with
+    # ``unexpected keyword argument 'now'``.
     from taskq.api.middleware import RateLimitMiddleware
     from taskq.service.rate_limit import TokenBucket
 
-    def _always_grant(self) -> bool:  # noqa: ANN001 — bound method
+    def _always_grant(self, **kwargs) -> bool:  # noqa: ANN001 — bound method
+        # Accept the ``now`` kwarg that ``consume_token`` forwards so
+        # the patched method has the same signature as the real one;
+        # otherwise a later test that imports the patched classmethod
+        # crashes with TypeError on the first consume_token call.
         return True
 
-    TokenBucket.consume = _always_grant
+    monkeypatch.setattr(TokenBucket, "consume", _always_grant)
 
     def _do_get() -> None:
         r = client.get(f"/v1/tasks/{task_id}", headers={"X-API-Key": plaintext})
@@ -77,7 +91,7 @@ def test_nfr01_ac1_get_p95_under_30ms(benchmark):
 
 
 
-def test_nfr01_ac2_list_p95_under_80ms(benchmark):
+def test_nfr01_ac2_list_p95_under_80ms(benchmark, monkeypatch):
     """[NFR-01 AC2] ``GET /v1/tasks?limit=50`` p95 < 80 ms over 200 iterations."""
     from fastapi.testclient import TestClient
 
@@ -98,13 +112,14 @@ def test_nfr01_ac2_list_p95_under_80ms(benchmark):
         trepo.create(name=f"perf-list-{i:03d}", command="true")
 
     # See test_nfr01_ac1_get_p95_under_30ms — bypass rate limit so all
-    # 200 benchmark iterations are served.
+    # 200 benchmark iterations are served. ``monkeypatch.setattr`` ensures
+    # the original ``TokenBucket.consume`` is restored on teardown.
     from taskq.service.rate_limit import TokenBucket
 
-    def _always_grant(self) -> bool:  # noqa: ANN001 — bound method
+    def _always_grant(self, **kwargs) -> bool:  # noqa: ANN001 — bound method
         return True
 
-    TokenBucket.consume = _always_grant
+    monkeypatch.setattr(TokenBucket, "consume", _always_grant)
 
     def _do_list() -> None:
         r = client.get("/v1/tasks?limit=50", headers={"X-API-Key": plaintext})
@@ -263,20 +278,36 @@ def test_nfr02_ac5_error_body_no_stack_sql_path():
 
 def test_nfr03_ac4_db_failure_readyz_503(monkeypatch):
     """[NFR-03 AC4] ``/readyz`` returns 503 when the DB is unreachable."""
+    # The shared in-memory engine is built once and cached at module import
+    # time, so a TASKQ_SQLALCHEMY_URL setenv has no effect on it. Reach
+    # into the engine module and swap ``_engine`` for one that points at a
+    # non-existent SQLite file so connect fails — that's what /readyz is
+    # meant to detect (NFR-03 fail-closed).
+    import taskq.repository.tasks as _tasks_mod
+    from sqlalchemy import create_engine
+    from sqlalchemy.pool import StaticPool
+
     from fastapi.testclient import TestClient
 
     from taskq.api.app import create_app
 
+    bad_engine = create_engine(
+        "sqlite:///nonexistent_dir_xyz_12345/foo.db",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    monkeypatch.setattr(_tasks_mod, "_engine", bad_engine)
     app = create_app()
     client = TestClient(app)
-    # Point the engine at a non-existent SQLite file path so connect fails.
-    monkeypatch.setenv("TASKQ_SQLALCHEMY_URL", "sqlite:///file:does-not-exist.db?mode=ro")
     r = client.get("/readyz")
     assert r.status_code == 503
     body = r.json()
-    assert "db_unreachable" in (body.get("detail") or "").lower() or body.get("type", "").endswith(
-        "db_unreachable"
-    )
+    # /readyz's 503 body names the failed checks (NFR-03 fail-closed):
+    # detail = "readiness check(s) failed: db, alembic" and
+    # failed_checks = ["db", "alembic"]. Accept either form.
+    detail = (body.get("detail") or "").lower()
+    failed = body.get("failed_checks") or []
+    assert "db" in failed or "db" in detail, body
 
 
 
@@ -304,7 +335,7 @@ def test_nfr03_ac6_migration_failure_rolls_back(monkeypatch, tmp_path):
 
     reset_db()
     cfg = AlembicConfig()
-    cfg.set_main_option("script_location", str(Path("03-development/src/taskq/migrations")))
+    cfg.set_main_option("script_location", str(_PROJECT_ROOT / "03-development/src/taskq/migrations"))
     # Capture state before the failing upgrade. The ``alembic_version`` table
     # is created by ``alembic upgrade``, NOT by ``reset_db``; the test
     # environment starts with no row (and no table). Read via a
@@ -417,7 +448,7 @@ def test_nfr09_ac5_real_sqlite_file_migration_test(tmp_path):
 
     engine = create_engine(db_url)
     cfg = AlembicConfig()
-    cfg.set_main_option("script_location", str(Path("03-development/src/taskq/migrations")))
+    cfg.set_main_option("script_location", str(_PROJECT_ROOT / "03-development/src/taskq/migrations"))
     cfg.set_main_option("sqlalchemy.url", db_url)
 
     command.upgrade(cfg, "head")
@@ -439,7 +470,7 @@ def test_nfr09_ac5_real_sqlite_file_migration_test(tmp_path):
 def test_nfr12_ac1_makefile_verify_system_target_chain():
     """[NFR-12 AC1] ``make verify-system`` chains upgrade → tests → smoke → migration roundtrip."""
     # Inspect the Makefile; confirm it wires the 4 declared steps.
-    makefile = Path("Makefile").read_text()
+    makefile = (_PROJECT_ROOT / "Makefile").read_text()
     for step in ("migrate-roundtrip", "test", "uvicorn", "healthz", "readyz"):
         assert step in makefile, f"Makefile missing step {step!r}"
     # And the rule name itself.
@@ -498,7 +529,7 @@ def test_system_round_trip_migration_full_chain(tmp_path):
     db_url = f"sqlite:///{db_path}"
     engine = create_engine(db_url)
     cfg = AlembicConfig()
-    cfg.set_main_option("script_location", str(Path("03-development/src/taskq/migrations")))
+    cfg.set_main_option("script_location", str(_PROJECT_ROOT / "03-development/src/taskq/migrations"))
     cfg.set_main_option("sqlalchemy.url", db_url)
 
     command.upgrade(cfg, "head")

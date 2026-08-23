@@ -38,13 +38,12 @@ service/runner; NFR-03.
 from __future__ import annotations
 
 import asyncio
-import collections
 import logging
 import os
 import shlex
 import time
 from datetime import datetime, timezone
-from typing import Any, Deque, Dict, Optional, Set, Tuple, cast
+from typing import Any, Dict, Optional, Tuple, cast
 
 
 # =============================================================================

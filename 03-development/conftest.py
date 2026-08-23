@@ -166,6 +166,89 @@ def _install_asgi_handle_request() -> None:
 _install_asgi_handle_request()
 
 
+# ---- benchmark fixture fallback ----
+# pytest-benchmark auto-registers the ``benchmark`` fixture via entry-point,
+# so a normal ``pytest`` invocation sees it. The mutation harness however
+# sets ``PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`` and only re-enables plugins it
+# can detect by token in the runner — pytest-benchmark's ``benchmark``
+# fixture is NOT detected, so the three benchmark tests
+# (``test_bench_list_default``, ``test_nfr01_ac1_get_p95_under_30ms``,
+# ``test_nfr01_ac2_list_p95_under_80ms``) error with
+# ``fixture 'benchmark' not found`` and break the mutation precheck.
+#
+# Provide a stub fixture that calls the callable once and returns the
+# callable's result verbatim — pytest-benchmark does the same
+# (``benchmark(callable)`` returns the callable's return value). The
+# NFR-01 perf tests only inspect ``result``, so the stub keeps the
+# baseline precheck green without inventing numbers. The ``performance``
+# dimension is measured separately by the framework's pytest-benchmark
+# invocation, which loads the real plugin and reads
+# ``.sessi-work/benchmark_report.json``.
+#
+# The stub defers to the real pytest-benchmark plugin when it IS loaded.
+# Detected at fixture-resolution time via the pluginmanager so the
+# stub never overrides the real BenchmarkFixture (whose teardown hook
+# otherwise aborts with a TypeError on the stub instance).
+#
+# NOTE: pytest inspects the fixture function's bytecode to decide
+# whether it is a generator-fixture (``yield`` somewhere) or a plain
+# ``return`` fixture. Mixing both shapes in one function forces every
+# branch into generator mode and breaks the no-plugin path with
+# ``benchmark did not yield a value``. Two distinct fixtures handle
+# the dispatch via the ``_pick_benchmark`` helper, which itself uses
+# ``return`` so neither path is a generator at the public name.
+def _pick_benchmark(request):
+    """Return ``True`` iff pytest-benchmark's plugin is loaded."""
+    return request.config.pluginmanager.hasplugin("benchmark")
+
+
+@pytest.fixture
+def _real_benchmark(request):
+    """Generator-fixture variant: yield a real BenchmarkFixture. Only
+    invoked when pytest-benchmark is loaded AND the stub's
+    ``_pick_benchmark`` short-circuits the lookup."""
+
+    from pytest_benchmark.fixture import BenchmarkFixture
+
+    bs = request.config._benchmarksession
+    fixture = BenchmarkFixture(
+        request.node,
+        add_stats=bs.benchmarks.append,
+        logger=bs.logger,
+        warner=request.node.warn,
+        disabled=bs.disabled,
+        **dict(bs.options),
+    )
+    yield fixture
+    fixture._cleanup()
+
+
+@pytest.fixture
+def _stub_benchmark():
+    """Plain (non-generator) fixture: returns a callable stub.
+
+    The stub runs the target once with no warmup and returns its
+    return value verbatim. Callers that unpack ``result, _ = benchmark(...)``
+    work because the return shape matches the real plugin's.
+    """
+
+    def _stub(callable_, *args, **kwargs):
+        return callable_(*args, **kwargs)
+
+    return _stub
+
+
+@pytest.fixture
+def benchmark(request, _stub_benchmark):
+    """Public ``benchmark`` name — dispatches to real or stub."""
+    if _pick_benchmark(request):
+        # Real plugin loaded; pull its BenchmarkFixture via the runtime
+        # request (avoids resolving ``_real_benchmark`` in the no-plugin
+        # path, where its ``_benchmarksession`` lookup would AttributeError).
+        return request.getfixturevalue("_real_benchmark")
+    return _stub_benchmark
+
+
 @pytest.fixture(autouse=True)
 def _reset_taskq_db():
     """Drop + recreate all ORM tables before every test.

@@ -1,6 +1,6 @@
 {
   "errors": [],
-  "generated_at": "2026-08-23T11:39:00Z",
+  "generated_at": "2026-08-23T14:03:25Z",
   "metrics": {
     "03-development/src/taskq/__init__.py": {
       "CONFIDENCE.HIGH": 0,
@@ -115,7 +115,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 131,
+      "loc": 122,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -336,7 +336,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 3,
+      "loc": 20,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -509,6 +509,19 @@
       "nosec": 0,
       "skipped_tests": 0
     },
+    "03-development/src/taskq/service/executor.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 234,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
     "03-development/src/taskq/service/metrics.py": {
       "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
@@ -544,7 +557,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 402,
+      "loc": 212,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -570,7 +583,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 3410,
+      "loc": 3462,
       "nosec": 0,
       "skipped_tests": 0
     }

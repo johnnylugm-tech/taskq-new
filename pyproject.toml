@@ -36,16 +36,6 @@ addopts = [
     # while still letting the suite finish inside the harness's 120s
     # budget. They are NOT deselected here on purpose: ``--deselect``
     # would HIDE them from junit-xml and re-break 4a.
-    #
-    # The two NFR-01 ``benchmark``-fixture tests bootstrap an admin API
-    # key BEFORE the conftest autouse fixture (which resets a different
-    # in-memory SQLite engine) and trip
-    # ``sqlite3.OperationalError: no such table: api_keys``. They are the
-    # only ``benchmark``-fixture tests besides ``test_bench_list_default``
-    # so deselecting them keeps the benchmark-only run exit-0 and the
-    # scorer reads the JSON.
-    "--deselect=03-development/tests/test_nfr_spec_coverage.py::test_nfr01_ac1_get_p95_under_30ms",
-    "--deselect=03-development/tests/test_nfr_spec_coverage.py::test_nfr01_ac2_list_p95_under_80ms",
 ]
 
 [tool.coverage.run]

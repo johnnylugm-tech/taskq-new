@@ -1,14 +1,14 @@
 # Harness-executed: pytest-cov
-# returncode: 1
-# agent_score: 95.3 | threshold: 80.0
+# returncode: 0
+# agent_score: 100.0 | threshold: 80.0
 
 ........................................................................ [ 21%]
 ........................................................................ [ 43%]
 ........................................................................ [ 65%]
-........................................................................ [ 87%]
-.......................F..................                               [100%]
+........................................................................ [ 86%]
+............................................                             [100%]
 =============================== warnings summary ===============================
-03-development/tests/test_nfr_spec_coverage.py::test_nfr02_ac4_403_no_resource_existence_leak
+03-development/tests/test_nfr_spec_coverage.py::test_nfr01_ac1_get_p95_under_30ms
   /Users/johnny/projects/taskq-new/.venv/lib/python3.11/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
     from starlette.testclient import TestClient as TestClient  # noqa
 
@@ -60,20 +60,20 @@ Name                                                                            
 03-development/src/taskq/service/executor.py                                              98      0   100%
 03-development/src/taskq/service/metrics.py                                               21      0   100%
 03-development/src/taskq/service/rate_limit.py                                            50      0   100%
-03-development/src/taskq/service/runner.py                                                87      0   100%
+03-development/src/taskq/service/runner.py                                                86      0   100%
 03-development/src/taskq/service/tasks.py                                                 36      0   100%
 --------------------------------------------------------------------------------------------------------------------
-TOTAL                                                                                   1279      0   100%
+TOTAL                                                                                   1278      0   100%
 
------------------------------------------------------ benchmark: 1 tests -----------------------------------------------------
-Name (time in us)                Min       Max      Mean  StdDev    Median     IQR  Outliers  OPS (Kops/s)  Rounds  Iterations
-------------------------------------------------------------------------------------------------------------------------------
-test_bench_list_default     125.5840  257.5000  131.2639  8.3991  129.5625  2.7920     47;76        7.6182     882           1
-------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------- benchmark: 3 tests --------------------------------------------------------------------------------------------------
+Name (time in us)                             Min                   Max                  Mean              StdDev                Median                 IQR            Outliers         OPS            Rounds  Iterations
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_bench_list_default                  126.9170 (1.0)        272.2500 (1.0)        131.8214 (1.0)        7.9141 (1.0)        130.2500 (1.0)        2.5420 (1.0)         40;61  7,586.0243 (1.0)         768           1
+test_nfr01_ac1_get_p95_under_30ms      4,268.0000 (33.63)    6,252.2920 (22.97)    4,435.3549 (33.65)    210.5508 (26.60)    4,393.5420 (33.73)    105.1880 (41.38)       11;11    225.4611 (0.03)        189           1
+test_nfr01_ac2_list_p95_under_80ms     5,196.7500 (40.95)    7,833.0000 (28.77)    5,348.6277 (40.57)    238.0367 (30.08)    5,306.2500 (40.74)     91.6560 (36.06)        9;12    186.9638 (0.02)        151           1
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Legend:
   Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
   OPS: Operations Per Second, computed as 1 / Mean
-=========================== short test summary info ============================
-FAILED 03-development/tests/test_nfr_spec_coverage.py::test_nfr03_ac4_db_failure_readyz_503
-1 failed, 329 passed, 2 deselected, 1 warning in 26.41s
+332 passed, 1 warning in 27.61s
