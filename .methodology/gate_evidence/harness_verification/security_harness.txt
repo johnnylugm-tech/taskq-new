@@ -4,7 +4,7 @@
 
 {
   "errors": [],
-  "generated_at": "2026-08-23T16:07:42Z",
+  "generated_at": "2026-08-23T16:09:31Z",
   "metrics": {
     "/Users/johnny/projects/taskq-new/03-development/src/taskq/__init__.py": {
       "CONFIDENCE.HIGH": 0,
@@ -366,7 +366,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 41,
+      "loc": 40,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -600,7 +600,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 3472,
+      "loc": 3471,
       "nosec": 0,
       "skipped_tests": 0
     }
