@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 5,
-  "fr_id": "FR-06",
+  "fr_id": "FR-07",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -16,26 +16,26 @@
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.191}}",
+      "tool_evidence": "{\"version\":\"1.1.409\",\"time\":\"1787510005101\",\"generalDiagnostics\":[],\"summary\":{\"filesAnalyzed\":45,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.192}}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 45,
+      "tests_passed": 9,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "03-development/tests/test_fr06.py .....................                  [ 46%]\n03-development/tests/test_fr01.py ........................               [100%]\n============================== 45 passed in 1.45s ==============================\ncoverage: 100% (148/148 statements covered, 0 missing)",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-06.txt",
+      "tool_evidence": "============================== 9 passed in 0.77s ===============================; coverage 100% (74/74 lines) across taskq.migrations.versions (v1_initial_tasks_api_keys, v2_add_tags_task_tags_unique, v3_split_result_json_to_task_results); spec_cov_pct=100% (7/7 required test functions present)",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-07.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-06",
+      "coverage_scope_fr": "FR-07",
       "score_source": "framework"
     },
     "architecture_constraints": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "Analyzed 44 files, 62 dependencies.\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\nContracts: 3 kept, 0 broken.",
+      "tool_evidence": "Analyzed 44 files, 62 dependencies. fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT. Contracts: 3 kept, 0 broken.",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
     }
@@ -85,23 +85,23 @@
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "bb5887d260527f0a07c5d480716e76ecaecd864204a399079dfe03788e22fbcf",
-      "bytes": 135,
-      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.191}}"
+      "sha256": "dc78a3ffc8f4d80c0ac292be67b5c6c441fe49b36c50db6ca3522382230954ac",
+      "bytes": 170,
+      "head": "{\"version\":\"1.1.409\",\"time\":\"1787510005101\",\"generalDiagnostics\":[],\"summary\":{\"filesAnalyzed\":45,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.192}}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "39068d0bd4858b17b34f1f20ce540ef32ca475a612cb0441e867416abc9f4b91",
+      "sha256": "f6f915ffc0485121fa38b1156577c96f0947a6396129b61de5dc8ee053c1a425",
       "bytes": 295,
-      "head": "03-development/tests/test_fr06.py .....................                  [ 46%]\n03-development/tests/test_fr01.py ........................               [100%]\n============================== 45 passed in 1.45s ==============================\ncoverage: 100% (148/148 statements covered, 0 missing)"
+      "head": "============================== 9 passed in 0.77s ===============================; coverage 100% (74/74 lines) across taskq.migrations.versions (v1_initial_tasks_api_keys, v2_add_tags_task_tags_unique, v3_split_result_json_to_task_results); spec_cov_pct=100% (7/7 required test functions present)"
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "d46c477f66450ecfac69b62e10050bd6bd97425c8379939ddff482b94223bfe9",
-      "bytes": 146,
-      "head": "Analyzed 44 files, 62 dependencies.\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\nContracts: 3 kept, 0 broken."
+      "sha256": "cdc81d804ce8366ebeda875c63efddc0026ab4a41317f6133956347978350bd3",
+      "bytes": 149,
+      "head": "Analyzed 44 files, 62 dependencies. fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT. Contracts: 3 kept, 0 broken."
     }
   },
   "composite_score": 100.0,
