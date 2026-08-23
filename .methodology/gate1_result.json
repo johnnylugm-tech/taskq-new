@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 8,
-  "fr_id": "FR-09",
+  "fr_id": "FR-10",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -16,26 +16,26 @@
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.194}}",
+      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0}}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 21,
+      "tests_passed": 62,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "21 passed in 0.23s. Coverage: percent_covered=100.0 (health.py: 51/51, metrics.py routes: 8/8, metrics.py service: 21/21). All required FR-09 tests present (3/3): test_fr09_ac1_healthz_returns_200_status_ok, test_fr09_ac2_readyz_db_and_alembic_head_check, test_fr09_ac3_metrics_admin_scope.",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-09.txt",
+      "tool_evidence": "62 passed in 4.20s; coverage 100% on middleware.py & schemas.py (124/124 statements); 12/12 spec tests required, all present and passing",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-10.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-09",
+      "coverage_scope_fr": "FR-10",
       "score_source": "framework"
     },
     "architecture_constraints": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers, fr01-config-errors-independence, fr01-root-independence all KEPT)",
+      "tool_evidence": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers, fr01-config-errors-independence, fr01-root-independence)",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
     }
@@ -85,23 +85,23 @@
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "90769808c8c73733c36625ac3abbd486577938abfb6390260a57a5b8aa3219bb",
-      "bytes": 135,
-      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.194}}"
+      "sha256": "de7a934988399367a305e4de9a70e12f5fbb2b230a734b4e4fbb0f588f571031",
+      "bytes": 115,
+      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0}}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "d1a7f878406520f6b38ca8fe3892ea6e0e974f83a5c2c543f608d3a0434daaaf",
-      "bytes": 290,
-      "head": "21 passed in 0.23s. Coverage: percent_covered=100.0 (health.py: 51/51, metrics.py routes: 8/8, metrics.py service: 21/21). All required FR-09 tests present (3/3): test_fr09_ac1_healthz_returns_200_status_ok, test_fr09_ac2_readyz_db_and_alembic_head_check, test_fr09_ac3_metrics_admin_scope."
+      "sha256": "8013c3a3214a44f59cf811160aedc7075e5d107ccdc68d8062cfef86e94aa985",
+      "bytes": 136,
+      "head": "62 passed in 4.20s; coverage 100% on middleware.py & schemas.py (124/124 statements); 12/12 spec tests required, all present and passing"
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "86e6da8bf5696f739c69118d7fe2eaead23da552927773fd36864a26a61b1a8c",
-      "bytes": 144,
-      "head": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers, fr01-config-errors-independence, fr01-root-independence all KEPT)"
+      "sha256": "6acd6348155a67ec7b600a170311bb7e0b6d24c8d51be2d4ac09f41d9b4f7a1f",
+      "bytes": 135,
+      "head": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers, fr01-config-errors-independence, fr01-root-independence)"
     }
   },
   "composite_score": 100.0,
