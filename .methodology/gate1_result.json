@@ -1,7 +1,7 @@
 {
   "gate": 1,
-  "phase": 4,
-  "fr_id": "FR-99",
+  "phase": 5,
+  "fr_id": "FR-01",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -9,33 +9,33 @@
     "linting": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "$ python3 -m ruff check 03-development/src/ --extend-ignore RUF001,RUF002,RUF003\nAll checks passed!\n",
+      "tool_evidence": "All checks passed!",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/linting_harness.txt"
     },
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\":\"1.1.409\",\"summary\":{\"filesAnalyzed\":42,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.192},\"generalDiagnostics\":[]}",
+      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.232}}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 2,
+      "tests_passed": 65,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "collected 2 items\n03-development/tests/test_fr99.py ..                                     [100%]\n============================== 2 passed in 0.14s ===============================\nCoverage: {\"totals\":{\"covered_lines\":8,\"num_statements\":8,\"percent_covered\":100.0,\"missing_lines\":0}}",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-99.txt",
+      "tool_evidence": "65 passed in 1.66s\n============================== test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2, pluggy-1.6.0\nrootdir: /Users/johnny/projects/taskq-new\nconfigfile: pyproject.toml\ncollected 65 items\n\n03-development/tests/test_fr01.py ........................               [ 36%]\n03-development/tests/test_fr06.py .....................                  [ 69%]\n03-development/tests/test_fr10.py ....................                   [100%]\n\n============================== 65 passed in 1.66s ==============================\nCoverage JSON: totals percent_covered=100.0 (219/219 statements, 0 missing_lines) across all 4 FR source files",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-01.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-99",
+      "coverage_scope_fr": "FR-01",
       "score_source": "framework"
     },
     "architecture_constraints": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "Import Linter — Analyzed 41 files, 55 dependencies.\nContracts: 3 kept, 0 broken.\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\n",
+      "tool_evidence": "Analyzed 44 files, 62 dependencies.\nContracts: 3 kept, 0 broken.\n- fr01-layers KEPT\n- fr01-config-errors-independence KEPT\n- fr01-root-independence KEPT",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
     }
@@ -64,8 +64,8 @@
     "test_coverage::pyproject.toml": {
       "source": "pyproject.toml (score-altering exclusions)",
       "kind": "file",
-      "sha256": "8f6d3b129d04cb0a08c85293ccc7f7bb83a7da7f183a35a1f4c7418a9354ebc6",
-      "bytes": 2198,
+      "sha256": "120f50a5f7e46a9d38b48280ffde889435f72bb9eaec48600fa9f12624439740",
+      "bytes": 2524,
       "head": "# taskq-new — pyproject.toml\n#\n# Pin pytest discovery to the project test directory so the harness-side\n# pytest-cov and pytest-benchmark invocations do NOT collect\n# `harness/tests/*` (the vendored harness method library) from the project\n# root. Without this, `pytest` invoked bare from `/Users/johnny/projects/taskq-new`\n# collects the harness test suite alongside the project's own, and either\n# times out (pytest-cov at 120s) or fails collection (pytest-benchmark trips\n# on a harness test referencing fixtures that do not exist in this layout).\n#\n# See harness/core/quality_gate/cross_artifact.py:481 and the tool_runners\n# pytest invocation paths for why this matters at the gate level.\n#\n# `[tool.coverage.run]` scopes coverage measurement to the project's own\n# source tree. The harness invokes `pytest --cov=.` from the project root\n# (harness/core/quality_gate/cross_artifact.py:481); without a `source`\n# constraint that would measure everything under `.` — including the\n# vendored harness/, all of `.methodology/`, etc. — and blow past the\n# 120s budget on a 1000+ file tree. With `source = [\"03-development/src\"]`\n# coverage only instruments the project's actual source, so the run"
     },
     "test_coverage::setup.cfg": {
@@ -78,30 +78,30 @@
     "linting": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "fad7bf8fec552781f58e1c0ffeca42f9112045994a8b691d1b407d6151442b6f",
-      "bytes": 99,
-      "head": "$ python3 -m ruff check 03-development/src/ --extend-ignore RUF001,RUF002,RUF003\nAll checks passed!"
+      "sha256": "f0d0b1081d9d3ebb26c4c93543053ecdc0a58998f22c071dc4ddb26021b57645",
+      "bytes": 18,
+      "head": "All checks passed!"
     },
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "9121c34f9fc97a8f121133cdf5ccf21c1059b84050b0d1cf8c59fc3177265ce0",
-      "bytes": 147,
-      "head": "{\"version\":\"1.1.409\",\"summary\":{\"filesAnalyzed\":42,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.192},\"generalDiagnostics\":[]}"
+      "sha256": "fda2e5d3d1af094a073fbcdd3bc33cab601ca58d02bc76c3b4fd3e5d1029d847",
+      "bytes": 135,
+      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.232}}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "17f7d7b03e7f48b19a71ff1fd395f2ac762d5cd156d4af76b3956ba349bf7cda",
-      "bytes": 280,
-      "head": "collected 2 items\n03-development/tests/test_fr99.py ..                                     [100%]\n============================== 2 passed in 0.14s ===============================\nCoverage: {\"totals\":{\"covered_lines\":8,\"num_statements\":8,\"percent_covered\":100.0,\"missing_lines\":0}}"
+      "sha256": "96af69cc5c72e7e545914b17e292dce000ca2215736b8071a105b9d1a363232e",
+      "bytes": 684,
+      "head": "65 passed in 1.66s\n============================== test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2, pluggy-1.6.0\nrootdir: /Users/johnny/projects/taskq-new\nconfigfile: pyproject.toml\ncollected 65 items\n\n03-development/tests/test_fr01.py ........................               [ 36%]\n03-development/tests/test_fr06.py .....................                  [ 69%]\n03-development/tests/test_fr10.py ....................                   [100%]\n\n============================== 65 passed in 1.66s ==============================\nCoverage JSON: totals percent_covered=100.0 (219/219 statements, 0 missing_lines) across all 4 FR source files"
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "b5e261ff1fb6c472c90a87e8d2c2eceaed0e8651f926b3fce81a7b91b8a7df06",
-      "bytes": 164,
-      "head": "Import Linter — Analyzed 41 files, 55 dependencies.\nContracts: 3 kept, 0 broken.\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT"
+      "sha256": "ddb01e681a81fe48daf11821060908209284d6e3567822644bb63efd7fb3c853",
+      "bytes": 152,
+      "head": "Analyzed 44 files, 62 dependencies.\nContracts: 3 kept, 0 broken.\n- fr01-layers KEPT\n- fr01-config-errors-independence KEPT\n- fr01-root-independence KEPT"
     }
   },
   "composite_score": 100.0,
