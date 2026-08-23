@@ -863,6 +863,29 @@ def test_coverage_task_repository_list_limit_clamped():
     assert len(rows) == 1, f"expected negative limit to clamp to 1, got {len(rows)}"
 
 
+def test_coverage_task_repository_list_limit_cap_raises():
+    """Cover ``TaskRepository.list`` upper-limit guard (tasks.py:201-202).
+
+    The repository caps ``limit`` at 200 and MUST raise ``ValueError`` for
+    any larger page request — this is the defense-in-depth the service
+    layer relies on (the public API enforces ``MAX_LIMIT=200`` too, but
+    the repository is the final backstop for callers that bypass the
+    service).
+    """
+    import pytest
+
+    from taskq.repository.tasks import TaskRepository
+
+    repo = TaskRepository()
+
+    # Exactly the cap is allowed; anything strictly above raises.
+    with pytest.raises(ValueError, match="limit must be <= 200"):
+        repo.list(limit=201)
+
+    with pytest.raises(ValueError, match="limit must be <= 200"):
+        repo.list(limit=10_000)
+
+
 def test_coverage_task_repository_list_status_filter():
     """Cover ``TaskRepository.list`` status filter (tasks.py:215-216).
 
