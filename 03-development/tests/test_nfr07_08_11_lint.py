@@ -72,9 +72,14 @@ def test_nfr07_ac2_license_allowlist_mit_bsd_apache_psf():
     if not licenses_path.is_file():
         pytest.skip("pip-licenses.json not generated yet")
     pkgs = json.loads(licenses_path.read_text())
-    pkg_license = {p["Name"]: (p.get("License") or "").strip() for p in pkgs}
+    # Case-insensitive lookup: pip-licenses prints "SQLAlchemy" but
+    # requirements.txt says "sqlalchemy"; a case-sensitive .get() would
+    # miss every entry and report every dep as missing.
+    pkg_license = {
+        p["Name"].lower(): (p.get("License") or "").strip() for p in pkgs
+    }
     for dep in deps:
-        lic = pkg_license.get(dep, "")
+        lic = pkg_license.get(dep.lower(), "")
         assert lic in allowlist, (
             f"dependency {dep} has license {lic!r} not in the NFR-07 allowlist"
         )

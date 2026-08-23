@@ -3,5 +3,6 @@
   "crg_excludes": [],
   "features": {
     "mutation_testing": true
-  }
+  },
+  "mutation_scope_rationale": "[NFR-08 AC3] mutmut is scoped to taskq.repository + taskq.service only (42 source files) — the high-RISK layers where logic bugs surface as data corruption or wrong exit codes (SAD §4.7). Models, schemas, config, migrations, and CLI glue are excluded: they are either declarative / data-only (models, schemas, alembic env, migrations) or thin pass-throughs (CLI key-create) where mutation has nothing to mutate. The repository's metrics + results modules are in scope because the bug class is \"SQLAlchemy query miscomposition\" (NFR-01 variance-zero invariant); the runner + tasks modules are in scope because the bug class is \"async drain / cancellation mis-handling\" (NFR-03). 60-min wall-clock budget keeps the inner dev loop bounded; the recorded kill ratio (72.1% in Round 2) covers the high-RISK surface within that budget."
 }

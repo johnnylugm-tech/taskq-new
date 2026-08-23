@@ -65,47 +65,30 @@ def is_db_reachable() -> bool:
 
 
 def alembic_current_is_head() -> bool:
-    """Return ``True`` iff the alembic_version table holds the head revision.
+    """Return True iff the alembic_version table holds the head revision.
 
-    Reads ``alembic_version.version_num`` and compares it against the
-    head revision reported by ``alembic.script.ScriptDirectory`` over
-    the on-disk migration files. Any I/O or parsing error maps to
-    ``False`` so a freshly-deployed-but-unmigrated binary reports
-    "not ready" (SPEC §3 FR-09, §8 #10, §8 #11; NFR-03 fail-closed).
-
-    The ``alembic_version`` table is created by the alembic migration
-    runner, NOT by ``Base.metadata.create_all``. When no migrations
-    have been applied yet (e.g. an in-process test that creates the
-    schema directly from the ORM) the table is absent — we treat
-    that as "no recorded revision, nothing to drift away from head"
-    and return ``True`` so the readiness probe stays green. A row
-    that exists but does NOT match the head revision is still
-    ``False`` so the deployed-but-unmigrated invariant from SPEC
-    §8 #10 / #8 #11 is preserved.
-
-    The test fixture overrides this with a stub returning ``True`` so
-    AC-9.2 exercises the happy path in-process regardless of which
-    probe-shape the implementation chose.
+    Compares ``alembic_version.version_num`` against the head revision
+    reported by ``alembic.script.ScriptDirectory`` over the on-disk
+    migration files. Any I/O or parsing error maps to ``False`` so a
+    freshly-deployed-but-unmigrated binary reports "not ready"
+    (SPEC §3 FR-09, §8 #10/#11; NFR-03 fail-closed). A missing
+    ``alembic_version`` table is treated as ``True`` (nothing has
+    drifted away from head) so in-process tests that build the schema
+    from the ORM stay green; a row that exists but does NOT match the
+    head revision is still ``False`` so the deploy-but-unmigrated
+    invariant is preserved.
     """
     try:
         engine = get_engine()
         if "alembic_version" not in inspect(engine).get_table_names():
-            # No migration has ever been recorded on this database.
-            # Treat as "nothing has drifted" — return True. Production
-            # environments with an explicit ``alembic upgrade`` history
-            # always create this table, so the deploy-but-unmigrated
-            # invariant is preserved by the row-exists-but-mismatch
-            # branch below.
-            return True
+            return True  # No migration recorded; nothing to drift.
         with engine.connect() as conn:
             row = conn.execute(
                 text("SELECT version_num FROM alembic_version LIMIT 1")
             ).first()
         if row is None or not row[0]:
             return True
-        current = str(row[0])
-        head = _alembic_head_revision()
-        return current == head
+        return str(row[0]) == _alembic_head_revision()
     except Exception:
         return False
 

@@ -97,15 +97,7 @@ def trigger_run(
     tasks_repo: TaskRepository = Depends(_get_tasks_repo),
     results_repo: TaskResultRepository = Depends(_get_results_repo),
 ) -> Dict[str, Any]:
-    """AC-2.1 — POST /v1/tasks/{id}/run returns 202 + run_id.
-
-    The handler does NOT block on subprocess exit (NFR-03); the actual
-    execution is scheduled via FastAPI's BackgroundTasks, which runs in
-    the threadpool AFTER the 202 response is sent. The HTTP-layer
-    contract is preserved by inserting a pending ``task_results`` row
-    at trigger time so the GET endpoint can list runs in trigger order
-    even before the subprocess finishes.
-    """
+    """AC-2.1 — POST /v1/tasks/{id}/run returns 202 + run_id (NFR-03: non-blocking)."""
     try:
         task = tasks_repo.get(task_id)
     except TaskNotFound as exc:
@@ -118,34 +110,38 @@ def trigger_run(
 
     run_id = str(uuid.uuid4())
     command = task.get("command", "")
-    # Insert a pending row at trigger time so the GET endpoint can
-    # list runs newest-first by ``created_at`` (set now) even when the
-    # subprocess completes out of order.
     results_repo.create_pending_result(
         task_id=task_id, run_id=run_id, command=command
     )
-
-    def _run_and_persist() -> None:
-        """Background-thread body: execute + persist outcome to the same row.
-
-        The runner's ``terminal`` string (``done`` / ``failed`` / ``timeout``)
-        is forwarded as the persisted ``status`` so AC-2.3's ``timeout``
-        terminal state is preserved in ``task_results`` instead of being
-        collapsed to ``failed`` by an exit-code heuristic.
-        """
-        result = TaskRunner().run(task_id=task_id, command=command)
-        results_repo.update_result(
-            run_id=run_id,
-            exit_code=result["exit_code"],
-            stdout_tail=result["stdout_tail"],
-            stderr_tail=result["stderr_tail"],
-            duration_ms=result["duration_ms"],
-            finished_at=result["finished_at"],
-            status=result["terminal"],
-        )
-
-    background_tasks.add_task(_run_and_persist)
+    background_tasks.add_task(
+        lambda: _execute_and_persist(task_id, command, run_id, results_repo)
+    )
     return {"run_id": run_id}
+
+
+def _execute_and_persist(
+    task_id: str,
+    command: str,
+    run_id: str,
+    results_repo: TaskResultRepository,
+) -> None:
+    """Background-thread body: execute the task and persist outcome (FR-02 AC-2.3).
+
+    The runner's ``terminal`` string (``done``/``failed``/``timeout``) is
+    forwarded as the persisted ``status`` so AC-2.3's ``timeout`` terminal
+    state is preserved in ``task_results`` instead of being collapsed to
+    ``failed`` by an exit-code heuristic.
+    """
+    result = TaskRunner().run(task_id=task_id, command=command)
+    results_repo.update_result(
+        run_id=run_id,
+        exit_code=result["exit_code"],
+        stdout_tail=result["stdout_tail"],
+        stderr_tail=result["stderr_tail"],
+        duration_ms=result["duration_ms"],
+        finished_at=result["finished_at"],
+        status=result["terminal"],
+    )
 
 
 def list_runs(

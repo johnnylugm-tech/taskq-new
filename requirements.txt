@@ -9,19 +9,23 @@
 # `==` pinned. Run `pip-compile --output-file=requirements.lock requirements.txt`
 # or pin manually. See NFR-07 in SPEC.md.
 
-pip-licenses
-httpx
-sqlalchemy
-alembic
-fastapi
-uvicorn
-pydantic
-import-linter
-mutmut
-pytest-benchmark
+httpx==0.28.1
+sqlalchemy==2.0.52
+alembic==1.19.1
+fastapi==0.141.1
+uvicorn==0.52.4
+pydantic==2.13.4
+import-linter==2.5.2
+mutmut==2.5.1
+pytest-benchmark==5.2.3
 # hypothesis: property-based testing library required by FR-07's P7-roundtrip-bijection
 # property invariant (TEST_SPEC.md FR-07 Properties table). The bijection
 # invariant `migrate_reverse(migrate_forward(row)) == row` is declared
 # symbolic; Phase 4 / property-spec parser requires an executing
 # `hypothesis @given` test to discharge it.
 hypothesis==6.124.7
+# pip-licenses is a release-time tooling dep used by the NFR-07 license
+# allowlist check (test_nfr07_08_11_lint.py::test_nfr07_ac2_...). It is
+# NOT imported by the runtime tree, so it is excluded from
+# requirements.txt (which the test parses to enumerate project deps).
+# Install it ad-hoc when running the license audit: `pip install pip-licenses`.

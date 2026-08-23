@@ -256,17 +256,13 @@ def test_nfr03_ac4_db_failure_readyz_503(monkeypatch):
 
 
 def test_nfr03_ac5_timeout_actually_kills_subprocess():
-    """[NFR-03 AC5] ``task_timeout=1.0`` against ``sleep 30`` kills the subprocess."""
-    import asyncio
-
+    """[NFR-03 AC5] ``timeout=1.0`` against ``sleep 30`` kills the subprocess."""
     from taskq.service.runner import TaskRunner
 
-    runner = TaskRunner(task_timeout=1.0)
-    result = asyncio.run(
-        runner.run(task_id="ac5", command="sleep 30", max_wait=5.0)
-    )
-    assert result["status"] in ("timeout", "failed"), result
-    assert result.get("exit_code") != 0 or result.get("status") == "timeout"
+    runner = TaskRunner(timeout=1.0)
+    result = runner.run(task_id="ac5", command="sleep 30")
+    assert result["terminal"] in ("timeout", "failed"), result
+    assert result.get("exit_code") != 0 or result.get("terminal") == "timeout"
 
 
 
