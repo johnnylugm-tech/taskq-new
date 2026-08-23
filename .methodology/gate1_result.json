@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 8,
-  "fr_id": "FR-06",
+  "fr_id": "FR-07",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -16,26 +16,26 @@
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\": \"1.1.409\", \"time\": \"1787520952300\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.189}}",
+      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0}}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 45,
+      "tests_passed": 9,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "============================= test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2\ncollected 45 items\n\n03-development/tests/test_fr06.py .....................                  [ 46%]\n03-development/tests/test_fr01.py ........................               [100%]\n\n============================== 45 passed in 1.46s ==============================",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-06.txt",
+      "tool_evidence": "collected 9 items\n03-development/tests/test_fr07.py .........                              [100%]\n============================== 9 passed in 0.77s ===============================\nCoverage: 100% (74/74 statements covered, totals percent_covered=100.0)",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-07.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-06",
+      "coverage_scope_fr": "FR-07",
       "score_source": "framework"
     },
     "architecture_constraints": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "=============\nImport Linter\n=============\n\nContracts\n---------\n\nAnalyzed 44 files, 62 dependencies.\n\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\n\nContracts: 3 kept, 0 broken.",
+      "tool_evidence": "Analyzed 44 files, 62 dependencies.\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\nContracts: 3 kept, 0 broken.",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
     }
@@ -85,23 +85,23 @@
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "1d43185a38ecc0a10d918f2ffa2778dabc7ae1fd6de4e67f9e7be610e4816240",
-      "bytes": 186,
-      "head": "{\"version\": \"1.1.409\", \"time\": \"1787520952300\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.189}}"
+      "sha256": "de7a934988399367a305e4de9a70e12f5fbb2b230a734b4e4fbb0f588f571031",
+      "bytes": 115,
+      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0}}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "93c3b7f4f1c89a20593591883fa550baaf3cfc84de7b2ab273ed1cc2a950bf9b",
-      "bytes": 390,
-      "head": "============================= test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2\ncollected 45 items\n\n03-development/tests/test_fr06.py .....................                  [ 46%]\n03-development/tests/test_fr01.py ........................               [100%]\n\n============================== 45 passed in 1.46s =============================="
+      "sha256": "6405d5bda0da7cf92f2ac69ca6f84ea09dd3993e18d153cb9230f9b4e3999d3d",
+      "bytes": 250,
+      "head": "collected 9 items\n03-development/tests/test_fr07.py .........                              [100%]\n============================== 9 passed in 0.77s ===============================\nCoverage: 100% (74/74 statements covered, totals percent_covered=100.0)"
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "44aacdcdea52d2a015b057811bb10ec5c04679752eddf458111ad1caf3d1fc79",
-      "bytes": 212,
-      "head": "=============\nImport Linter\n=============\n\nContracts\n---------\n\nAnalyzed 44 files, 62 dependencies.\n\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\n\nContracts: 3 kept, 0 broken."
+      "sha256": "d46c477f66450ecfac69b62e10050bd6bd97425c8379939ddff482b94223bfe9",
+      "bytes": 146,
+      "head": "Analyzed 44 files, 62 dependencies.\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\nContracts: 3 kept, 0 broken."
     }
   },
   "composite_score": 100.0,
