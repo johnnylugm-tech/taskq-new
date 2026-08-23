@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 5,
-  "fr_id": "FR-04",
+  "fr_id": "FR-05",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -16,20 +16,20 @@
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\": \"1.1.409\", \"time\": \"1787509418828\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.188}}",
+      "tool_evidence": "{\"version\": \"1.1.409\", \"time\": \"1787509591857\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.189}}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 27,
+      "tests_passed": 38,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "tests/test_fr04.py .......... [ 37%]\ntests/test_fr03.py ................. [100%]\n============================== 27 passed in 0.26s ==============================\nCoverage: 100% on deps.py and auth.py (43/43 lines covered)",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-04.txt",
+      "tool_evidence": "03-development/tests/test_fr05.py .................. [ 47%]\n03-development/tests/test_fr10.py .................... [100%]\n============================== 38 passed in 4.19s ==============================\nmiddleware.py 99/99 (100%), rate_limit.py 50/50 (100%), rate_buckets.py 95/95 (100%)",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-05.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-04",
+      "coverage_scope_fr": "FR-05",
       "score_source": "framework"
     },
     "architecture_constraints": {
@@ -85,16 +85,16 @@
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "6e6b15476651b893950c5e530fa5cabae681136201666e17c5d8f0dc804b33b5",
+      "sha256": "d015ce890962396732ba4b9bd0b7f24dc002d2bf2bd955cb0e5be92bfd7817c5",
       "bytes": 186,
-      "head": "{\"version\": \"1.1.409\", \"time\": \"1787509418828\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.188}}"
+      "head": "{\"version\": \"1.1.409\", \"time\": \"1787509591857\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.189}}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "354fd164f543cc100da6e175ffe1274f1d4e3dd11a440fb06eac6f7f3efb27a3",
-      "bytes": 221,
-      "head": "tests/test_fr04.py .......... [ 37%]\ntests/test_fr03.py ................. [100%]\n============================== 27 passed in 0.26s ==============================\nCoverage: 100% on deps.py and auth.py (43/43 lines covered)"
+      "sha256": "76caf9513dbd9ca768af74ee788183706bf20eceed455cc3576815ec8f162ad4",
+      "bytes": 287,
+      "head": "03-development/tests/test_fr05.py .................. [ 47%]\n03-development/tests/test_fr10.py .................... [100%]\n============================== 38 passed in 4.19s ==============================\nmiddleware.py 99/99 (100%), rate_limit.py 50/50 (100%), rate_buckets.py 95/95 (100%)"
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
