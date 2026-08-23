@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 8,
-  "fr_id": "FR-07",
+  "fr_id": "FR-08",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -9,33 +9,33 @@
     "linting": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "All checks passed!",
+      "tool_evidence": "All checks passed!\n",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/linting_harness.txt"
     },
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0}}",
+      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.192}}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 9,
+      "tests_passed": 45,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "collected 9 items\n03-development/tests/test_fr07.py .........                              [100%]\n============================== 9 passed in 0.77s ===============================\nCoverage: 100% (74/74 statements covered, totals percent_covered=100.0)",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-07.txt",
+      "tool_evidence": "45 passed in 5.07s. Coverage: percent_covered=100.0 (runner.py: 86/86 statements). All required FR-08 tests present (5/5).",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-08.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-07",
+      "coverage_scope_fr": "FR-08",
       "score_source": "framework"
     },
     "architecture_constraints": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "Analyzed 44 files, 62 dependencies.\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\nContracts: 3 kept, 0 broken.",
+      "tool_evidence": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers, fr01-config-errors-independence, fr01-root-independence all KEPT)",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
     }
@@ -85,23 +85,23 @@
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "de7a934988399367a305e4de9a70e12f5fbb2b230a734b4e4fbb0f588f571031",
-      "bytes": 115,
-      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0}}"
+      "sha256": "ba17a5973bffaba2a69cd428722261e75c5e78aa5a0a0ba81189e64f99d8657d",
+      "bytes": 135,
+      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.192}}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "6405d5bda0da7cf92f2ac69ca6f84ea09dd3993e18d153cb9230f9b4e3999d3d",
-      "bytes": 250,
-      "head": "collected 9 items\n03-development/tests/test_fr07.py .........                              [100%]\n============================== 9 passed in 0.77s ===============================\nCoverage: 100% (74/74 statements covered, totals percent_covered=100.0)"
+      "sha256": "98c18d387364b9424cc087b3dd92fd480ff1e865a30722e1248a091b984a1eb8",
+      "bytes": 122,
+      "head": "45 passed in 5.07s. Coverage: percent_covered=100.0 (runner.py: 86/86 statements). All required FR-08 tests present (5/5)."
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "d46c477f66450ecfac69b62e10050bd6bd97425c8379939ddff482b94223bfe9",
-      "bytes": 146,
-      "head": "Analyzed 44 files, 62 dependencies.\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\nContracts: 3 kept, 0 broken."
+      "sha256": "86e6da8bf5696f739c69118d7fe2eaead23da552927773fd36864a26a61b1a8c",
+      "bytes": 144,
+      "head": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers, fr01-config-errors-independence, fr01-root-independence all KEPT)"
     }
   },
   "composite_score": 100.0,
