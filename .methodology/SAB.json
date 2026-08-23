@@ -32,9 +32,6 @@
           "name": "taskq.api.routes.runs"
         },
         {
-          "name": "taskq.api.routes.keys"
-        },
-        {
           "name": "taskq.api.routes.health"
         },
         {
@@ -117,12 +114,7 @@
         {
           "name": "taskq.models.task_result"
         },
-        {
-          "name": "taskq.models.tag"
-        },
-        {
-          "name": "taskq.models.rate_bucket"
-        },
+        "taskq.repository.rate_buckets",
         "taskq.models"
       ],
       "allowed_dependencies": []
@@ -140,9 +132,6 @@
         {
           "name": "taskq.config.settings"
         },
-        {
-          "name": "taskq.config.env"
-        },
         "taskq.config"
       ],
       "allowed_dependencies": []
@@ -150,9 +139,6 @@
     {
       "name": "cli",
       "modules": [
-        {
-          "name": "taskq.cli.main"
-        },
         {
           "name": "taskq.cli.key_create"
         },

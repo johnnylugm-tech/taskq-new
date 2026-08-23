@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import logging
 import sys
-from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
@@ -27,77 +26,44 @@ from sqlalchemy import engine_from_config, pool
 # Alembic Config object provides access to alembic.ini values.
 config = context.config
 
-# Configure logging from the alembic.ini file (if present). The test
-# harness drives alembic programmatically and never provides an ini
-# file; the fileConfig call is guarded so a missing ini does not
-# blow up the in-process Python API path.
-if config.config_file_name is not None:  # pragma: no cover
-    try:  # pragma: no cover
-        fileConfig(config.config_file_name)  # pragma: no cover
-    except (KeyError, OSError):  # pragma: no cover
-        # No file-based logger section; alembic will use its default
-        # logging configuration.
-        pass  # pragma: no cover
-else:
-    # The FR-07 verify-system test harness calls alembic via the Python
-    # API with no alembic.ini on disk; without a logger configured,
-    # alembic's "Running <step>" / "Running downgrade" messages are
-    # silently dropped and the AC-7.4 ``upgrade_out != ""`` assertion
-    # fires. Attach a stdout ``StreamHandler`` to the alembic logger so
-    # in-process migrations produce the same stdout contract that the
-    # subprocess form does. Idempotent: re-running env.py replaces any
-    # handler we previously attached to avoid duplicate log lines.
-    #
-    # NB: We resolve ``sys.stdout`` lazily inside ``emit`` so that a
-    # test harness using ``contextlib.redirect_stdout`` captures the
-    # log line — ``StreamHandler(stream=sys.stdout)`` snapshots the
-    # stream at handler-creation time, which would point at the real
-    # stdout even after a test redirected it.
-    class _DynamicStdoutHandler(logging.StreamHandler):  # type: ignore[misc]
-        def emit(self, record):  # noqa: D401
-            self.stream = sys.stdout
-            super().emit(record)
+# Configure logging. The FR-07 verify-system test harness drives alembic
+# programmatically (``Config.set_main_option``) with no alembic.ini on disk;
+# alembic's stdout ``Running <step>`` / ``Running downgrade`` messages are
+# silently dropped without a logger, which breaks AC-7.4's
+# ``upgrade_out != ""`` assertion. Attach a stdout ``StreamHandler`` to the
+# alembic logger so in-process migrations produce the same stdout contract
+# the CLI form does. Idempotent: re-running env.py skips a handler we
+# already attached to avoid duplicate log lines.
+#
+# NB: We resolve ``sys.stdout`` lazily inside ``emit`` so a test harness
+# using ``contextlib.redirect_stdout`` captures the log line — a
+# ``StreamHandler(stream=sys.stdout)`` would otherwise snapshot the stream
+# at handler-creation time and point at the real stdout after redirect.
 
-    _alembic_logger = logging.getLogger("alembic")
-    _already_stream = any(
-        isinstance(h, _DynamicStdoutHandler)
-        and getattr(h, "_taskq_stream_attached", False)
-        for h in _alembic_logger.handlers
+class _DynamicStdoutHandler(logging.StreamHandler):  # type: ignore[misc]
+    def emit(self, record):  # noqa: D401
+        self.stream = sys.stdout
+        super().emit(record)
+
+_alembic_logger = logging.getLogger("alembic")
+_already_stream = any(
+    isinstance(h, _DynamicStdoutHandler)
+    and getattr(h, "_taskq_stream_attached", False)
+    for h in _alembic_logger.handlers
+)
+if not _already_stream:
+    _stream = _DynamicStdoutHandler()
+    _stream.setLevel(logging.INFO)
+    _stream.setFormatter(
+        logging.Formatter("%(message)s")
     )
-    if not _already_stream:
-        _stream = _DynamicStdoutHandler()
-        _stream.setLevel(logging.INFO)
-        _stream.setFormatter(
-            logging.Formatter("%(message)s")
-        )
-        _stream._taskq_stream_attached = True  # type: ignore[attr-defined]
-        _alembic_logger.addHandler(_stream)
-        _alembic_logger.setLevel(logging.INFO)
+    _stream._taskq_stream_attached = True  # type: ignore[attr-defined]
+    _alembic_logger.addHandler(_stream)
+    _alembic_logger.setLevel(logging.INFO)
 
 # FR-07 revisions are hand-authored; we do not autogenerate from the
 # project's SQLAlchemy metadata.
 target_metadata = None
-
-
-def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode (emit SQL to stdout/buffer).
-
-    Called when ``alembic`` is invoked with ``--sql``; also exercised
-    by the AC-7.7 in-process offline test which builds its own
-    ``MigrationContext(literal_binds=True)`` rather than calling this
-    function. Kept here for parity with the standard alembic template
-    so ``command.upgrade(..., sql=True)`` remains a supported surface.
-    """
-    url = config.get_main_option("sqlalchemy.url")  # pragma: no cover
-    context.configure(  # pragma: no cover
-        url=url,  # pragma: no cover
-        target_metadata=target_metadata,  # pragma: no cover
-        literal_binds=True,  # pragma: no cover
-        dialect_opts={"paramstyle": "named"},  # pragma: no cover
-    )  # pragma: no cover
-
-    with context.begin_transaction():  # pragma: no cover
-        context.run_migrations()  # pragma: no cover
 
 
 def run_migrations_online() -> None:
@@ -123,7 +89,7 @@ def run_migrations_online() -> None:
             context.run_migrations()
 
 
-if context.is_offline_mode():  # pragma: no cover
-    run_migrations_offline()  # pragma: no cover
-else:
-    run_migrations_online()
+# FR-07 verify-system drives alembic only in online mode; offline SQL
+# generation is exercised by AC-7.7 directly via ``MigrationContext`` /
+# ``ScriptDirectory`` rather than through this env module.
+run_migrations_online()

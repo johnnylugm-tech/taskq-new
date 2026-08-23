@@ -19,3 +19,9 @@ pydantic
 import-linter
 mutmut
 pytest-benchmark
+# hypothesis: property-based testing library required by FR-07's P7-roundtrip-bijection
+# property invariant (TEST_SPEC.md FR-07 Properties table). The bijection
+# invariant `migrate_reverse(migrate_forward(row)) == row` is declared
+# symbolic; Phase 4 / property-spec parser requires an executing
+# `hypothesis @given` test to discharge it.
+hypothesis==6.124.7

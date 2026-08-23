@@ -46,6 +46,15 @@ from typing import List
 
 import pytest
 
+# Hypothesis is the Python property-based testing library. It is
+# required to execute FR-07's P7-roundtrip-bijection invariant
+# (TEST_SPEC.md FR-07 Properties table; see also ``requirements.txt``
+# justification comment). The bijection ``migrate_reverse(migrate_forward(row))
+# == row`` is declared symbolic and degrades to ``needs_review`` until a
+# `@given`-driven test runs it; this module adds the executing test.
+from hypothesis import HealthCheck, given, settings
+from hypothesis import strategies as st
+
 # ---- Import path bootstrap ----
 # Test file lives at 03-development/tests/test_fr07.py; the package
 # source is at 03-development/src. We resolve to the project root so
@@ -1078,3 +1087,230 @@ def test_v3_downgrade_updates_existing_tasks_row(tmp_path: Path):
     assert payload["exit_code"] == 0
     assert payload["stdout_tail"] == "existing-stdout-line\n"
     assert payload["command"] == "echo existing"
+
+
+# ---------- Property: P7-roundtrip-bijection ----------
+#
+# NOT a TEST_SPEC.md enumerated AC — added to discharge the
+# P7-roundtrip-bijection property declared in TEST_SPEC.md FR-07
+# Properties table:
+#
+#   P7-roundtrip-bijection:
+#     invariant: migrate_reverse(migrate_forward(row)) == row
+#     applies_to (case #): 5  (test_fr07_ac5_round_trip_byte_identical_sample)
+#     fulfill_phase: 4
+#
+# The TEST_SPEC declares the invariant symbolic and degrades to
+# `needs_review` until a `hypothesis @given` test executes it. This
+# function is that executing test: for every randomly drawn valid row
+# it drives the full upgrade → downgrade → upgrade cycle on a real
+# SQLite file (NFR-09) and asserts every column on the seeded row
+# survives byte-identical.
+#
+# Citations: SPEC.md §3 FR-07 v3 row, §8 #12 (round-trip); TEST_SPEC.md
+# FR-07 Properties table P7-roundtrip-bijection; SAD.md §3.4
+# (Migration Round-Trip — load-bearing for verify-system); NFR-09
+# (real SQLite file, not in-memory); NFR-12 (verify-system: PASS).
+
+# Restrict generated text to the printable-ASCII subset so JSON
+# serialization, SQLite TEXT storage, and ``json_extract`` over the
+# envelope all see a single, well-defined encoding path. Unicode and
+# control characters are out of scope for this bijection — they would
+# exercise the JSON layer, not the v3 migration's algebraic invariant.
+_ASCII_PRINTABLE = st.characters(
+    min_codepoint=ord(" "),
+    max_codepoint=ord("~"),
+)
+
+# Identifiers are short alphanumeric so ``id`` / ``task_id`` stay
+# readable in failure output and cannot collide with SQL escape
+# semantics (SQLAlchemy parameterises anyway; this just keeps the
+# failure diff small).
+_ID_ALPHABET = st.characters(
+    min_codepoint=ord("a"),
+    max_codepoint=ord("z"),
+)
+
+# Exit codes are bounded to the signed 16-bit range — wider integers
+# still round-trip on SQLite's 64-bit INTEGER, but ``json_extract``
+# hands the value back as a Python int regardless of the source width.
+_EXIT_CODE = st.integers(min_value=-32768, max_value=32767)
+
+
+@st.composite
+def _task_result_rows(draw, min_size: int = 1, max_size: int = 5):
+    """Generate a list of valid ``task_results`` rows.
+
+    Each row maps 1:1 onto the v3 schema (id PK, task_id, command,
+    exit_code, stdout_tail — all nullable). Ids are unique within an
+    example so the schema's PRIMARY KEY constraint never fires for a
+    non-bijection reason.
+
+    The ``st.lists`` wrapper is intentional: it lets the property
+    exercise both the single-row case (size 1) and the multi-row case
+    (size > 1) which exercises the loop in v3.downgrade's
+    back-fill.
+    """
+    from hypothesis import assume
+
+    size = draw(st.integers(min_value=min_size, max_value=max_size))
+    rows = []
+    seen_ids: set[str] = set()
+    for _ in range(size):
+        rid = draw(
+            st.text(alphabet=_ID_ALPHABET, min_size=1, max_size=6)
+        )
+        # Reject id collisions via ``assume`` so every drawn example
+        # is a valid SQLite INSERT. Hypothesis will resample the
+        # example when ``assume`` fails.
+        assume(rid not in seen_ids)
+        seen_ids.add(rid)
+        rows.append(
+            {
+                "id": rid,
+                "task_id": draw(
+                    st.text(alphabet=_ID_ALPHABET, min_size=1, max_size=6)
+                ),
+                "command": draw(
+                    st.one_of(
+                        st.none(),
+                        st.text(alphabet=_ASCII_PRINTABLE, max_size=64),
+                    )
+                ),
+                "exit_code": draw(
+                    st.one_of(
+                        st.none(),
+                        _EXIT_CODE,
+                    )
+                ),
+                "stdout_tail": draw(
+                    st.one_of(
+                        st.none(),
+                        st.text(alphabet=_ASCII_PRINTABLE, max_size=128),
+                    )
+                ),
+            }
+        )
+    return rows
+
+
+# ``HealthCheck.function_scoped_fixture`` is suppressed because the
+# ``_isolate_taskq_home`` autouse fixture is ``tmp_path``-scoped (per
+# test) — hypothesis replays the test body many times against the same
+# fixture, which trips hypothesis's default ``function_scoped_fixture``
+# health check. The fixture is correct; the health check is overly
+# strict for this property-test pattern.
+@settings(
+    max_examples=25,
+    deadline=None,
+    suppress_health_check=[HealthCheck.function_scoped_fixture],
+)
+@given(rows=_task_result_rows())
+def test_fr07_p7_roundtrip_bijection(tmp_path: Path, rows: list):
+    """P7-roundtrip-bijection — FR-07 property invariant.
+
+    Drive the v3 data-migration round-trip on ``rows`` (a list of
+    valid ``task_results`` rows drawn by hypothesis) and assert that
+    every column on every seeded row survives the
+    upgrade head → downgrade -1 → upgrade head cycle byte-identical.
+
+    If the round-trip is a bijection on the
+    ``task_results`` ↔ ``tasks.result_json`` representation (per
+    SPEC.md §3 FR-07 v3 row + §8 #12 round-trip acceptance), this
+    invariant must hold for every row the migration can carry. A
+    hypothesis failure surfaces a counterexample row that breaks the
+    bijection — exactly the regression a fixed-seed byte-identical
+    sample test cannot catch.
+    """
+    import uuid
+
+    # ``tmp_path`` is function-scoped: hypothesis re-runs this body
+    # many times against the SAME ``tmp_path`` directory. If we reused
+    # a single SQLite file across examples, the data left behind by
+    # example N would corrupt example N+1's INSERT (UNIQUE constraint
+    # on ``task_results.id``). Make every example point at its own
+    # SQLite file inside the shared ``tmp_path`` directory.
+    db_path = tmp_path / f"p7-{uuid.uuid4().hex}.db"
+    db_url = _sqlite_url(db_path)
+    cfg = _alembic_cfg(db_url)
+
+    from alembic import command
+    from sqlalchemy import create_engine, text
+
+    engine = create_engine(db_url)
+
+    # ---- 1. upgrade head (reaches v3 schema) ----
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        command.upgrade(cfg, "head")
+    buf.getvalue()
+
+    # ---- 2. seed the drawn rows into ``task_results`` ----
+    with engine.begin() as conn:
+        for row in rows:
+            conn.execute(
+                text(
+                    "INSERT INTO task_results "
+                    "(id, task_id, command, exit_code, stdout_tail) "
+                    "VALUES (:id, :task_id, :command, :exit_code, "
+                    ":stdout_tail)"
+                ),
+                row,
+            )
+
+    # ---- 3. snapshot every column on every seeded row ----
+    expected_columns = ("id", "task_id", "command", "exit_code", "stdout_tail")
+    snapshot: dict[str, dict] = {}
+    with engine.begin() as conn:
+        seeded = conn.execute(
+            text(
+                "SELECT id, task_id, command, exit_code, stdout_tail "
+                "FROM task_results ORDER BY id"
+            )
+        ).mappings().all()
+    for r in seeded:
+        snapshot[r["id"]] = {col: r[col] for col in expected_columns}
+
+    # ---- 4. downgrade -1 (v3 -> v2) ----
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        command.downgrade(cfg, "-1")
+    buf.getvalue()
+
+    # ---- 5. upgrade head (v2 -> v3) ----
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        command.upgrade(cfg, "head")
+    buf.getvalue()
+
+    # ---- 6. verify the round-trip is byte-identical ----
+    after: dict[str, dict] = {}
+    with engine.begin() as conn:
+        rows_after = conn.execute(
+            text(
+                "SELECT id, task_id, command, exit_code, stdout_tail "
+                "FROM task_results ORDER BY id"
+            )
+        ).mappings().all()
+    for r in rows_after:
+        after[r["id"]] = {col: r[col] for col in expected_columns}
+
+    assert set(after.keys()) == set(snapshot.keys()), (
+        f"P7-roundtrip-bijection violated: row id set changed across "
+        f"upgrade head -> downgrade -1 -> upgrade head. "
+        f"missing={sorted(set(snapshot.keys()) - set(after.keys()))!r} "
+        f"extra={sorted(set(after.keys()) - set(snapshot.keys()))!r}"
+    )
+
+    for rid in sorted(snapshot.keys()):
+        for col in expected_columns:
+            before_val = snapshot[rid][col]
+            after_val = after[rid][col]
+            assert before_val == after_val, (
+                f"P7-roundtrip-bijection violated: column {col!r} of "
+                f"row {rid!r} differs after "
+                f"upgrade head -> downgrade -1 -> upgrade head; "
+                f"before={before_val!r} after={after_val!r}. "
+                f"The round-trip migration MUST be a bijection on "
+                f"task_results (SPEC §3 FR-07, §8 #12)."
+            )

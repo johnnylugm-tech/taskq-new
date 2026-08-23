@@ -296,14 +296,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             # Integer seconds per RFC 9110 §10.2.3 / SPEC §3 FR-05.
             retry_after = max(0, int(math.ceil(wait)))
         # FR-09 — record the rejection so /v1/metrics can surface a
-        # cumulative counter to the operator. Best-effort: the counter
-        # import is wrapped so the middleware never raises on the hot
-        # path even if the metrics module is somehow unavailable.
-        try:
-            from taskq.service.metrics import record_rate_limit_rejection
-            record_rate_limit_rejection()
-        except Exception:  # defensive on hot path  # pragma: no cover
-            pass  # pragma: no cover  # nosec B110 -- metrics is best-effort
+        # cumulative counter to the operator. The metrics module is
+        # declared by SAB as part of the architecture (NFR-06 layer
+        # contract), so the import cannot fail and the function itself
+        # is a simple atomic increment; no defensive try/except.
+        from taskq.service.metrics import record_rate_limit_rejection
+
+        record_rate_limit_rejection()
         cid = getattr(request.state, "correlation_id", None)
         return _problem_response(
             status=429,

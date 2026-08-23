@@ -1,7 +1,7 @@
 {
   "schema": "harness/traceability/attestation/v1",
-  "git_sha": "56220baa2fa40b44e9aada6860c0a44fb0049756",
-  "content_sha256": "8280b53ea7b16c6d7d49e82a63ab68169d5f7b0e07da75bf2bc38ec87142b200",
+  "git_sha": "f92212bb137e505a615188a811167c819a9acd95",
+  "content_sha256": "559c1e1c2a3a11b7cd200835ce2a8c44bad11ebd70fd4fc8c1311bc66f179cc8",
   "tool": "scripts/build_trace_attestation.py",
   "overlay_used": null,
   "overlay_errors": [],
@@ -13,8 +13,8 @@
       "srs_coverage": "90.9%",
       "code_coverage": "100.0%",
       "test_coverage": "100.0%",
-      "verification_rate": "100.0%",
-      "total_links": 79,
+      "verification_rate": "90.9%",
+      "total_links": 84,
       "missing_mappings": {
         "fr_without_srs": [
           "FR-99"
@@ -54,9 +54,12 @@
           "03-development/src/taskq/repository/tasks.py",
           "03-development/src/taskq/service/__init__.py",
           "03-development/src/taskq/service/tasks.py",
+          "03-development/tests/integration/conftest.py",
+          "03-development/tests/integration/test_integration_fr01.py",
           "03-development/tests/test_fr01.py"
         ],
         "test_files": [
+          "03-development/tests/integration/test_integration_fr01.py",
           "03-development/tests/test_fr01.py"
         ],
         "sad_module": "—",
@@ -146,7 +149,7 @@
       },
       "FR-07": {
         "fr_id": "FR-07",
-        "status": "verified",
+        "status": "in_progress",
         "srs_section": "SAD.md",
         "code_files": [
           "03-development/conftest.py",
@@ -155,7 +158,9 @@
           "03-development/src/taskq/migrations/versions/__init__.py",
           "03-development/src/taskq/migrations/versions/v1_initial_tasks_api_keys.py",
           "03-development/src/taskq/migrations/versions/v2_add_tags_task_tags_unique.py",
-          "03-development/src/taskq/migrations/versions/v3_split_result_json_to_task_results.py"
+          "03-development/src/taskq/migrations/versions/v3_split_result_json_to_task_results.py",
+          "03-development/tests/integration/conftest.py",
+          "03-development/tests/integration/test_integration_migrations.py"
         ],
         "test_files": [
           "03-development/tests/test_fr07.py"
