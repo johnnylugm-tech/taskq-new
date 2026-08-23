@@ -4,7 +4,7 @@
 
 {
   "errors": [],
-  "generated_at": "2026-08-23T15:55:49Z",
+  "generated_at": "2026-08-23T16:07:42Z",
   "metrics": {
     "/Users/johnny/projects/taskq-new/03-development/src/taskq/__init__.py": {
       "CONFIDENCE.HIGH": 0,

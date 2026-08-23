@@ -10,15 +10,13 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
-from typing import List, TYPE_CHECKING
+from typing import List
 
 from sqlalchemy import DateTime, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from taskq.models.base import Base
-
-if TYPE_CHECKING:
-    from taskq.models.task_result import TaskResult
+from taskq.models.task_result import TaskResult
 
 
 def _utc_now() -> datetime:
