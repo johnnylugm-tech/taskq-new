@@ -10,7 +10,6 @@ unimplemented.
 """
 from __future__ import annotations
 
-import re
 import sys
 from pathlib import Path
 
@@ -79,9 +78,6 @@ def test_taskrunner_does_not_leak_sk_token_in_stdout_tail(monkeypatch):
     failed (RED) — the runner wrote the subprocess bytes verbatim.
     """
     import asyncio
-    import os
-    import sys
-    from taskq.service import runner as runner_mod
 
     secret = "sk-prod-leak-9999abcdef"
 

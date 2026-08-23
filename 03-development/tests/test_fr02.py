@@ -792,7 +792,6 @@ def test_fr02_runner_hard_kill_swallows_process_lookup_error_and_wait_exception(
     succeeds); we drive the static method directly with a fake process whose
     ``kill()`` and ``wait()`` raise to prove the defensive branches work.
     """
-    import asyncio
 
     from taskq.service.runner import TaskRunner
 

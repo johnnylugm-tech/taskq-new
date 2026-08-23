@@ -35,7 +35,6 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
-import os
 import re
 import subprocess as _subprocess
 import sys

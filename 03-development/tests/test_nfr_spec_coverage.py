@@ -22,10 +22,7 @@ Citations: TEST_SPEC.md §NFR-01..12; SPEC.md §5 NFR-12; SAD.md §4.
 """
 from __future__ import annotations
 
-import json
-import os
 import subprocess
-import time
 import secrets
 import uuid
 from pathlib import Path
@@ -70,7 +67,6 @@ def test_nfr01_ac1_get_p95_under_30ms(benchmark, monkeypatch):
     # test (``test_concurrent_rate_bucket_no_overshoot``) sees the real
     # ``consume(now=now)`` signature and does not crash with
     # ``unexpected keyword argument 'now'``.
-    from taskq.api.middleware import RateLimitMiddleware
     from taskq.service.rate_limit import TokenBucket
 
     def _always_grant(self, **kwargs) -> bool:  # noqa: ANN001 — bound method
@@ -255,7 +251,7 @@ def test_nfr02_ac5_error_body_no_stack_sql_path():
     plaintext = secrets.token_hex(16)
     key_hash = hash_api_key(plaintext)
     repo.create(scope="admin", key_hash=key_hash)
-    trepo = TaskRepository()
+    TaskRepository()
     # Trigger a 500 by sending malformed JSON in a request body (FastAPI
     # raises inside the handler; the centralised handlers must scrub the
     # body).
@@ -393,7 +389,7 @@ def test_nfr04_ac3_api_key_plaintext_once_no_persist():
         # CLI signature: taskq.cli.key_create key create --scope <scope>
         # (the test originally called main(["--scope", "write"]) which
         # argparse rejects because "key" is a required sub-command verb).
-        rc = main(["key", "create", "--scope", "write"])
+        main(["key", "create", "--scope", "write"])
     finally:
         sys.stdout = old_stdout
     output = captured.getvalue()
@@ -403,7 +399,7 @@ def test_nfr04_ac3_api_key_plaintext_once_no_persist():
     # The DB row must contain only the hash, not the plaintext.
     from taskq.repository.keys import APIKeyRepository, hash_api_key
 
-    repo = APIKeyRepository()
+    APIKeyRepository()
     # The CLI prints the plaintext (urlsafe-base64) as the entire line;
     # use the line content directly as the plaintext. Then confirm no
     # DB row's stored hash column contains the plaintext (i.e. the hash
