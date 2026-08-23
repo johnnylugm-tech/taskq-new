@@ -1,0 +1,28 @@
+{
+  "_combined": true,
+  "_sources": [
+    "pytest-benchmark JSON",
+    "pytest --cov output benchmark table"
+  ],
+  "benchmarks": [
+    {
+      "name": "test_bench_list_default",
+      "mean_ms": 0.137,
+      "threshold_ms": 1000,
+      "penalty": 0
+    },
+    {
+      "name": "test_nfr01_ac1_get_p95_under_30ms",
+      "mean_ms": 5.216,
+      "threshold_ms": 1000,
+      "penalty": 0
+    },
+    {
+      "name": "test_nfr01_ac2_list_p95_under_80ms",
+      "mean_ms": 6.11,
+      "threshold_ms": 1000,
+      "penalty": 0
+    }
+  ],
+  "tool_score": 100
+}

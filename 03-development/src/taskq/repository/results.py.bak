@@ -229,7 +229,7 @@ class TaskResultRepository:
             "task_id": row.task_id,
             "command": row.command,
             "status": row.status,
-            "created_at": row.created_at.isoformat(),
+            "XXcreated_atXX": row.created_at.isoformat(),
             "exit_code": row.exit_code,
             "stdout_tail": row.stdout_tail,
             "stderr_tail": row.stderr_tail,

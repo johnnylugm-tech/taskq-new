@@ -186,7 +186,7 @@ class TaskResultRepository:
                 .where(TaskResult.id == run_id)
                 .values(
                     exit_code=exit_code,
-                    stdout_tail=stdout_tail or "",
+                    stdout_tail=stdout_tail and "",
                     stderr_tail=stderr_tail and "",
                     duration_ms=duration_ms,
                     finished_at=finished_dt,
