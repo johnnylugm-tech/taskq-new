@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 7,
-  "fr_id": "FR-04",
+  "fr_id": "FR-05",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -9,38 +9,38 @@
     "linting": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "$ python3 -m ruff check 03-development/src/ --extend-ignore RUF001,RUF002,RUF003\nAll checks passed!",
+      "tool_evidence": "ruff check 03-development/src/ --extend-ignore RUF001,RUF002,RUF003 -> exit 0\nAll checks passed!",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/linting_harness.txt"
     },
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.258}, \"generalDiagnostics\": []}",
+      "tool_evidence": "pyright 03-development/src/ --outputjson -> {\"version\": \"1.1.409\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.204}}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 27,
+      "tests_passed": 38,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "============================== 27 passed in 0.44s ==============================\nName                                       Stmts   Miss  Cover   Missing\n------------------------------------------------------------------------\n03-development/src/taskq/api/deps.py          15      0   100%\n03-development/src/taskq/service/auth.py      28      0   100%\n------------------------------------------------------------------------\nTOTAL                                         43      0   100%",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-04.txt",
+      "tool_evidence": "pytest 03-development/tests/test_fr05.py 03-development/tests/test_fr10.py -> 38 collected, 38 passed in 4.05s. Coverage on FR-05 source files (middleware.py, rate_limit.py, rate_buckets.py) = 100.0% (244/244 statements). All 4 required tests present: test_fr05_ac1_bucket_config_burst_per_sec, test_fr05_ac2_overflow_returns_429_with_retry_after, test_fr05_ac3_db_backed_row_level_lock, test_fr05_ac4_healthz_readyz_rate_limit_exempt. spec_cov_pct=100, coverage_pct=100, score=min(100,100)=100.",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-05.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-04",
+      "coverage_scope_fr": "FR-05",
       "score_source": "framework"
     },
     "architecture_constraints": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "Analyzed 44 files, 62 dependencies.\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\nContracts: 3 kept, 0 broken.",
+      "tool_evidence": "PYTHONPATH=03-development/src lint-imports -> exit 0. Analyzed 44 files, 62 dependencies. Contracts: fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT. Contracts: 3 kept, 0 broken.",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
     }
   },
-  "enforcer_sha": "725a220c35a6432d77e714aa520024f72c82061c-dirty",
+  "enforcer_sha": "627cccc77e90188a92e0943fd8e6a16f10a27301",
   "enforcer_surface": {
     "core/quality_gate": "fc600ef09159eb15c1f24a0a18d4cb6e45e4dce7",
     "harness/harness_bridge.py": "4858e5529079e9432fb38d85d68c6051d956312d",
@@ -78,30 +78,30 @@
     "linting": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "fad7bf8fec552781f58e1c0ffeca42f9112045994a8b691d1b407d6151442b6f",
-      "bytes": 99,
-      "head": "$ python3 -m ruff check 03-development/src/ --extend-ignore RUF001,RUF002,RUF003\nAll checks passed!"
+      "sha256": "9f886db7d2996e8d052791bf70a3482c19f3d97fe8aa1f39b94d28bb9d1ba7c6",
+      "bytes": 96,
+      "head": "ruff check 03-development/src/ --extend-ignore RUF001,RUF002,RUF003 -> exit 0\nAll checks passed!"
     },
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "294c7e6332c4f953a1b5d58245b5ef898615541bfab28ef9f6a8e11126690b23",
-      "bytes": 161,
-      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.258}, \"generalDiagnostics\": []}"
+      "sha256": "952fde1fad16db11d934bc9c59658c8bd166f0c5d939beec09b0b8ebd57f27a8",
+      "bytes": 205,
+      "head": "pyright 03-development/src/ --outputjson -> {\"version\": \"1.1.409\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.204}}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "c3e9704ce70ac79fd87c73bc7faad2c150f068c8dc35e92bf070553c59a91f7d",
-      "bytes": 488,
-      "head": "============================== 27 passed in 0.44s ==============================\nName                                       Stmts   Miss  Cover   Missing\n------------------------------------------------------------------------\n03-development/src/taskq/api/deps.py          15      0   100%\n03-development/src/taskq/service/auth.py      28      0   100%\n------------------------------------------------------------------------\nTOTAL                                         43      0   100%"
+      "sha256": "02f908119991aeb65bf2a013b552305fbc22896ef6b58696fbe7fd911501c1fb",
+      "bytes": 495,
+      "head": "pytest 03-development/tests/test_fr05.py 03-development/tests/test_fr10.py -> 38 collected, 38 passed in 4.05s. Coverage on FR-05 source files (middleware.py, rate_limit.py, rate_buckets.py) = 100.0% (244/244 statements). All 4 required tests present: test_fr05_ac1_bucket_config_burst_per_sec, test_fr05_ac2_overflow_returns_429_with_retry_after, test_fr05_ac3_db_backed_row_level_lock, test_fr05_ac4_healthz_readyz_rate_limit_exempt. spec_cov_pct=100, coverage_pct=100, score=min(100,100)=100."
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "d46c477f66450ecfac69b62e10050bd6bd97425c8379939ddff482b94223bfe9",
-      "bytes": 146,
-      "head": "Analyzed 44 files, 62 dependencies.\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\nContracts: 3 kept, 0 broken."
+      "sha256": "fe13757b18aca90b8dbe7b540af0dad86bc51e2429a9fc38a92670d219f26cc2",
+      "bytes": 214,
+      "head": "PYTHONPATH=03-development/src lint-imports -> exit 0. Analyzed 44 files, 62 dependencies. Contracts: fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT. Contracts: 3 kept, 0 broken."
     }
   },
   "composite_score": 100.0,
