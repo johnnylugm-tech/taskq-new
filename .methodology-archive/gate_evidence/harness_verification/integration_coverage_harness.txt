@@ -1,0 +1,59 @@
+# Harness-executed: pytest-cov-integration
+# returncode: 0
+# agent_score: 84.0 | threshold: 75.0
+
+........................................................................ [ 66%]
+.....................................                                    [100%]
+================================ tests coverage ================================
+______________ coverage: platform darwin, python 3.11.15-final-0 _______________
+
+Name                                                                                   Stmts   Miss  Cover   Missing
+--------------------------------------------------------------------------------------------------------------------
+03-development/src/taskq/__init__.py                                                       0      0   100%
+03-development/src/taskq/api/__init__.py                                                   0      0   100%
+03-development/src/taskq/api/app.py                                                       25      0   100%
+03-development/src/taskq/api/deps.py                                                      15      0   100%
+03-development/src/taskq/api/handlers.py                                                  35      0   100%
+03-development/src/taskq/api/middleware.py                                                99      0   100%
+03-development/src/taskq/api/problem.py                                                   18      0   100%
+03-development/src/taskq/api/routes/__init__.py                                            0      0   100%
+03-development/src/taskq/api/routes/health.py                                             51      0   100%
+03-development/src/taskq/api/routes/metrics.py                                             8      0   100%
+03-development/src/taskq/api/routes/runs.py                                               41     24    41%   64, 73-77, 81-85, 101-119, 135-136, 157-158
+03-development/src/taskq/api/routes/tasks.py                                              36      0   100%
+03-development/src/taskq/api/schemas.py                                                   25      0   100%
+03-development/src/taskq/cli/key_create.py                                                26      0   100%
+03-development/src/taskq/config/__init__.py                                                0      0   100%
+03-development/src/taskq/config/settings.py                                               24      5    79%   26, 34-37
+03-development/src/taskq/errors/__init__.py                                                0      0   100%
+03-development/src/taskq/framework_paths.py                                                8      8     0%   27-55
+03-development/src/taskq/migrations/__init__.py                                            1      0   100%
+03-development/src/taskq/migrations/env.py                                                27     27     0%   18-97
+03-development/src/taskq/migrations/versions/__init__.py                                   6      0   100%
+03-development/src/taskq/migrations/versions/v1_initial_tasks_api_keys.py                 16      6    62%   35-53, 63-65
+03-development/src/taskq/migrations/versions/v2_add_tags_task_tags_unique.py              18      8    56%   46-69, 84-87
+03-development/src/taskq/migrations/versions/v3_split_result_json_to_task_results.py      34     16    53%   111-125, 136, 150, 163, 180, 208-238
+03-development/src/taskq/models/__init__.py                                                5      0   100%
+03-development/src/taskq/models/api_key.py                                                19      0   100%
+03-development/src/taskq/models/base.py                                                    4      0   100%
+03-development/src/taskq/models/task.py                                                   21      0   100%
+03-development/src/taskq/models/task_result.py                                            24      0   100%
+03-development/src/taskq/repository/__init__.py                                            0      0   100%
+03-development/src/taskq/repository/keys.py                                               46      0   100%
+03-development/src/taskq/repository/metrics.py                                            17      0   100%
+03-development/src/taskq/repository/rate_buckets.py                                       95      0   100%
+03-development/src/taskq/repository/results.py                                            55     35    36%   59-66, 77-82, 99, 121-138, 153-164, 182-199, 210-220, 226
+03-development/src/taskq/repository/tasks.py                                             122      0   100%
+03-development/src/taskq/repository/units_of_work.py                                      26     26     0%   16-77
+03-development/src/taskq/security/__init__.py                                              0      0   100%
+03-development/src/taskq/security/redact.py                                               12      1    92%   62
+03-development/src/taskq/service/__init__.py                                               0      0   100%
+03-development/src/taskq/service/auth.py                                                  28      0   100%
+03-development/src/taskq/service/executor.py                                              98     20    80%   80, 82, 84, 113, 125, 151, 160, 188-189, 195-200, 268-269, 293-294, 297-298, 307
+03-development/src/taskq/service/metrics.py                                               21      0   100%
+03-development/src/taskq/service/rate_limit.py                                            50      0   100%
+03-development/src/taskq/service/runner.py                                                86     27    69%   79, 96, 138-139, 142-143, 160, 178, 183-216, 233-240, 252-253
+03-development/src/taskq/service/tasks.py                                                 36      0   100%
+--------------------------------------------------------------------------------------------------------------------
+TOTAL                                                                                   1278    203    84%
+109 passed in 5.10s

@@ -1,0 +1,1138 @@
+{
+  "headers": [
+    {
+      "tool_name": "scancode-toolkit",
+      "tool_version": "32.4.1",
+      "options": {
+        "input": [
+          "03-development/src/"
+        ],
+        "--json-pp": "-",
+        "--license": true,
+        "--processes": "2"
+      },
+      "notice": "Generated with ScanCode and provided on an \"AS IS\" BASIS, WITHOUT WARRANTIES\nOR CONDITIONS OF ANY KIND, either express or implied. No content created from\nScanCode should be considered or used as legal advice. Consult an Attorney\nfor any legal advice.\nScanCode is a free software code scanning tool from nexB Inc. and others.\nVisit https://github.com/nexB/scancode-toolkit/ for support and download.",
+      "start_timestamp": "2026-08-22T225238.076101",
+      "end_timestamp": "2026-08-22T225244.598484",
+      "output_format_version": "4.1.0",
+      "duration": 6.52239990234375,
+      "message": null,
+      "errors": [],
+      "warnings": [],
+      "extra_data": {
+        "system_environment": {
+          "operating_system": "mac",
+          "cpu_architecture": "64",
+          "platform": "macOS-26.6.2-arm64-arm-64bit",
+          "platform_version": "Darwin Kernel Version 25.6.0: Fri Jul 31 19:18:53 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T6031",
+          "python_version": "3.9.6 (default, May 22 2026, 11:13:45) \n[Clang 21.0.0 (clang-2100.1.1.101)]"
+        },
+        "spdx_license_list_version": "3.27",
+        "files_count": 87
+      }
+    }
+  ],
+  "license_detections": [],
+  "files": [
+    {
+      "path": "src",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/__init__.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/framework_paths.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/__pycache__",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/__pycache__/__init__.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/__pycache__/framework_paths.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/__init__.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/app.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/deps.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/handlers.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/middleware.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/problem.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/schemas.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/__pycache__",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/__pycache__/__init__.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/__pycache__/app.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/__pycache__/deps.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/__pycache__/handlers.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/__pycache__/middleware.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/__pycache__/problem.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/__pycache__/schemas.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/routes",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/routes/__init__.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/routes/health.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/routes/metrics.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/routes/runs.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/routes/tasks.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/routes/__pycache__",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/routes/__pycache__/__init__.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/routes/__pycache__/health.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/routes/__pycache__/metrics.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/routes/__pycache__/runs.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/api/routes/__pycache__/tasks.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/cli",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/cli/key_create.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/cli/__pycache__",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/cli/__pycache__/key_create.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/config",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/config/__init__.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/config/settings.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/config/__pycache__",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/config/__pycache__/__init__.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/config/__pycache__/settings.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/errors",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/errors/__init__.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/errors/__pycache__",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/errors/__pycache__/__init__.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/errors/__pycache__/handlers.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/errors/__pycache__/problem.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/migrations",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/migrations/__init__.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/migrations/env.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/migrations/script.py.mako",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/migrations/__pycache__",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/migrations/__pycache__/__init__.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/migrations/__pycache__/env.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/migrations/versions",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/migrations/versions/__init__.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/migrations/versions/v1_initial_tasks_api_keys.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/migrations/versions/v2_add_tags_task_tags_unique.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/migrations/versions/v3_split_result_json_to_task_results.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/migrations/versions/__pycache__",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/migrations/versions/__pycache__/__init__.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/migrations/versions/__pycache__/v1_initial_tasks_api_keys.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/migrations/versions/__pycache__/v2_add_tags_task_tags_unique.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/migrations/versions/__pycache__/v3_split_result_json_to_task_results.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/models",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/models/__init__.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/models/api_key.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/models/base.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/models/task.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/models/task_result.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/models/__pycache__",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/models/__pycache__/__init__.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/models/__pycache__/api_key.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/models/__pycache__/base.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/models/__pycache__/task.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/models/__pycache__/task_result.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/repository",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/repository/__init__.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/repository/keys.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/repository/metrics.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/repository/rate_buckets.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/repository/results.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/repository/tasks.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/repository/units_of_work.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/repository/__pycache__",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/repository/__pycache__/__init__.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/repository/__pycache__/keys.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/repository/__pycache__/metrics.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/repository/__pycache__/rate_buckets.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/repository/__pycache__/results.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/repository/__pycache__/tasks.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/repository/__pycache__/units_of_work.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/service",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/service/__init__.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/service/auth.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/service/metrics.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/service/rate_limit.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/service/runner.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/service/tasks.py",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/service/__pycache__",
+      "type": "directory",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/service/__pycache__/__init__.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/service/__pycache__/auth.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/service/__pycache__/metrics.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/service/__pycache__/rate_limit.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/service/__pycache__/runner.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "src/taskq/service/__pycache__/tasks.cpython-311.pyc",
+      "type": "file",
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "scan_errors": []
+    }
+  ]
+}

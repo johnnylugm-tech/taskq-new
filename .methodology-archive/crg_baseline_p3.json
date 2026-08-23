@@ -1,0 +1,44 @@
+{
+  "community_cohesion": {
+    "score": 81.8,
+    "healthy": 9,
+    "total": 11,
+    "total_all": 40,
+    "excluded_test_communities": 29,
+    "unhealthy": [
+      {
+        "name": "api-task",
+        "cohesion": 0.311,
+        "size": 63,
+        "issues": [
+          "oversized(63)"
+        ]
+      },
+      {
+        "name": "versions-task",
+        "cohesion": 0.1481,
+        "size": 5,
+        "issues": [
+          "low_cohesion(0.15)"
+        ],
+        "dominant_file": "03-development/src/taskq/migrations/versions/v3_split_result_json_to_task_results.py"
+      }
+    ],
+    "_cohesion_threshold": 0.15,
+    "_community_oversized": 50,
+    "_community_min_size": 5,
+    "_extra_excludes": [],
+    "excludes_matched": {},
+    "excludes_files_matched": {}
+  },
+  "large_functions_critical": [],
+  "large_functions_penalty": 0,
+  "architecture_score": 81.8,
+  "_source": "framework-independent",
+  "_graph_files": 65,
+  "_source_files": 65,
+  "_unparsed_files": [],
+  "_build_type": "update",
+  "_baseline_sha": "821f6c5d45f9c6feff58ad62ae6490e4bcbbc3e5",
+  "_baseline_phase": 3
+}

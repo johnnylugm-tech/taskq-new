@@ -1,0 +1,95 @@
+{
+  "gate": 1,
+  "phase": 3,
+  "fr_id": "FR-99",
+  "overall_score": 100.0,
+  "quality_complete": true,
+  "rounds_used": 1,
+  "breakdown": {
+    "linting": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "All checks passed!",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/linting_harness.txt"
+    },
+    "type_safety": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "{\"version\": \"1.1.409\", \"time\": \"1787437533096\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 42, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.189}}",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
+    },
+    "test_coverage": {
+      "score": 100.0,
+      "threshold": 100,
+      "tests_passed": 2,
+      "tests_failed": 0,
+      "tests_skipped": 0,
+      "tool_evidence": "============================= test session starts ==============================\ncollected 2 items\n\n03-development/tests/test_fr99.py ..                                     [100%]\n\n============================== 2 passed in 0.06s ===============================\n{\"meta\": {\"format\": 3, \"version\": \"7.15.4\", \"timestamp\": \"2026-08-23T06:25:33.678375\"}, \"files\": {\"03-development/src/taskq/framework_paths.py\": {\"executed_lines\": [27, 29, 35, 47, 48, 49, 51, 53], \"summary\": {\"covered_lines\": 8, \"num_statements\": 8, \"percent_covered\": 100.0, \"percent_covered_display\": \"100\", \"missing_lines\": 0, \"excluded_lines\": 0, \"percent_statements_covered\": 100.0}}, \"missing_lines\": [], \"excluded_lines\": []}}, \"totals\": {\"covered_lines\": 8, \"num_statements\": 8, \"percent_covered\": 100.0, \"percent_covered_display\": \"100\", \"missing_lines\": 0, \"excluded_lines\": 0, \"percent_statements_covered\": 100.0}}",
+      "tool_output": ".methodology/gate_evidence/gate1/test_coverage.txt",
+      "coverage_scope": "per_fr",
+      "coverage_scope_fr": "FR-99",
+      "score_source": "framework"
+    },
+    "architecture_constraints": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "Import Linter\n\nContracts\n\nAnalyzed 41 files, 55 dependencies.\n-----------------------------------\n\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\n\nContracts: 3 kept, 0 broken.",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
+    }
+  },
+  "enforcer_sha": "c949e647f28141be51f1c35886432529fff1b911",
+  "enforcer_surface": {
+    "core/quality_gate": "92fb39ca39cbc752b8f1664b9dd4b871d4ce8216",
+    "harness/harness_bridge.py": "c36e31d5615cb32c775141bff38a1a44384da8f9",
+    "harness/gate_configs": "92d5728b783841baed6e1beeb57d5e7fbe56c71e"
+  },
+  "evidence_digest": {
+    "linting": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "f0d0b1081d9d3ebb26c4c93543053ecdc0a58998f22c071dc4ddb26021b57645",
+      "bytes": 18,
+      "head": "All checks passed!"
+    },
+    "type_safety": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "a085269e5f2c63647b94f923aa81551899c154c7230934d167b177e092af359e",
+      "bytes": 186,
+      "head": "{\"version\": \"1.1.409\", \"time\": \"1787437533096\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 42, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.189}}"
+    },
+    "test_coverage": {
+      "source": ".methodology/gate_evidence/gate1/test_coverage.txt",
+      "kind": "file",
+      "sha256": "e756921907a664bb3182f76a445c2f597249eeb6245d8e515c4ee6f28206b845",
+      "bytes": 916,
+      "head": "============================= test session starts ==============================\ncollecting ... collected 2 items\n\n03-development/tests/test_fr99.py::test_fr99_placeholder_framework_owned_role_registry PASSED [ 50%]\n03-development/tests/test_fr99.py::test_fr99_placeholder_no_extra_own_assertions PASSED [100%]\n\n================================ tests coverage ================================\n______________ coverage: platform darwin, python 3.11.15-final-0 _______________\n\nName                                          Stmts   Miss  Cover   Missing\n---------------------------------------------------------------------------\n03-development/src/taskq/framework_paths.py       8      0   100%\n---------------------------------------------------------------------------\nTOTAL                                             8      0   100%\n============================== 2 passed in 0.06s ==============================="
+    },
+    "architecture_constraints": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "33befa9bb3e174c4871c063622b9c2c3f03c338efbcc0fd5b36de0e87c29561e",
+      "bytes": 210,
+      "head": "Import Linter\n\nContracts\n\nAnalyzed 41 files, 55 dependencies.\n-----------------------------------\n\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\n\nContracts: 3 kept, 0 broken."
+    }
+  },
+  "composite_score": 100.0,
+  "verdict": "PASS",
+  "passed": true,
+  "spec_undelivered": [],
+  "spec_declared": 0,
+  "measurement_scope": {
+    "weight_covered": 1.0,
+    "weight_total": 1.0,
+    "dimensions_scored": [
+      "architecture_constraints",
+      "linting",
+      "test_coverage",
+      "type_safety"
+    ],
+    "dimensions_unscored": []
+  }
+}

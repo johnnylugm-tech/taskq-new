@@ -1,0 +1,95 @@
+{
+  "gate": 1,
+  "phase": 3,
+  "fr_id": "FR-09",
+  "overall_score": 100.0,
+  "quality_complete": true,
+  "rounds_used": 1,
+  "breakdown": {
+    "linting": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "All checks passed!",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/linting_harness.txt"
+    },
+    "type_safety": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "{\"version\":\"1.1.409\",\"time\":\"1787414449386\",\"generalDiagnostics\":[],\"summary\":{\"filesAnalyzed\":41,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.175}}",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
+    },
+    "test_coverage": {
+      "score": 100.0,
+      "threshold": 100,
+      "tests_passed": 21,
+      "tests_failed": 0,
+      "tests_skipped": 0,
+      "tool_evidence": "============================== 21 passed in 0.43s ==============================\n\nFR-09 file coverage:\n03-development/src/taskq/api/routes/health.py            53      0   100%\n03-development/src/taskq/api/routes/metrics.py            8      0   100%\n03-development/src/taskq/service/metrics.py              21      0   100%\n\nRequired tests present:\n- test_fr09_ac1_healthz_returns_200_status_ok\n- test_fr09_ac2_readyz_db_and_alembic_head_check\n- test_fr09_ac3_metrics_admin_scope\nspec_cov_pct=100 (3/3 required tests)",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-09.txt",
+      "coverage_scope": "per_fr",
+      "coverage_scope_fr": "FR-09",
+      "score_source": "framework"
+    },
+    "architecture_constraints": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "Contracts: 3 kept, 0 broken.\n\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\n\nAnalyzed 40 files, 53 dependencies.",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
+    }
+  },
+  "enforcer_sha": "b453cf6c1219839ba8f948ff1c41ffdb61a6149c",
+  "enforcer_surface": {
+    "core/quality_gate": "449eb3c8eb04168e16922b6c7f67bf74a400749f",
+    "harness/harness_bridge.py": "c36e31d5615cb32c775141bff38a1a44384da8f9",
+    "harness/gate_configs": "92d5728b783841baed6e1beeb57d5e7fbe56c71e"
+  },
+  "evidence_digest": {
+    "linting": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "f0d0b1081d9d3ebb26c4c93543053ecdc0a58998f22c071dc4ddb26021b57645",
+      "bytes": 18,
+      "head": "All checks passed!"
+    },
+    "type_safety": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "626be1298a398de3247d6f44adeea75482f395a425f049f27e215388d07c54be",
+      "bytes": 170,
+      "head": "{\"version\":\"1.1.409\",\"time\":\"1787414449386\",\"generalDiagnostics\":[],\"summary\":{\"filesAnalyzed\":41,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.175}}"
+    },
+    "test_coverage": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "b7fe6e0f99e4f5047053422e9d2b88f055b03ca8134f3b48d5c32bdb1efc9c94",
+      "bytes": 518,
+      "head": "============================== 21 passed in 0.43s ==============================\n\nFR-09 file coverage:\n03-development/src/taskq/api/routes/health.py            53      0   100%\n03-development/src/taskq/api/routes/metrics.py            8      0   100%\n03-development/src/taskq/service/metrics.py              21      0   100%\n\nRequired tests present:\n- test_fr09_ac1_healthz_returns_200_status_ok\n- test_fr09_ac2_readyz_db_and_alembic_head_check\n- test_fr09_ac3_metrics_admin_scope\nspec_cov_pct=100 (3/3 required tests)"
+    },
+    "architecture_constraints": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "9b52d16f2c172a8f7ef04d7267e3d113748c74ac2aa2ebe334b6f82366f684d1",
+      "bytes": 148,
+      "head": "Contracts: 3 kept, 0 broken.\n\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\n\nAnalyzed 40 files, 53 dependencies."
+    }
+  },
+  "composite_score": 100.0,
+  "verdict": "PASS",
+  "passed": true,
+  "spec_undelivered": [],
+  "spec_declared": 0,
+  "measurement_scope": {
+    "weight_covered": 1.0,
+    "weight_total": 1.0,
+    "dimensions_scored": [
+      "architecture_constraints",
+      "linting",
+      "test_coverage",
+      "type_safety"
+    ],
+    "dimensions_unscored": []
+  }
+}

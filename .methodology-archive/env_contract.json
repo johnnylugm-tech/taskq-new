@@ -1,0 +1,63 @@
+{
+  "classified_at": "2026-08-23T16:30:26Z",
+  "cli_tools": [
+    "alembic",
+    "bandit",
+    "fastapi",
+    "httpx",
+    "hypothesis",
+    "importlinter",
+    "lint-imports",
+    "mutmut",
+    "pip-compile",
+    "pip-licenses",
+    "pydantic",
+    "pytest",
+    "pytest_benchmark",
+    "pytest_cov",
+    "python3.11",
+    "sqlalchemy",
+    "uvicorn"
+  ],
+  "enforcer_sha": "725a220c35a6432d77e714aa520024f72c82061c",
+  "env_vars": {
+    "dev_opt_in": [],
+    "has_default": [
+      "TASKQ_CORS_ORIGINS",
+      "TASKQ_DB_POOL_PRE_PING",
+      "TASKQ_DB_POOL_SIZE",
+      "TASKQ_DB_URL",
+      "TASKQ_DRAIN_TIMEOUT",
+      "TASKQ_HOST",
+      "TASKQ_LOG_FORMAT",
+      "TASKQ_LOG_LEVEL",
+      "TASKQ_MAX_CONCURRENT",
+      "TASKQ_PORT",
+      "TASKQ_RATE_BURST",
+      "TASKQ_RATE_PER_SEC",
+      "TASKQ_TASK_TIMEOUT"
+    ],
+    "mandatory": []
+  },
+  "infra_services": {
+    "docker_compose_services": [],
+    "required": [
+      {
+        "checked_via": "python3 -c 'import sqlite3; sqlite3.connect(\":memory:\")'",
+        "fix": "",
+        "name": "sqlite",
+        "reachable": true,
+        "type": "SQLite 3.50.4 (stdlib)"
+      },
+      {
+        "checked_via": "pg_isready -h 127.0.0.1 -p 5432 -t 1",
+        "fix": "",
+        "name": "postgres",
+        "reachable": true,
+        "type": "PostgreSQL (local dev, optional for sqlite-default project)"
+      }
+    ]
+  },
+  "schema_version": 1,
+  "source_sha256": "f5864dab3d4533625eb83c84ca71c4937bd0bbb1c5cddefcfe97923acc47ab36"
+}

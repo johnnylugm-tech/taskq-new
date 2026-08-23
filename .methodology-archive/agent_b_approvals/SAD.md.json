@@ -1,0 +1,32 @@
+{
+  "fr": "SAD.md",
+  "review_status": "APPROVE",
+  "reason": "SAD.md passes all schema and content checks: every FR-01..FR-10 maps to one or more modules (SAD.md:123-134); every NFR-01..NFR-12 is addressed with handling strategy and enforcement site (SAD.md:362-373); all 12 `dimension:` values match SRS.md verbatim (SRS.md lines 781/823/879/931/963/987/1027/1069/1101/1163/1196/1224 verified against SAD.md:362-373); all 12 `type:` values (performance/security/reliability/security/documentation/layering/licensing/mutation/testability/integration/maintainability/verifiability) are from the legal SAB vocabulary (SAD.md:471-532); `phase: 2` is a bare int (SAD.md:392); SAB markers present at SAD.md:387/565 and SEC markers at SAD.md:581/682; `scope_layers` correctly carried for NFR-06 (api,service,cli,errors,config — non-repository layers where sqlalchemy i",
+  "citations": [
+    "02-architecture/SAD.md:392",
+    "02-architecture/SAD.md:362",
+    "02-architecture/SAD.md:363",
+    "02-architecture/SAD.md:364",
+    "02-architecture/SAD.md:365",
+    "02-architecture/SAD.md:366",
+    "02-architecture/SAD.md:367",
+    "02-architecture/SAD.md:368",
+    "02-architecture/SAD.md:369",
+    "02-architecture/SAD.md:370",
+    "02-architecture/SAD.md:371",
+    "02-architecture/SAD.md:372",
+    "02-architecture/SAD.md:373",
+    "02-architecture/SAD.md:471",
+    "02-architecture/SAD.md:476",
+    "02-architecture/SAD.md:481",
+    "02-architecture/SAD.md:486",
+    "02-architecture/SAD.md:491",
+    "02-architecture/SAD.md:496",
+    "02-architecture/SAD.md:502"
+  ],
+  "docs_embedded": [
+    "SRS.md",
+    "SAD.md"
+  ],
+  "confidence": 0.9
+}

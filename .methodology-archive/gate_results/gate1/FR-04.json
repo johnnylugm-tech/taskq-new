@@ -1,0 +1,95 @@
+{
+  "gate": 1,
+  "phase": 3,
+  "fr_id": "FR-04",
+  "overall_score": 100.0,
+  "quality_complete": true,
+  "rounds_used": 1,
+  "breakdown": {
+    "linting": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "All checks passed!",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/linting_harness.txt"
+    },
+    "type_safety": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 25, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0}}",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
+    },
+    "test_coverage": {
+      "score": 100.0,
+      "threshold": 100,
+      "tests_passed": 20,
+      "tests_failed": 0,
+      "tests_skipped": 0,
+      "tool_evidence": "collected 20 items\n03-development/tests/test_fr04.py ... [ 15%]\n03-development/tests/test_fr03.py ................. [100%]\n============================== 20 passed in 0.39s ==============================\ncoverage totals: percent_covered=100.0 covered_lines=44 num_statements=44",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-04.txt",
+      "coverage_scope": "per_fr",
+      "coverage_scope_fr": "FR-04",
+      "score_source": "framework"
+    },
+    "architecture_constraints": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "Contracts: 3 kept, 0 broken. fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT. Analyzed 24 files, 28 dependencies. EXIT=0",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
+    }
+  },
+  "enforcer_sha": "17f5f448162c66feb47b08e7cf0796425faeb93e",
+  "enforcer_surface": {
+    "core/quality_gate": "c0626e4209d4e24d3d1a571ed53ea5e1386a3856",
+    "harness/harness_bridge.py": "c36e31d5615cb32c775141bff38a1a44384da8f9",
+    "harness/gate_configs": "92d5728b783841baed6e1beeb57d5e7fbe56c71e"
+  },
+  "evidence_digest": {
+    "linting": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "f0d0b1081d9d3ebb26c4c93543053ecdc0a58998f22c071dc4ddb26021b57645",
+      "bytes": 18,
+      "head": "All checks passed!"
+    },
+    "type_safety": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "724f7fe2894ea918cc9136b4854def2d67982ae68670ae0b67cfb1092cb2a7a9",
+      "bytes": 115,
+      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 25, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0}}"
+    },
+    "test_coverage": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "7a11e194cefdb98ea2a991d6fc5581b633d23236a42dd4d8021364cd2b0de61b",
+      "bytes": 277,
+      "head": "collected 20 items\n03-development/tests/test_fr04.py ... [ 15%]\n03-development/tests/test_fr03.py ................. [100%]\n============================== 20 passed in 0.39s ==============================\ncoverage totals: percent_covered=100.0 covered_lines=44 num_statements=44"
+    },
+    "architecture_constraints": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "c68e7ad52213c96b777b8ac242de63873a3123dabfefa64db776f36ce7b6614f",
+      "bytes": 156,
+      "head": "Contracts: 3 kept, 0 broken. fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT. Analyzed 24 files, 28 dependencies. EXIT=0"
+    }
+  },
+  "composite_score": 100.0,
+  "verdict": "PASS",
+  "passed": true,
+  "spec_undelivered": [],
+  "spec_declared": 0,
+  "measurement_scope": {
+    "weight_covered": 1.0,
+    "weight_total": 1.0,
+    "dimensions_scored": [
+      "architecture_constraints",
+      "linting",
+      "test_coverage",
+      "type_safety"
+    ],
+    "dimensions_unscored": []
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "acceptance_criteria": {
+    "parse_gap": 1,
+    "uncited_by_test_spec": 0,
+    "unnumbered": 0
+  },
+  "architecture": {
+    "declared_only": [
+      "layers api > service > repository > models (NFR-06)",
+      "sqlalchemy import forbidden outside repository and models (NFR-06 forbidden contract)",
+      "CancelledError must propagate, never be swallowed (NFR-03)"
+    ],
+    "modules_outside_every_contract": []
+  },
+  "coverage": {
+    "omit": [],
+    "statements_measured": 74,
+    "statements_omitted": 0
+  },
+  "gate": 4,
+  "phase": 6,
+  "stubbed_boundaries": {
+    "count": 0,
+    "modules": []
+  },
+  "verify_system": {
+    "obligations_unmet": [],
+    "reach_status": "measured",
+    "status": "unmeasured",
+    "swallowed": null,
+    "tautological": null
+  }
+}

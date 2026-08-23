@@ -1,0 +1,46 @@
+{
+  "community_cohesion": {
+    "score": 81.8,
+    "healthy": 9,
+    "total": 11,
+    "total_all": 44,
+    "excluded_test_communities": 33,
+    "unhealthy": [
+      {
+        "name": "api-task",
+        "cohesion": 0.3089,
+        "size": 67,
+        "issues": [
+          "oversized(67)"
+        ]
+      },
+      {
+        "name": "versions-task",
+        "cohesion": 0.1481,
+        "size": 5,
+        "issues": [
+          "low_cohesion(0.15)"
+        ],
+        "dominant_file": "03-development/src/taskq/migrations/versions/v3_split_result_json_to_task_results.py"
+      }
+    ],
+    "_cohesion_threshold": 0.15,
+    "_community_oversized": 50,
+    "_community_min_size": 5,
+    "_extra_excludes": [],
+    "excludes_matched": {},
+    "excludes_files_matched": {}
+  },
+  "large_functions_critical": [],
+  "large_functions_penalty": 0,
+  "architecture_score": 81.8,
+  "_source": "framework-independent",
+  "_graph_files": 67,
+  "_source_files": 70,
+  "_unparsed_files": [
+    "03-development/tests/test_benchmark_nfr01.py",
+    "03-development/tests/test_nfr07_08_11_lint.py",
+    "03-development/tests/test_nfr_spec_coverage.py"
+  ],
+  "_build_type": "build"
+}

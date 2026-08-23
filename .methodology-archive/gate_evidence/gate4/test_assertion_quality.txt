@@ -1,0 +1,7 @@
+{
+  "total": 342,
+  "asserted": 320,
+  "zero_assert": 22,
+  "density": 2.96,
+  "tool_score": 100
+}

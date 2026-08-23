@@ -1,0 +1,14 @@
+=== test_assertion_quality (ast-assertions via core.tool_runners.ast_assertions) ===
+scope: 03-development/tests/  (174 test functions scanned)
+result: asserted=163 zero_assert=11 score=100.0
+command: harness_cli.py evaluate-dim --dim test_assertion_quality
+
+ast-assertions output
+{"total": 174, "asserted": 163, "zero_assert": 11, "neutralised": 0, "score": 100.0}
+
+zero_assert list (all in test_fr01.py — RED-style structural AC tests using pytest.raises):
+  - 03-development/tests/test_fr01.py::test_fr01_inprocess_validation_oversize_command_raises
+  - 03-development/tests/test_fr01.py::test_fr01_inprocess_list_limit_over_200_raises
+  - 03-development/tests/test_fr01.py::test_fr01_inprocess_list_limit_zero_raises
+  - 03-development/tests/test_fr01.py::test_fr01_inprocess_taskcreate_blacklist_char_raises_value_error
+  - 03-development/tests/test_fr01.py::test_fr01_inprocess_delete_unknown_task_raises_tasknotfound

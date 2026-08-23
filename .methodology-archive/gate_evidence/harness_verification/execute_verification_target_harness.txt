@@ -1,0 +1,6 @@
+# Harness-executed: system-verification
+# returncode: 0
+# agent_score: 100.0 | threshold: 100.0
+
+migrate-roundtrip: PASS
+verify-system: PASS (healthz=200 readyz=200)

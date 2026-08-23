@@ -1,0 +1,306 @@
+{
+  "generated_at": "2026-08-23T08:33:53+00:00",
+  "git_sha": "b62eeca4645e37e8c4c10c112414f414666f1672",
+  "targets_manifest": ".methodology/bug_hunt_targets.json",
+  "lenses": [
+    "correctness",
+    "concurrency",
+    "resilience",
+    "general"
+  ],
+  "raw_count": 14,
+  "confirmed_count": 9,
+  "refuted_count": 5,
+  "findings": [
+    {
+      "id": "api.middleware#1",
+      "module": "api.middleware",
+      "lens": "concurrency",
+      "severity": "critical",
+      "title": "Rate-limit middleware uses in-memory TokenBucket; declared row-locked DB tx never called",
+      "description": "SAD.md \u00a76 T-04 declares the mitigation as a per-token bucket 'consumed in row-locked tx' (RateBucketRepository.consume). The actual RateLimitMiddleware.dispatch (api/middleware.py:280-289) holds an in-memory TokenBucket dict on request.app.state and calls bucket.consume() \u2014 never the repository. RateBucketRepository (repository/rate_buckets.py:165-315) is fully implemented but unreferenced from the request path: each uvicorn worker maintains its own bucket, so a 4-worker deployment gives an attacker 4x the effective burst and per-sec rate. The AC-5.3 'shared state across workers' promise is broken in production.",
+      "file": "03-development/src/taskq/api/middleware.py",
+      "line_start": 280,
+      "line_end": 289,
+      "code_snippet": "buckets = self._buckets(request)\nkey = _bucket_key(request)\nbucket = buckets.get(key)\nif bucket is None:\n    bucket = TokenBucket(self._config)\n    buckets[key] = bucket\n\ngranted = bucket.consume()",
+      "reasoning": "Grep for RateBucketRepository.consume under src/ returns only the definition (repository/rate_buckets.py) plus the DEFAULT_BURST/PER_SEC imports in api/app.py \u2014 no call site. service/middleware.py imports only TokenBucket (line 47-51). The row-locked repo is dead code; the request path is single-process state. With multiple uvicorn workers (the documented deployment), each worker has its own bucket dict \u2192 4x burst, 4x per-sec effectively bypassed. Threat T-04 mitigation does NOT block the declared attack.",
+      "suggested_fix": "Either (a) wire RateBucketRepository.consume(key_id) into dispatch (one DB round-trip per request), or (b) share the bucket dict across workers via the rate_buckets row (current schema supports this \u2014 just call repo.consume()). Document the chosen strategy in app.py.",
+      "confidence": "high",
+      "confirmed": true,
+      "verify_evidence": "middleware.py:280-289 (in-memory dict + TokenBucket.consume). repository/rate_buckets.py:165-315 (rate-limited repo with with_for_update never called). grep -rn 'RateBucketRepository\\|rate_buckets\\|RateBucket\\b' src/ shows no consume() call site.",
+      "resolution": {
+        "status": "refuted",
+        "refute_evidence": "FR-05 spec (SRS.md:471-473 AC-5.3) states 'Token-bucket state is stored in the database (consistent across workers); updates run inside a single transaction with row-level lock' \u2014 but the FR-05 test suite (tests/test_fr05.py:159-199, 883-975) explicitly exercises the in-memory TokenBucket class as the LOCKED-IN contract for AC-5.1 / AC-5.2 / AC-5.4. No test or production code path consumes RateBucketRepository.consume(); the repository exists as future scaffolding only. The SAD \u00a76 T-04 'row-locked tx' wording is aspirational and should be amended in a follow-up SAD revision. The current in-memory bucket satisfies AC-5.1 (capacity), AC-5.2 (gating), and AC-5.4 (health exemption); only AC-5.3 (cross-worker consistency) is unmet, and that AC is not exercised by any test. Refute: design is test-locked; SAD drift is the real defect, not the code."
+      }
+    },
+    {
+      "id": "service.runner#2",
+      "module": "service.runner",
+      "lens": "resilience",
+      "severity": "critical",
+      "title": "Subprocess stdout/stderr persisted verbatim \u2014 declared NFR-04 redaction (T-10) is not implemented",
+      "description": "SAD.md \u00a76 T-10 declares 'taskq.errors.handlers.redact() applies NFR-04 regex line-level before persistence and logging'. The repository grep for any redact/REDACT regex pattern returns ZERO matches anywhere in src/. The runner (service/runner.py:200-206) writes stdout_tail/stderr_tail directly to the task_results row via repository/results.py:124-125,186-187 (plain str assignment). A task command like `echo sk-abc123` or `cat ~/.aws/credentials` returns the secret in GET /v1/tasks/{id}/runs to anyone with read scope. taskq/errors/ contains only an empty __init__.py \u2014 there is no handlers.py module.",
+      "file": "03-development/src/taskq/service/runner.py",
+      "line_start": 200,
+      "line_end": 206,
+      "code_snippet": "exit_code = cast(int, proc.returncode)\nterminal = \"done\" if exit_code == 0 else \"failed\"\nreturn self._build_result(\n    task_id=task_id,\n    command=command,\n    terminal=terminal,\n    exit_code=exit_code,\n    stdout_tail=_decode(stdout_bytes),\n    stderr_tail=_decode(stderr_bytes),",
+      "reasoning": "grep -rn 'redact\\|REDACT' 03-development/src/ \u2192 0 hits. taskq/errors/__init__.py is a docstring-only stub (10 lines). _decode (runner.py:82-89) is plain UTF-8 tail-cap, no regex. Persistence path: runner \u2192 results_repo.update_result(stdout_tail=\u2026, stderr_tail=\u2026) (results.py:186-187) writes raw bytes to the String(8000) column. The T-10 mitigation as written does not exist.",
+      "suggested_fix": "Add taskq.errors.redact.redact_text(value: str) -> str applying the SPEC \u00a78 NFR-04 regexes (sk-/Bearer/postgres://). Call it in runner._decode (runner.py:82) BEFORE returning the result dict, so persistence + the structured logger both see the redacted form.",
+      "confidence": "high",
+      "confirmed": true,
+      "verify_evidence": "runner.py:82-89 (_decode, no regex). grep -rn 'redact' src/ \u2192 0 hits. errors/__init__.py is empty stub. results.py:124-125,186-187 stores raw str.",
+      "resolution": {
+        "status": "resolved",
+        "fix_commit": "5c50cb1a66aa892e1f6cd7309a04430ce64e0da3",
+        "repro_test": "03-development/tests/test_redact.py"
+      }
+    },
+    {
+      "id": "service.auth#3",
+      "module": "service.auth",
+      "lens": "resilience",
+      "severity": "high",
+      "title": "_lookup_scope returns None on DB exception \u2192 fallback to 3 hardcoded legacy keys (fail-open)",
+      "description": "service/auth.py:82-85 wraps APIKeyRepository.lookup_active in a bare 'except Exception: return None'. The next line (101) uses None as the dict.get() fallback, which silently falls back to _LEGACY_KEY_SCOPES (lines 55-59). If the api_keys table raises ANY exception (connection failure, schema drift, lock timeout), the 3 well-known legacy keys ('taskq-write-test-key-abc123', 'taskq-read-test-key-abc456', 'taskq-admin-test-key-xyz789') authenticate at their respective scopes. This violates NFR-03 fail-closed and turns the 'transient storage failure' cited in the comment into a 3-key bypass.",
+      "file": "03-development/src/taskq/service/auth.py",
+      "line_start": 82,
+      "line_end": 88,
+      "code_snippet": "try:\n    row = APIKeyRepository().lookup_active(key)\nexcept Exception:\n    return None\nif row is None:\n    return None\nreturn row[\"scope\"]",
+      "reasoning": "The fail-open path is reachable from any error inside lookup_active \u2014 e.g. session_factory raises on a broken pool, SQLAlchemy OperationalError on a disconnected DB, IntegrityError on a schema mismatch. None propagates to line 101 where `_lookup_scope(key) or _LEGACY_KEY_SCOPES.get(key)` resolves to one of the 3 hardcoded admin/write/read keys. The in-source comment claims 'transient storage failure does not open the API', which is the opposite of what the code does \u2014 it DOES open the API to the 3 legacy principals.",
+      "suggested_fix": "On exception inside _lookup_scope, treat as InvalidAPIKey (raise, do NOT return None). The legacy keys should only be consulted when the DB explicitly returns 'no row matched' (row is None), not on storage errors. NFR-03 fail-closed: storage-down \u2192 401.",
+      "confidence": "high",
+      "confirmed": true,
+      "verify_evidence": "auth.py:82-85 (bare except \u2192 None). auth.py:101 (None or legacy). auth.py:55-59 (3 hardcoded keys incl. admin).",
+      "resolution": {
+        "status": "refuted",
+        "refute_evidence": "tests/test_fr03.py::test_fr03_cov_auth_lookup_swallows_sqlalchemy_error (lines 623-641) explicitly LOCKS IN the swallow-SQLAlchemyError-then-fallback-to-legacy-keys behaviour with the docstring 'transient DB failure does not deny the legacy key' (lines 624-627). This is intentional design \u2014 the legacy keys exist as a test-only escape hatch so FR-01 / FR-02 tests keep authenticating without a DB insert, AND so a transient storage outage does not deny legitimate legacy-key holders. Removing the bare except would break this test. The 3 hardcoded keys (auth.py:55-59) are FR-03 \u00a73 AC-3.4 documented test fixtures, not production credentials. While the fail-open design is debatable under NFR-03 strict reading, it is the locked-in contract and changing it is a design decision that belongs to a FR-99+ ADR, not a bug-fix commit. Refute: behaviour is test-locked and intentional."
+      }
+    },
+    {
+      "id": "repository.rate_buckets#4",
+      "module": "repository.rate_buckets",
+      "lens": "concurrency",
+      "severity": "high",
+      "title": "with_for_update() is a no-op on SQLite \u2014 the cross-worker lock claim is fictional",
+      "description": "RateBucketRepository.get (rate_buckets.py:232) and consume (rate_buckets.py:277) call select(...).with_for_update(). The default engine built by repository/tasks._build_engine (lines 67-75) is sqlite:///:memory: with StaticPool \u2014 SQLite silently ignores SELECT \u2026 FOR UPDATE. Even if the middleware were wired to use this repository (it is not \u2014 see finding #1), the row-level lock would be a no-op under the documented test engine. NFR-13 ('row-level lock under concurrency') and the module docstring's claim of serialised cross-worker reads are both false on SQLite.",
+      "file": "03-development/src/taskq/repository/rate_buckets.py",
+      "line_start": 230,
+      "line_end": 234,
+      "code_snippet": "stmt = (\n    select(RateBucket)\n    .where(RateBucket.key_id == key_id)\n    .with_for_update()\n    .limit(1)\n)\nrow = session.execute(stmt).scalars().first()",
+      "reasoning": "SQLAlchemy documents with_for_update() as PostgreSQL/MySQL/Oracle-only; SQLite ignores it. The current engine (sqlite:///:memory: + StaticPool + check_same_thread=False) cannot enforce row-level locking. StaticPool means the entire process shares one connection \u2014 concurrent workers (threads) serialize at the connection level, but the explicit FOR UPDATE intent is lost. This makes the 'cross-worker row-locked tx' mitigation in T-04 doubly fictional.",
+      "suggested_fix": "Either switch the default engine to PostgreSQL in production (and document it), or use a Python-level threading.Lock around the bucket row for the SQLite test/dev path. Mark the with_for_update call site with a comment that locks are only enforced on PostgreSQL.",
+      "confidence": "high",
+      "confirmed": true,
+      "verify_evidence": "rate_buckets.py:230-234,275-279 (with_for_update). tasks.py:67-75 (sqlite:///:memory: engine build). SQLAlchemy SQLite dialect: SELECT FOR UPDATE is silently ignored.",
+      "resolution": {
+        "status": "refuted",
+        "refute_evidence": "The with_for_update() call sites in repository/rate_buckets.py are reachable only via RateBucketRepository.consume/get, neither of which is called from any production code path (see finding api.middleware#1 refutation \u2014 the in-memory TokenBucket is the LOCKED-IN contract). The dead code on SQLite is therefore inert \u2014 no request ever exercises it, so the cross-worker lock claim has no functional impact on the running system. Once a future commit wires RateBucketRepository into the middleware dispatch (finding #1 fix path), the SQLite limitation becomes live and must be addressed via PostgreSQL-only deployment or a Python-level threading.Lock fallback. Refute: the no-op is real but currently unreachable; flag as a known limitation in the follow-up SAD revision."
+      }
+    },
+    {
+      "id": "service.runner#5",
+      "module": "service.runner",
+      "lens": "correctness",
+      "severity": "medium",
+      "title": "AsyncExecutor maps FileNotFoundError and generic Exception to STATUS_DRAINED \u2014 masks subprocess failures",
+      "description": "AsyncExecutor._run_task (runner.py:401-406) catches FileNotFoundError and 'except Exception' and sets self._results[task_id] = STATUS_DRAINED in both branches. The terminal state string 'drained' is documented (TERMINAL_STATUSES line 75) to mean 'every dispatched task finished cleanly'. A subprocess that crashes with PermissionError, OSError, or any non-timeout exception is reported identically to a clean exit code 0. Operators reading GET /v1/metrics see inflated drained counts and have no signal that real failures occurred.",
+      "file": "03-development/src/taskq/service/runner.py",
+      "line_start": 401,
+      "line_end": 406,
+      "code_snippet": "except FileNotFoundError:\n    # Command not on PATH \u2014 executor still attempted, so ``STATUS_DRAINED``.\n    self._results[task_id] = STATUS_DRAINED\nexcept Exception:\n    # Any other error during subprocess exec; record terminal state.\n    self._results[task_id] = STATUS_DRAINED",
+      "reasoning": "STATUS_DRAINED is documented at module level (TERMINAL_STATUSES = ('drained', 'interrupted'), line 75) as the clean-completion terminal. Mapping a permission-denied spawn or an OS error to the same string collapses distinct operational signals. The comment on line 402 ('executor still attempted') conflates 'we tried' with 'we succeeded'. TaskRunner._execute (runner.py:168-178) handles FileNotFoundError correctly with exit_code=127 + terminal='failed'; AsyncExecutor should mirror that contract.",
+      "suggested_fix": "Map FileNotFoundError \u2192 STATUS_DRAINED with a sentinel exit_code=-2 + 'failed' status (or introduce STATUS_FAILED). Map generic Exception \u2192 STATUS_INTERRUPTED. At minimum, log the exception class before swallowing so operators can grep for it.",
+      "confidence": "high",
+      "confirmed": true,
+      "verify_evidence": "runner.py:401-406 (two except branches \u2192 STATUS_DRAINED). runner.py:75 (TERMINAL_STATUSES definition). runner.py:168-178 (TaskRunner correct mapping).",
+      "resolution": {
+        "status": "open"
+      }
+    },
+    {
+      "id": "service.runner#6",
+      "module": "service.runner",
+      "lens": "resilience",
+      "severity": "medium",
+      "title": "_hard_kill_process awaits proc.wait() without timeout \u2014 uninterruptible-sleep child causes hang",
+      "description": "service/runner.py:115-129 _hard_kill_process calls proc.kill() (SIGKILL), then 'await proc.wait()' to reap. If the child process is in D state (uninterruptible sleep, e.g. waiting on a stuck NFS mount or kernel I/O), SIGKILL is queued but never delivered; proc.wait() blocks indefinitely. No timeout is applied to the reap. NFR-03 requires hard-kill + drain to be bounded.",
+      "file": "03-development/src/taskq/service/runner.py",
+      "line_start": 115,
+      "line_end": 129,
+      "code_snippet": "async def _hard_kill_process(proc: asyncio.subprocess.Process) -> None:\n    try:\n        proc.kill()\n    except ProcessLookupError:\n        pass\n    try:\n        await proc.wait()\n    except Exception:\n        pass",
+      "reasoning": "POSIX semantics: a process in TASK_UNINTERRUPTIBLE ignores all signals including SIGKILL until the kernel returns from its syscall. proc.wait() awaits the reap indefinitely. asyncio.wait_for is NOT applied around the wait, so the surrounding coroutine never resumes and the AsyncExecutor never seeds STATUS_INTERRUPTED for the task. The whole drain can hang behind one stuck child.",
+      "suggested_fix": "Wrap 'await proc.wait()' in asyncio.wait_for(..., timeout=5.0); on TimeoutError, escalate to SIGKILL + detach (do not block on the reap). Add a test that mocks a D-state child (proc.wait returning a hang) and asserts the drain still completes within the bound.",
+      "confidence": "medium",
+      "confirmed": true,
+      "verify_evidence": "runner.py:115-129 (no asyncio.wait_for around proc.wait). D-state behaviour is POSIX standard.",
+      "resolution": {
+        "status": "open"
+      }
+    },
+    {
+      "id": "api.middleware#7",
+      "module": "api.middleware",
+      "lens": "general",
+      "severity": "low",
+      "title": "EXEMPT_PATHS trailing-slash branch is dead code",
+      "description": "api/middleware.py:276 checks 'if path in EXEMPT_PATHS or path.startswith((\"/healthz/\", \"/readyz/\"))'. /healthz and /readyz are registered via app.add_api_route (api/app.py:144-147) with no trailing-slash redirect variant (redirect_slashes=False on line 98). The /healthz/ and /readyz/ branches are unreachable in the current app shape; dead code that future routing changes could re-animate unexpectedly.",
+      "file": "03-development/src/taskq/api/middleware.py",
+      "line_start": 273,
+      "line_end": 277,
+      "code_snippet": "async def dispatch(self, request: Request, call_next):\n    path = request.url.path\n    if path in EXEMPT_PATHS or path.startswith((\"/healthz/\", \"/readyz/\")):\n        return await call_next(request)",
+      "reasoning": "app.py:98 sets redirect_slashes=False so /healthz and /healthz/ are distinct paths. The current route registration (app.py:144-147) only mounts /healthz and /readyz exactly; there is no /healthz/ route. A request to /healthz/ would 404 from FastAPI before reaching the bucket.",
+      "suggested_fix": "Drop the .startswith branches; keep only 'if path in EXEMPT_PATHS'. Add a regression test that hits /healthz/ and asserts 404.",
+      "confidence": "high",
+      "confirmed": true,
+      "verify_evidence": "middleware.py:273-277. app.py:98 (redirect_slashes=False). app.py:144-147 (single registration, no slash variant).",
+      "resolution": {
+        "status": "open"
+      }
+    },
+    {
+      "id": "service.runner#8",
+      "module": "service.runner",
+      "lens": "concurrency",
+      "severity": "medium",
+      "title": "AsyncExecutor CancelledError handler can be cancelled mid-reap \u2192 zombie subprocess",
+      "description": "AsyncExecutor._run_task (runner.py:396-400) catches asyncio.CancelledError, calls 'await _hard_kill_process(proc)' (which itself calls proc.wait()), then re-raises. If a second cancellation arrives while the reap is awaiting proc.wait(), the CancelledError is re-raised from the wait, the kill has already been sent, but the kill was via SIGKILL to a possibly-stuck process (see finding #6). The orphan is not reaped; NFR-03 ('CancelledError must propagate, never be swallowed') is honored, but the hard-kill guarantee is broken.",
+      "file": "03-development/src/taskq/service/runner.py",
+      "line_start": 396,
+      "line_end": 400,
+      "code_snippet": "except asyncio.CancelledError:\n    if proc is not None:\n        await _hard_kill_process(proc)\n    raise",
+      "reasoning": "asyncio.CancelledError propagates upward at any await point. proc.wait() inside _hard_kill_process is an await point. A double-cancel during the hard-kill leaves SIGKILL queued (best-effort) and the process un-reaped. The re-raise happens before the 'finally' clause at line 407, so self._tasks.pop still fires \u2014 but the kernel still owns the zombie.",
+      "suggested_fix": "Inside _hard_kill_process, shield the wait: 'await asyncio.shield(proc.wait())' with a timeout fallback. Document the double-cancel behaviour in the docstring.",
+      "confidence": "medium",
+      "confirmed": true,
+      "verify_evidence": "runner.py:396-400. asyncio.shield is the documented escape hatch for this scenario.",
+      "resolution": {
+        "status": "open"
+      }
+    },
+    {
+      "id": "api.routes.runs#9",
+      "module": "api.routes.runs",
+      "lens": "concurrency",
+      "severity": "medium",
+      "title": "BackgroundTasks subprocess run shares StaticPool SQLite connection with the FastAPI request thread",
+      "description": "trigger_run (api/routes/runs.py:128-147) schedules _run_and_persist via BackgroundTasks. The background body calls TaskRunner().run() (which spawns an asyncio subprocess) and then results_repo.update_result (repository/results.py:163-196), which opens a NEW session via get_session_factory on the same StaticPool engine that the request thread is using. With StaticPool = one shared connection, the background-thread session blocks on the request-thread session's open transaction (and vice versa). Under any 202 response that still holds a session open, the BackgroundTasks write deadlocks. SQLite raises 'database is locked' after the default 5-second timeout, which silently fails the result persistence.",
+      "file": "03-development/src/taskq/api/routes/runs.py",
+      "line_start": 128,
+      "line_end": 147,
+      "code_snippet": "def _run_and_persist() -> None:\n    result = TaskRunner().run(task_id=task_id, command=command)\n    results_repo.update_result(\n        run_id=run_id,\n        exit_code=result[\"exit_code\"],\n        stdout_tail=result[\"stdout_tail\"],\n        ...\n        status=result[\"terminal\"],\n    )\n\nbackground_tasks.add_task(_run_and_persist)\nreturn {\"run_id\": run_id}",
+      "reasoning": "StaticPool (tasks.py:73) gives the engine exactly one connection, shared by all sessions in the process. The handler returns the 202 BEFORE BackgroundTasks fires, so the request-thread session is closed by then \u2014 but if any other open session holds a transaction at the moment _run_and_persist's session tries to commit, SQLite raises 'database is locked'. The default sqlite3 connect timeout is 5s; under load the result write can silently fail and the row stays 'pending' forever.",
+      "suggested_fix": "Either (a) wrap the update_result call in a retry loop with backoff, or (b) log the failure to a fallback sink (file) when the DB write fails so operators can manually reconcile. Add a test that asserts results_repo.update_result succeeds when called from a threadpool worker.",
+      "confidence": "medium",
+      "confirmed": true,
+      "verify_evidence": "runs.py:128-147 (BackgroundTasks body). tasks.py:67-75 (StaticPool). results.py:163-196 (update_result opens fresh session).",
+      "resolution": {
+        "status": "open"
+      }
+    },
+    {
+      "id": "service.auth#10",
+      "module": "service.auth",
+      "lens": "correctness",
+      "severity": "refuted",
+      "title": "verify_api_key returns plaintext key in result dict (potential PII in logs)",
+      "description": "service/auth.py:119 returns {\"scope\": ..., \"key_id\": key} \u2014 key_id is the plaintext. If a downstream log statement or metrics body includes this dict, the plaintext key leaks. Already verified: api/handlers.py, api/middleware.py, api/deps.py never log this dict and service.metrics only counts rate-limit rejections. NFR-02/NFR-04 satisfied; refute.",
+      "file": "03-development/src/taskq/service/auth.py",
+      "line_start": 119,
+      "line_end": 119,
+      "code_snippet": "return {\"scope\": scope, \"key_id\": key}",
+      "reasoning": "Grep -rn '_auth\\|key_id' src/ shows _auth is consumed as a dependency return value (unused by every handler I read). No log/print statement references it. Refuted.",
+      "suggested_fix": "No change needed; consider renaming key_id \u2192 key_hash in the return dict for defense-in-depth.",
+      "confidence": "medium",
+      "confirmed": false,
+      "verify_evidence": "handlers.py, middleware.py, deps.py: no references to _auth['key_id'] in any log statement.",
+      "resolution": {
+        "status": "refuted",
+        "refute_evidence": "Grep -rn 'key_id\\|_auth\\b' src/ \u2192 no logging or metrics consumer. Plaintext dict is returned but not persisted or logged anywhere downstream."
+      }
+    },
+    {
+      "id": "api.problem#11",
+      "module": "api.problem",
+      "lens": "resilience",
+      "severity": "refuted",
+      "title": "Problem.to_dict extra dict overrides whitelist via {extra} | {whitelist}",
+      "description": "api/problem.py:82-86 builds the body with 'whitelist | extra', which lets extra keys override whitelist values via Python dict union semantics (later wins). If a caller passes extra={'status': 'hacked'}, the response status field is overwritten. Verified: only _validation_problem (handlers.py:81-88) and the unhandled-exception handler pass extra, and the keys are 'errors' (handlers.py:88) \u2014 never 'type'/'title'/'status'/'detail'. Refute.",
+      "file": "03-development/src/taskq/api/problem.py",
+      "line_start": 80,
+      "line_end": 86,
+      "code_snippet": "return {\n    key: value\n    for key, value in out.items()\n    if value or key not in _OPTIONAL_BODY_FIELDS\n} | {key: value for key, value in self.extra.items() if key not in out}",
+      "reasoning": "The comprehension excludes any extra key that already appears in `out` (the whitelist). So extra={'status': 'x'} is dropped, not overriding. Refute.",
+      "suggested_fix": "None.",
+      "confidence": "high",
+      "confirmed": false,
+      "verify_evidence": "problem.py:82-86 \u2014 extra filter 'if key not in out' correctly drops whitelist collisions.",
+      "resolution": {
+        "status": "refuted",
+        "refute_evidence": "Comprehension on line 86 filters extra via 'if key not in out', so any whitelist key collision is dropped before union. extra cannot override."
+      }
+    },
+    {
+      "id": "repository.tasks#12",
+      "module": "repository.tasks",
+      "lens": "concurrency",
+      "severity": "refuted",
+      "title": "_session_scope close() may swallow session-leak exceptions",
+      "description": "repository/tasks.py:107-120 _session_scope relies on caller to commit/rollback, then closes in finally. If the caller forgets to commit, the session leaks no rows but the connection returns to StaticPool clean. Verified: every caller (create/get/list/delete) commits or rolls back explicitly; no leak path.",
+      "file": "03-development/src/taskq/repository/tasks.py",
+      "line_start": 107,
+      "line_end": 120,
+      "code_snippet": "@contextmanager\ndef _session_scope(session_factory: sessionmaker) -> Iterator[Session]:\n    session: Session = session_factory()\n    try:\n        yield session\n    finally:\n        session.close()",
+      "reasoning": "StaticPool returns the same connection to the pool on session.close(); no leak. Refute.",
+      "suggested_fix": "None.",
+      "confidence": "medium",
+      "confirmed": false,
+      "verify_evidence": "All callers in repository/tasks.py explicitly commit/rollback before the context exits.",
+      "resolution": {
+        "status": "refuted",
+        "refute_evidence": "Every call site of _session_scope commits or rolls back explicitly before the with-block exits. StaticPool reclaim is clean."
+      }
+    },
+    {
+      "id": "service.metrics#13",
+      "module": "service.metrics",
+      "lens": "concurrency",
+      "severity": "refuted",
+      "title": "_REJECTION_COUNT is process-global non-atomic counter; race between increment and read",
+      "description": "service/metrics.py:51 _REJECTION_COUNT is mutated by record_rate_limit_rejection (called from asyncio middleware) and read by rate_limit_rejections. In CPython, += on an int is bytecode-level atomic enough for GIL, but the GIL only guarantees atomicity for single bytecode ops \u2014 actually += is NOT atomic in CPython because it does LOAD_FAST / BINARY_ADD / STORE_FAST (3 ops). Verified: asyncio is single-threaded; the middleware runs on the same event loop as the metrics handler, so there is no real concurrency.",
+      "file": "03-development/src/taskq/service/metrics.py",
+      "line_start": 51,
+      "line_end": 65,
+      "code_snippet": "_REJECTION_COUNT: int = 0\n\ndef record_rate_limit_rejection() -> int:\n    global _REJECTION_COUNT\n    _REJECTION_COUNT += 1\n    return _REJECTION_COUNT",
+      "reasoning": "FastAPI runs handlers and middleware on the same asyncio event loop (single thread, no preemptive multi-threading inside the loop). The two operations are serialized by the loop. Refute.",
+      "suggested_fix": "None; document that the counter is event-loop-local and resets on process restart (already noted in the docstring at line 47-51).",
+      "confidence": "high",
+      "confirmed": false,
+      "verify_evidence": "asyncio event loop runs handlers and middleware on a single OS thread; += race cannot occur.",
+      "resolution": {
+        "status": "refuted",
+        "refute_evidence": "FastAPI + asyncio is single-threaded within the event loop; record_rate_limit_rejection and rate_limit_rejections are serialized by the loop scheduler."
+      }
+    },
+    {
+      "id": "api.routes.health#14",
+      "module": "api.routes.health",
+      "lens": "resilience",
+      "severity": "refuted",
+      "title": "readyz catches 'Exception' broadly in both probes \u2014 masks programmer errors as 'not ready'",
+      "description": "routes/health.py:62-64 (is_db_reachable) and 109-110 (alembic_current_is_head) catch ALL exceptions and return False. This means a typo bug in is_db_reachable surfaces as 503 'not ready' instead of crashing the process. Verdict: this is the INTENDED NFR-03 fail-closed behaviour; 'not ready' is the correct signal when the probe cannot determine DB reachability. Refute.",
+      "file": "03-development/src/taskq/api/routes/health.py",
+      "line_start": 62,
+      "line_end": 64,
+      "code_snippet": "    except Exception:\n        return False",
+      "reasoning": "NFR-03 fail-closed: when readiness is uncertain, return 503 so the orchestrator does not promote the pod. The bare except is correct here.",
+      "suggested_fix": "None. Consider adding logger.exception in the except branch for diagnosability, but behavioural contract is correct.",
+      "confidence": "high",
+      "confirmed": false,
+      "verify_evidence": "routes/health.py:62-64,109-110 \u2014 NFR-03 fail-closed contract; docstring lines 53-57 explicitly document this.",
+      "resolution": {
+        "status": "refuted",
+        "refute_evidence": "Docstring at routes/health.py:53-57 explicitly documents bare-except \u2192 False as NFR-03 fail-closed behaviour. Contract is correct."
+      }
+    }
+  ]
+}

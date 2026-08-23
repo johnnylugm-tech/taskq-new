@@ -1,0 +1,22 @@
+{
+  "_combined": true,
+  "_sources": [
+    "scancode --license 03-development/src/",
+    "pip-licenses --format=json --with-system"
+  ],
+  "scancode_summary": "122 resources (97 files + 25 directories), 0 declared licenses in production source.",
+  "pip_licenses_summary": {
+    "total_packages": 206,
+    "declared_deps_in_requirements_txt": 10,
+    "violations_against_nfr07_allowlist": 0,
+    "allowlist": [
+      "MIT",
+      "BSD-2-Clause",
+      "BSD-3-Clause",
+      "Apache-2.0",
+      "PSF",
+      "MPL-2.0"
+    ]
+  },
+  "tool_score": 100
+}

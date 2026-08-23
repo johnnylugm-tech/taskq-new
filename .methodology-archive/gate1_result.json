@@ -1,0 +1,123 @@
+{
+  "gate": 1,
+  "phase": 8,
+  "fr_id": "FR-99",
+  "overall_score": 100.0,
+  "quality_complete": true,
+  "rounds_used": 1,
+  "breakdown": {
+    "linting": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "All checks passed!",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/linting_harness.txt"
+    },
+    "type_safety": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.181}}",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
+    },
+    "test_coverage": {
+      "score": 100.0,
+      "threshold": 100,
+      "tests_passed": 2,
+      "tests_failed": 0,
+      "tests_skipped": 0,
+      "tool_evidence": "2 passed in 0.13s. coverage 100% (8/8 statements, 0 missing)",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-99.txt",
+      "coverage_scope": "per_fr",
+      "coverage_scope_fr": "FR-99",
+      "score_source": "framework"
+    },
+    "architecture_constraints": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "Contracts: 3 kept, 0 broken. fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
+    }
+  },
+  "enforcer_sha": "09637de4a1f574cf8e9a357fa5caf1995ede39b8",
+  "enforcer_surface": {
+    "core/quality_gate": "92e717ad7ddfd8fb61251b004b9aef546c01554b",
+    "harness/harness_bridge.py": "4858e5529079e9432fb38d85d68c6051d956312d",
+    "harness/gate_configs": "d91e4c3c9409081ea44b75ae3060f3293fa59cab"
+  },
+  "evidence_digest": {
+    "secrets_scanning::.gitleaksignore": {
+      "source": ".gitleaksignore (score-altering exclusions)",
+      "kind": "file",
+      "sha256": "b4149a873b57f3f6c89f6fd0cb87e1fa8b1b8930ce5ef613944fc0a2cfc2e1e9",
+      "bytes": 539,
+      "head": "f9c31a90388e293c794c2affe055ade5464a4a4f:.methodology/lessons/2026-08-23-fr99-finalization.md:generic-api-key:2\n\n# test_fr99 redact fixtures - synthetic sk- prefixed tokens used to verify the redaction system\n03-development/tests/test_redact.py:generic-api-key:31\n03-development/tests/test_redact.py:generic-api-key:86\n\n# test_sec_threats synthetic secrets - exercise redaction contract (sk-, postgres://, password=)\n03-development/tests/test_sec_threats.py:generic-api-key:411\n03-development/tests/test_sec_threats.py:generic-api-key:508"
+    },
+    "mutation_testing::setup.cfg": {
+      "source": "setup.cfg (score-altering exclusions)",
+      "kind": "file",
+      "sha256": "e708c4e0384ad5266ca6f3ecb04b67d702ff5b0e4451b4e7d5ae71f46b8d965d",
+      "bytes": 191,
+      "head": "[mutmut]\npaths_to_mutate=03-development/src/taskq/repository,03-development/src/taskq/service\nbackup=False\nrunner=python -m pytest -x -q 03-development/tests/\ntests_dir=03-development/tests/"
+    },
+    "test_coverage::pyproject.toml": {
+      "source": "pyproject.toml (score-altering exclusions)",
+      "kind": "file",
+      "sha256": "120f50a5f7e46a9d38b48280ffde889435f72bb9eaec48600fa9f12624439740",
+      "bytes": 2524,
+      "head": "# taskq-new — pyproject.toml\n#\n# Pin pytest discovery to the project test directory so the harness-side\n# pytest-cov and pytest-benchmark invocations do NOT collect\n# `harness/tests/*` (the vendored harness method library) from the project\n# root. Without this, `pytest` invoked bare from `/Users/johnny/projects/taskq-new`\n# collects the harness test suite alongside the project's own, and either\n# times out (pytest-cov at 120s) or fails collection (pytest-benchmark trips\n# on a harness test referencing fixtures that do not exist in this layout).\n#\n# See harness/core/quality_gate/cross_artifact.py:481 and the tool_runners\n# pytest invocation paths for why this matters at the gate level.\n#\n# `[tool.coverage.run]` scopes coverage measurement to the project's own\n# source tree. The harness invokes `pytest --cov=.` from the project root\n# (harness/core/quality_gate/cross_artifact.py:481); without a `source`\n# constraint that would measure everything under `.` — including the\n# vendored harness/, all of `.methodology/`, etc. — and blow past the\n# 120s budget on a 1000+ file tree. With `source = [\"03-development/src\"]`\n# coverage only instruments the project's actual source, so the run"
+    },
+    "test_coverage::setup.cfg": {
+      "source": "setup.cfg (score-altering exclusions)",
+      "kind": "file",
+      "sha256": "e708c4e0384ad5266ca6f3ecb04b67d702ff5b0e4451b4e7d5ae71f46b8d965d",
+      "bytes": 191,
+      "head": "[mutmut]\npaths_to_mutate=03-development/src/taskq/repository,03-development/src/taskq/service\nbackup=False\nrunner=python -m pytest -x -q 03-development/tests/\ntests_dir=03-development/tests/"
+    },
+    "linting": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "f0d0b1081d9d3ebb26c4c93543053ecdc0a58998f22c071dc4ddb26021b57645",
+      "bytes": 18,
+      "head": "All checks passed!"
+    },
+    "type_safety": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "1c65d763990f09eb3137940b1d612953c56cc52dc475b660cbbc71cdc9cfe658",
+      "bytes": 135,
+      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.181}}"
+    },
+    "test_coverage": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "66685e9d1ba4c9ac6732ae0bb3c7a4f318d87016b624acbfe870979c1c4c5653",
+      "bytes": 60,
+      "head": "2 passed in 0.13s. coverage 100% (8/8 statements, 0 missing)"
+    },
+    "architecture_constraints": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "f1ddc794ca6cceab552729de6cb53e7c3e1f07fa29f6bb50bda1f3909246bdf5",
+      "bytes": 112,
+      "head": "Contracts: 3 kept, 0 broken. fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT"
+    }
+  },
+  "composite_score": 100.0,
+  "verdict": "PASS",
+  "passed": true,
+  "spec_undelivered": [],
+  "spec_declared": 0,
+  "measurement_scope": {
+    "weight_covered": 1.0,
+    "weight_total": 1.0,
+    "dimensions_scored": [
+      "architecture_constraints",
+      "linting",
+      "test_coverage",
+      "type_safety"
+    ],
+    "dimensions_unscored": []
+  }
+}

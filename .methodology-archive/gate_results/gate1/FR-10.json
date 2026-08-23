@@ -1,0 +1,95 @@
+{
+  "gate": 1,
+  "phase": 3,
+  "fr_id": "FR-10",
+  "overall_score": 100.0,
+  "quality_complete": true,
+  "rounds_used": 1,
+  "breakdown": {
+    "linting": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "All checks passed! (ruff check 03-development/src/ --extend-ignore RUF001,RUF002,RUF003)",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/linting_harness.txt"
+    },
+    "type_safety": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "{\"summary\": {\"filesAnalyzed\": 41, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.175}}",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
+    },
+    "test_coverage": {
+      "score": 100.0,
+      "threshold": 100,
+      "tests_passed": 58,
+      "tests_failed": 0,
+      "tests_skipped": 0,
+      "tool_evidence": "58 passed in 4.21s. coverage: middleware.py 100%, schemas.py 100%. FR-10 source files (middleware.py, schemas.py) at 100% coverage; spec_cov_pct=100% (12/12 required tests present).",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-10.txt",
+      "coverage_scope": "per_fr",
+      "coverage_scope_fr": "FR-10",
+      "score_source": "framework"
+    },
+    "architecture_constraints": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "Analyzed 40 files, 55 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT)",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
+    }
+  },
+  "enforcer_sha": "b453cf6c1219839ba8f948ff1c41ffdb61a6149c",
+  "enforcer_surface": {
+    "core/quality_gate": "449eb3c8eb04168e16922b6c7f67bf74a400749f",
+    "harness/harness_bridge.py": "c36e31d5615cb32c775141bff38a1a44384da8f9",
+    "harness/gate_configs": "92d5728b783841baed6e1beeb57d5e7fbe56c71e"
+  },
+  "evidence_digest": {
+    "linting": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "a53a6b74d36094ab77e45ca49a2b162dd3a0c428fde9d5a8bdd9fece1b23890d",
+      "bytes": 88,
+      "head": "All checks passed! (ruff check 03-development/src/ --extend-ignore RUF001,RUF002,RUF003)"
+    },
+    "type_safety": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "3d70a46d2929f9d6ecc598788a076b6259620c52f3bd562a1879d9393ab039d4",
+      "bytes": 113,
+      "head": "{\"summary\": {\"filesAnalyzed\": 41, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.175}}"
+    },
+    "test_coverage": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "a8471ac73959922f7a3d2a3b57ddabd1ad13e62c978073a2e208d87b754010bc",
+      "bytes": 181,
+      "head": "58 passed in 4.21s. coverage: middleware.py 100%, schemas.py 100%. FR-10 source files (middleware.py, schemas.py) at 100% coverage; spec_cov_pct=100% (12/12 required tests present)."
+    },
+    "architecture_constraints": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "13156c2ef590b3718488ab8d1c2071f11fe39368aba839f7318873c0cf34b0dd",
+      "bytes": 150,
+      "head": "Analyzed 40 files, 55 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT)"
+    }
+  },
+  "composite_score": 100.0,
+  "verdict": "PASS",
+  "passed": true,
+  "spec_undelivered": [],
+  "spec_declared": 0,
+  "measurement_scope": {
+    "weight_covered": 1.0,
+    "weight_total": 1.0,
+    "dimensions_scored": [
+      "architecture_constraints",
+      "linting",
+      "test_coverage",
+      "type_safety"
+    ],
+    "dimensions_unscored": []
+  }
+}

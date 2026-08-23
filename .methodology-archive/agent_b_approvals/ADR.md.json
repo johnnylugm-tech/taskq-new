@@ -1,0 +1,21 @@
+{
+  "fr": "ADR.md",
+  "review_status": "APPROVE",
+  "reason": "ADR.md contains 20 binding decisions covering every FR (01-10) and every NFR (01-12, with NFR-99 correctly noted as framework-owned). Each decision has Status, Context, Decision, Alternatives Considered, and Consequences — the Alternatives block is a stricter superset of the template's Rationale, so the format deviation is non-blocking. The traceability matrix at lines 13-34 maps every ADR to FRs/NFRs served and an SRS anchor, and SAD cross-references (§2 layers graph, §3.3 async run lifecycle, §3.5 RFC 7807 contract, §8 A-01/A-02/A-03 open decisions) verify cleanly against SAD.md. ADR-019 and ADR-020 close the previously-unowned NFR-01 and NFR-08 rows respectively, and ADR-017 nails down the load-bearing verify-system round-trip target NFR-12 names.",
+  "citations": [
+    "02-architecture/adr/ADR.md:38",
+    "02-architecture/adr/ADR.md:472",
+    "02-architecture/adr/ADR.md:496",
+    "02-architecture/adr/ADR.md:13",
+    "02-architecture/SAD.md:108",
+    "02-architecture/SAD.md:17",
+    "01-requirements/SRS.md:63",
+    "harness/templates/ADR.md:27"
+  ],
+  "docs_embedded": [
+    "ADR.md",
+    "SAD.md",
+    "SRS.md"
+  ],
+  "confidence": 0.9
+}

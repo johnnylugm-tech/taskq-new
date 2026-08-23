@@ -1,0 +1,95 @@
+{
+  "gate": 1,
+  "phase": 3,
+  "fr_id": "FR-07",
+  "overall_score": 100.0,
+  "quality_complete": true,
+  "rounds_used": 1,
+  "breakdown": {
+    "linting": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "All checks passed!",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/linting_harness.txt"
+    },
+    "type_safety": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 37, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0}}",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
+    },
+    "test_coverage": {
+      "score": 100.0,
+      "threshold": 100,
+      "tests_passed": 8,
+      "tests_failed": 0,
+      "tests_skipped": 0,
+      "tool_evidence": "8 passed in 0.17s | coverage 100% (74/74 statements, 0 missing) across migrations/versions/*.py | all 7 required tests present: test_fr07_ac1..ac7",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-07.txt",
+      "coverage_scope": "per_fr",
+      "coverage_scope_fr": "FR-07",
+      "score_source": "framework"
+    },
+    "architecture_constraints": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "Import Linter: Analyzed 36 files, 41 dependencies. Contracts: 3 kept, 0 broken.",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
+    }
+  },
+  "enforcer_sha": "11b182c0a5a014d325bd09701488429b81f2ad64",
+  "enforcer_surface": {
+    "core/quality_gate": "449eb3c8eb04168e16922b6c7f67bf74a400749f",
+    "harness/harness_bridge.py": "c36e31d5615cb32c775141bff38a1a44384da8f9",
+    "harness/gate_configs": "92d5728b783841baed6e1beeb57d5e7fbe56c71e"
+  },
+  "evidence_digest": {
+    "linting": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "f0d0b1081d9d3ebb26c4c93543053ecdc0a58998f22c071dc4ddb26021b57645",
+      "bytes": 18,
+      "head": "All checks passed!"
+    },
+    "type_safety": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "963c259fd8fafb0d42890022ccf014be23aea225ca8d10b29faf3791c6d9bb9b",
+      "bytes": 115,
+      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 37, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0}}"
+    },
+    "test_coverage": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "2ca87073296634a99d37a42e96e1835b3bab940e7e21379d177a26439edd1167",
+      "bytes": 146,
+      "head": "8 passed in 0.17s | coverage 100% (74/74 statements, 0 missing) across migrations/versions/*.py | all 7 required tests present: test_fr07_ac1..ac7"
+    },
+    "architecture_constraints": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "4a7ad4264a4bade6a5124e94de7a381482809c1c506b06124a3c80c31f764d34",
+      "bytes": 79,
+      "head": "Import Linter: Analyzed 36 files, 41 dependencies. Contracts: 3 kept, 0 broken."
+    }
+  },
+  "composite_score": 100.0,
+  "verdict": "PASS",
+  "passed": true,
+  "spec_undelivered": [],
+  "spec_declared": 0,
+  "measurement_scope": {
+    "weight_covered": 1.0,
+    "weight_total": 1.0,
+    "dimensions_scored": [
+      "architecture_constraints",
+      "linting",
+      "test_coverage",
+      "type_safety"
+    ],
+    "dimensions_unscored": []
+  }
+}

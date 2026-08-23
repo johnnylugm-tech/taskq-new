@@ -1,0 +1,95 @@
+{
+  "gate": 1,
+  "phase": 3,
+  "fr_id": "FR-05",
+  "overall_score": 100.0,
+  "quality_complete": true,
+  "rounds_used": 1,
+  "breakdown": {
+    "linting": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "All checks passed!",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/linting_harness.txt"
+    },
+    "type_safety": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 28, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.012}}",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
+    },
+    "test_coverage": {
+      "score": 100.0,
+      "threshold": 100,
+      "tests_passed": 14,
+      "tests_failed": 0,
+      "tests_skipped": 0,
+      "tool_evidence": "============================== 14 passed in 3.60s ===============================; coverage on FR-05 source files (middleware.py, rate_limit.py, rate_buckets.py) = 100% (198/198 lines, 0 missing)",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-05.txt",
+      "coverage_scope": "per_fr",
+      "coverage_scope_fr": "FR-05",
+      "score_source": "framework"
+    },
+    "architecture_constraints": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_evidence": "Analyzed 27 files, 35 dependencies. fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT. Contracts: 3 kept, 0 broken. Exit 0.",
+      "score_source": "framework",
+      "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
+    }
+  },
+  "enforcer_sha": "7584a7da6b9cfebd1aae501b3bc05728c7b58f2b",
+  "enforcer_surface": {
+    "core/quality_gate": "c0626e4209d4e24d3d1a571ed53ea5e1386a3856",
+    "harness/harness_bridge.py": "c36e31d5615cb32c775141bff38a1a44384da8f9",
+    "harness/gate_configs": "92d5728b783841baed6e1beeb57d5e7fbe56c71e"
+  },
+  "evidence_digest": {
+    "linting": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "f0d0b1081d9d3ebb26c4c93543053ecdc0a58998f22c071dc4ddb26021b57645",
+      "bytes": 18,
+      "head": "All checks passed!"
+    },
+    "type_safety": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "dd713d72957be23cdf2adcf13c692931af1c194601087d66d5afe2d986da2f8c",
+      "bytes": 135,
+      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 28, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.012}}"
+    },
+    "test_coverage": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "f9bfde71508e422e60bcecb618afd33fce593b826eb68a278aa381b47bfd1391",
+      "bytes": 195,
+      "head": "============================== 14 passed in 3.60s ===============================; coverage on FR-05 source files (middleware.py, rate_limit.py, rate_buckets.py) = 100% (198/198 lines, 0 missing)"
+    },
+    "architecture_constraints": {
+      "source": "tool_evidence (inline)",
+      "kind": "inline",
+      "sha256": "ad794747d0e0ce5e4093c3b565da273fb22b03661741cd126ee01f7ed9e1ff17",
+      "bytes": 157,
+      "head": "Analyzed 27 files, 35 dependencies. fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT. Contracts: 3 kept, 0 broken. Exit 0."
+    }
+  },
+  "composite_score": 100.0,
+  "verdict": "PASS",
+  "passed": true,
+  "spec_undelivered": [],
+  "spec_declared": 0,
+  "measurement_scope": {
+    "weight_covered": 1.0,
+    "weight_total": 1.0,
+    "dimensions_scored": [
+      "architecture_constraints",
+      "linting",
+      "test_coverage",
+      "type_safety"
+    ],
+    "dimensions_unscored": []
+  }
+}

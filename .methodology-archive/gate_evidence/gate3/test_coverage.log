@@ -1,0 +1,50 @@
+03-development/src/taskq/api/routes/metrics.py                                             8      0   100%
+03-development/src/taskq/api/routes/runs.py                                               41      0   100%
+03-development/src/taskq/api/routes/tasks.py                                              36      0   100%
+03-development/src/taskq/api/schemas.py                                                   25      0   100%
+03-development/src/taskq/cli/key_create.py                                                26      0   100%
+03-development/src/taskq/config/__init__.py                                                0      0   100%
+03-development/src/taskq/config/settings.py                                               24      0   100%
+03-development/src/taskq/errors/__init__.py                                                0      0   100%
+03-development/src/taskq/errors/redact.py                                                 12      0   100%
+03-development/src/taskq/framework_paths.py                                                8      0   100%
+03-development/src/taskq/migrations/__init__.py                                            1      0   100%
+03-development/src/taskq/migrations/env.py                                                27      0   100%
+03-development/src/taskq/migrations/versions/__init__.py                                   6      0   100%
+03-development/src/taskq/migrations/versions/v1_initial_tasks_api_keys.py                 16      0   100%
+03-development/src/taskq/migrations/versions/v2_add_tags_task_tags_unique.py              18      0   100%
+03-development/src/taskq/migrations/versions/v3_split_result_json_to_task_results.py      34      0   100%
+03-development/src/taskq/models/__init__.py                                                5      0   100%
+03-development/src/taskq/models/api_key.py                                                19      0   100%
+03-development/src/taskq/models/base.py                                                    4      0   100%
+03-development/src/taskq/models/task.py                                                   21      0   100%
+03-development/src/taskq/models/task_result.py                                            24      0   100%
+03-development/src/taskq/repository/__init__.py                                            0      0   100%
+03-development/src/taskq/repository/keys.py                                               46      0   100%
+03-development/src/taskq/repository/metrics.py                                            17      0   100%
+03-development/src/taskq/repository/rate_buckets.py                                       95      0   100%
+03-development/src/taskq/repository/results.py                                            55      0   100%
+03-development/src/taskq/repository/tasks.py                                             122      0   100%
+03-development/src/taskq/repository/units_of_work.py                                      26      0   100%
+03-development/src/taskq/service/__init__.py                                               0      0   100%
+03-development/src/taskq/service/auth.py                                                  28      0   100%
+03-development/src/taskq/service/executor.py                                              98      0   100%
+03-development/src/taskq/service/metrics.py                                               21      0   100%
+03-development/src/taskq/service/rate_limit.py                                            50      0   100%
+03-development/src/taskq/service/runner.py                                                86      0   100%
+03-development/src/taskq/service/tasks.py                                                 36      0   100%
+--------------------------------------------------------------------------------------------------------------------
+TOTAL                                                                                   1278      0   100%
+
+--------------------------------------------------------------------------------------------------- benchmark: 3 tests --------------------------------------------------------------------------------------------------
+Name (time in us)                             Min                   Max                  Mean              StdDev                Median                 IQR            Outliers         OPS            Rounds  Iterations
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_bench_list_default                  125.5830 (1.0)        568.9580 (1.0)        130.7571 (1.0)       13.9685 (1.0)        129.4170 (1.0)        2.3330 (1.0)         20;80  7,647.7694 (1.0)        1164           1
+test_nfr01_ac1_get_p95_under_30ms      4,329.4170 (34.47)    6,627.0840 (11.65)    4,496.9568 (34.39)    211.6278 (15.15)    4,446.9580 (34.36)    114.5100 (49.08)       10;11    222.3726 (0.03)        183           1
+test_nfr01_ac2_list_p95_under_80ms     5,248.8340 (41.80)    6,942.0000 (12.20)    5,423.0169 (41.47)    207.4978 (14.85)    5,371.7290 (41.51)    100.7490 (43.18)       12;13    184.3992 (0.02)        158           1
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Legend:
+  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
+  OPS: Operations Per Second, computed as 1 / Mean
+332 passed, 1 warning in 27.90s
