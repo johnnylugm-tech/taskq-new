@@ -17,9 +17,9 @@ Name                                                                            
 03-development/src/taskq/api/middleware.py                                                99      0   100%
 03-development/src/taskq/api/problem.py                                                   18      0   100%
 03-development/src/taskq/api/routes/__init__.py                                            0      0   100%
-03-development/src/taskq/api/routes/health.py                                             53      0   100%
+03-development/src/taskq/api/routes/health.py                                             51      0   100%
 03-development/src/taskq/api/routes/metrics.py                                             8      0   100%
-03-development/src/taskq/api/routes/runs.py                                               41     25    39%   64, 73-77, 81-85, 109-148, 161-162
+03-development/src/taskq/api/routes/runs.py                                               41     24    41%   64, 73-77, 81-85, 101-119, 135-136, 157-158
 03-development/src/taskq/api/routes/tasks.py                                              36      0   100%
 03-development/src/taskq/api/schemas.py                                                   25      0   100%
 03-development/src/taskq/cli/key_create.py                                                26      0   100%
@@ -34,10 +34,10 @@ Name                                                                            
 03-development/src/taskq/migrations/versions/v1_initial_tasks_api_keys.py                 16      6    62%   35-53, 63-65
 03-development/src/taskq/migrations/versions/v2_add_tags_task_tags_unique.py              18      8    56%   46-69, 84-87
 03-development/src/taskq/migrations/versions/v3_split_result_json_to_task_results.py      34     16    53%   111-125, 136, 150, 163, 180, 208-238
-03-development/src/taskq/models/__init__.py                                                0      0   100%
+03-development/src/taskq/models/__init__.py                                                5      0   100%
 03-development/src/taskq/models/api_key.py                                                19      0   100%
 03-development/src/taskq/models/base.py                                                    4      0   100%
-03-development/src/taskq/models/task.py                                                   20      0   100%
+03-development/src/taskq/models/task.py                                                   22      1    95%   21
 03-development/src/taskq/models/task_result.py                                            24      0   100%
 03-development/src/taskq/repository/__init__.py                                            0      0   100%
 03-development/src/taskq/repository/keys.py                                               46      0   100%
@@ -48,10 +48,11 @@ Name                                                                            
 03-development/src/taskq/repository/units_of_work.py                                      26     26     0%   16-77
 03-development/src/taskq/service/__init__.py                                               0      0   100%
 03-development/src/taskq/service/auth.py                                                  28      0   100%
+03-development/src/taskq/service/executor.py                                              98     20    80%   80, 82, 84, 113, 125, 151, 160, 188-189, 195-200, 268-269, 293-294, 297-298, 307
 03-development/src/taskq/service/metrics.py                                               21      0   100%
 03-development/src/taskq/service/rate_limit.py                                            50      0   100%
-03-development/src/taskq/service/runner.py                                               177     47    73%   80, 97, 139-140, 143-144, 161, 179, 184-217, 234-241, 253-254, 305, 307, 309, 338, 350, 376, 385, 413-414, 420-425, 493-494, 518-519, 522-523, 532
+03-development/src/taskq/service/runner.py                                                87     27    69%   80, 97, 139-140, 143-144, 161, 179, 184-217, 234-241, 253-254
 03-development/src/taskq/service/tasks.py                                                 36      0   100%
 --------------------------------------------------------------------------------------------------------------------
-TOTAL                                                                                   1267    204    84%
-109 passed in 5.08s
+TOTAL                                                                                   1280    204    84%
+109 passed in 5.07s

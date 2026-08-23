@@ -1,5 +1,79 @@
 # Harness-executed: pytest-cov
-# returncode: -2
+# returncode: 1
 # agent_score: 95.3 | threshold: 80.0
 
-TIMEOUT: pytest-cov exceeded 120s
+........................................................................ [ 21%]
+........................................................................ [ 43%]
+........................................................................ [ 65%]
+........................................................................ [ 87%]
+.......................F..................                               [100%]
+=============================== warnings summary ===============================
+03-development/tests/test_nfr_spec_coverage.py::test_nfr02_ac4_403_no_resource_existence_leak
+  /Users/johnny/projects/taskq-new/.venv/lib/python3.11/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+______________ coverage: platform darwin, python 3.11.15-final-0 _______________
+
+Name                                                                                   Stmts   Miss  Cover   Missing
+--------------------------------------------------------------------------------------------------------------------
+03-development/src/taskq/__init__.py                                                       0      0   100%
+03-development/src/taskq/api/__init__.py                                                   0      0   100%
+03-development/src/taskq/api/app.py                                                       25      0   100%
+03-development/src/taskq/api/deps.py                                                      15      0   100%
+03-development/src/taskq/api/handlers.py                                                  35      0   100%
+03-development/src/taskq/api/middleware.py                                                99      0   100%
+03-development/src/taskq/api/problem.py                                                   18      0   100%
+03-development/src/taskq/api/routes/__init__.py                                            0      0   100%
+03-development/src/taskq/api/routes/health.py                                             51      0   100%
+03-development/src/taskq/api/routes/metrics.py                                             8      0   100%
+03-development/src/taskq/api/routes/runs.py                                               41      0   100%
+03-development/src/taskq/api/routes/tasks.py                                              36      0   100%
+03-development/src/taskq/api/schemas.py                                                   25      0   100%
+03-development/src/taskq/cli/key_create.py                                                26      0   100%
+03-development/src/taskq/config/__init__.py                                                0      0   100%
+03-development/src/taskq/config/settings.py                                               24      0   100%
+03-development/src/taskq/errors/__init__.py                                                0      0   100%
+03-development/src/taskq/errors/redact.py                                                 12      0   100%
+03-development/src/taskq/framework_paths.py                                                8      0   100%
+03-development/src/taskq/migrations/__init__.py                                            1      0   100%
+03-development/src/taskq/migrations/env.py                                                27      0   100%
+03-development/src/taskq/migrations/versions/__init__.py                                   6      0   100%
+03-development/src/taskq/migrations/versions/v1_initial_tasks_api_keys.py                 16      0   100%
+03-development/src/taskq/migrations/versions/v2_add_tags_task_tags_unique.py              18      0   100%
+03-development/src/taskq/migrations/versions/v3_split_result_json_to_task_results.py      34      0   100%
+03-development/src/taskq/models/__init__.py                                                5      0   100%
+03-development/src/taskq/models/api_key.py                                                19      0   100%
+03-development/src/taskq/models/base.py                                                    4      0   100%
+03-development/src/taskq/models/task.py                                                   22      1    95%   21
+03-development/src/taskq/models/task_result.py                                            24      0   100%
+03-development/src/taskq/repository/__init__.py                                            0      0   100%
+03-development/src/taskq/repository/keys.py                                               46      0   100%
+03-development/src/taskq/repository/metrics.py                                            17      0   100%
+03-development/src/taskq/repository/rate_buckets.py                                       95      0   100%
+03-development/src/taskq/repository/results.py                                            55      0   100%
+03-development/src/taskq/repository/tasks.py                                             122      0   100%
+03-development/src/taskq/repository/units_of_work.py                                      26      0   100%
+03-development/src/taskq/service/__init__.py                                               0      0   100%
+03-development/src/taskq/service/auth.py                                                  28      0   100%
+03-development/src/taskq/service/executor.py                                              98      0   100%
+03-development/src/taskq/service/metrics.py                                               21      0   100%
+03-development/src/taskq/service/rate_limit.py                                            50      0   100%
+03-development/src/taskq/service/runner.py                                                87      0   100%
+03-development/src/taskq/service/tasks.py                                                 36      0   100%
+--------------------------------------------------------------------------------------------------------------------
+TOTAL                                                                                   1280      1    99%
+
+------------------------------------------------------ benchmark: 1 tests -----------------------------------------------------
+Name (time in us)                Min       Max      Mean   StdDev    Median     IQR  Outliers  OPS (Kops/s)  Rounds  Iterations
+-------------------------------------------------------------------------------------------------------------------------------
+test_bench_list_default     125.5420  576.0410  132.9784  17.9715  129.7910  3.1670    67;159        7.5200    1418           1
+-------------------------------------------------------------------------------------------------------------------------------
+
+Legend:
+  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
+  OPS: Operations Per Second, computed as 1 / Mean
+=========================== short test summary info ============================
+FAILED 03-development/tests/test_nfr_spec_coverage.py::test_nfr03_ac4_db_failure_readyz_503
+1 failed, 329 passed, 2 deselected, 1 warning in 25.93s

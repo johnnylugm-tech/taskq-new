@@ -2,4 +2,107 @@
 # returncode: 0
 # agent_score: 100.0 | threshold: 90.0
 
-[]
+[
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 19,
+      "row": 41
+    },
+    "filename": "/Users/johnny/projects/taskq-new/03-development/src/taskq/service/runner.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 42
+          },
+          "location": {
+            "column": 1,
+            "row": 41
+          }
+        }
+      ],
+      "message": "Remove unused import: `collections`"
+    },
+    "location": {
+      "column": 8,
+      "row": 41
+    },
+    "message": "`collections` imported but unused",
+    "noqa_row": 41,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 30,
+      "row": 47
+    },
+    "filename": "/Users/johnny/projects/taskq-new/03-development/src/taskq/service/runner.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from typing import Any, Dict, Optional, Tuple, cast",
+          "end_location": {
+            "column": 64,
+            "row": 47
+          },
+          "location": {
+            "column": 1,
+            "row": 47
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 25,
+      "row": 47
+    },
+    "message": "`typing.Deque` imported but unused",
+    "noqa_row": 47,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 51,
+      "row": 47
+    },
+    "filename": "/Users/johnny/projects/taskq-new/03-development/src/taskq/service/runner.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from typing import Any, Dict, Optional, Tuple, cast",
+          "end_location": {
+            "column": 64,
+            "row": 47
+          },
+          "location": {
+            "column": 1,
+            "row": 47
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 48,
+      "row": 47
+    },
+    "message": "`typing.Set` imported but unused",
+    "noqa_row": 47,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  }
+]
