@@ -660,8 +660,8 @@ security_design:
       boundary: TB-03
       category: information_disclosure
       description: "TASKQ_DB_URL with password leaks via error body, log line, or /v1/metrics"
-      mitigation: "taskq.errors.handlers.problem_json enforces detail whitelist; taskq.config.settings never logs db_url (NFR-04)"
-      owner_module: "taskq.errors.handlers"
+      mitigation: "taskq.api.handlers.problem_json enforces detail whitelist; taskq.config.settings never logs db_url; taskq.security.redact scrubs DSNs before any sink (NFR-04)"
+      owner_module: "taskq.security.redact"
       nfr: NFR-04
       verified_by: "test_sec_t08_db_url_redacted_in_logs"
     - id: T-09
@@ -676,8 +676,8 @@ security_design:
       boundary: TB-04
       category: information_disclosure
       description: "stdout_tail/stderr_tail/log lines leak sk-/Bearer/token patterns or postgres:// URLs"
-      mitigation: "taskq.errors.handlers.redact() applies NFR-04 regex line-level before persistence and logging (NFR-04)"
-      owner_module: "taskq.errors.handlers"
+      mitigation: "taskq.security.redact.redact_text() applies NFR-04 regex line-level to subprocess output before persistence and logging (NFR-04)"
+      owner_module: "taskq.security.redact"
       nfr: NFR-04
       verified_by: "test_sec_t10_subprocess_output_redacted"
 ```

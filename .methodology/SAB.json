@@ -147,41 +147,6 @@
         {
           "name": "taskq.cli.key_create"
         },
-        {
-          "name": "taskq.api.routes.keys"
-        },
-        {
-          "name": "taskq.models.tag"
-        },
-        {
-          "name": "taskq.models.rate_bucket"
-        },
-        {
-          "name": "taskq.errors.problem"
-        },
-        {
-          "name": "taskq.errors.handlers"
-        },
-        {
-          "name": "taskq.config.env"
-        },
-        {
-          "name": "taskq.cli.main"
-        },
-        "taskq.api",
-        "taskq.api.routes",
-        "taskq.service",
-        "taskq.repository",
-        "taskq.models",
-        "taskq.errors",
-        "taskq.config",
-        "taskq",
-        "taskq.migrations",
-        "taskq.migrations.env",
-        "taskq.migrations.versions",
-        "taskq.migrations.versions.v1_initial_tasks_api_keys",
-        "taskq.migrations.versions.v2_add_tags_task_tags_unique",
-        "taskq.migrations.versions.v3_split_result_json_to_task_results",
         "taskq.framework_paths"
       ],
       "allowed_dependencies": [
