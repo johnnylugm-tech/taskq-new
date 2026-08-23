@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 7,
-  "fr_id": "FR-06",
+  "fr_id": "FR-07",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -16,26 +16,26 @@
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\": \"1.1.409\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0}}",
+      "tool_evidence": "{\"version\": \"1.1.409\", \"time\": \"1787518311224\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.188}}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 45,
+      "tests_passed": 9,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "============================== 45 passed in 1.54s ============================== 0 failed\nName                                                                                    Stmts   Miss   Cover   Missing\n03-development/src/taskq/repository/tasks.py                                             122      0   100%\n03-development/src/taskq/repository/units_of_work.py                                      26      0   100%\nTOTAL                                                                                   1252    489    61%\nFR-scoped coverage (units_of_work.py + tasks.py): 148/148 statements = 100.0%\nSpec coverage: 5/5 required tests present (100.0%)",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-06.txt",
+      "tool_evidence": "============================== 9 passed in 0.78s ===============================\nCoverage 100% on migrations/versions",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-07.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-06",
+      "coverage_scope_fr": "FR-07",
       "score_source": "framework"
     },
     "architecture_constraints": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers, fr01-config-errors-independence, fr01-root-independence)",
+      "tool_evidence": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken.",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
     }
@@ -85,23 +85,23 @@
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "8947f4e97a3bb93573c5976d1faaf1724ece0e31147bd6ca04ba089a996dbbce",
-      "bytes": 141,
-      "head": "{\"version\": \"1.1.409\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0}}"
+      "sha256": "42413f090b1c23ca82c1a19fd6012f11c9b4cccebc17580e8d6f16b3eec31cd2",
+      "bytes": 186,
+      "head": "{\"version\": \"1.1.409\", \"time\": \"1787518311224\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.188}}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "27cde7603fde443562636936a04f952283a4bb021f7dfc4379b5bfad445b0a4a",
-      "bytes": 658,
-      "head": "============================== 45 passed in 1.54s ============================== 0 failed\nName                                                                                    Stmts   Miss   Cover   Missing\n03-development/src/taskq/repository/tasks.py                                             122      0   100%\n03-development/src/taskq/repository/units_of_work.py                                      26      0   100%\nTOTAL                                                                                   1252    489    61%\nFR-scoped coverage (units_of_work.py + tasks.py): 148/148 statements = 100.0%\nSpec coverage: 5/5 required tests present (100.0%)"
+      "sha256": "19e01fc3db567043dbf88caab994d93c41d4761df147a0ebc1484208b17ca479",
+      "bytes": 117,
+      "head": "============================== 9 passed in 0.78s ===============================\nCoverage 100% on migrations/versions"
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "6acd6348155a67ec7b600a170311bb7e0b6d24c8d51be2d4ac09f41d9b4f7a1f",
-      "bytes": 135,
-      "head": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers, fr01-config-errors-independence, fr01-root-independence)"
+      "sha256": "274d63b88dae483adfda4e40940ac9f91308d1da03a0a1295145f8f91945a6f0",
+      "bytes": 64,
+      "head": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken."
     }
   },
   "composite_score": 100.0,
