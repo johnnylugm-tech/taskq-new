@@ -80,13 +80,27 @@ def _now_iso() -> str:
 
 
 def _decode(stream: Optional[bytes]) -> str:
-    """Decode captured bytes to a tail-capped UTF-8 string."""
+    """Decode captured bytes to a tail-capped UTF-8 string.
+
+    [FR-02 / SAD §6 T-10 / NFR-04] Every secret-shaped substring
+    (``sk-…`` / ``Bearer …`` / ``postgres://`` / ``password=…``) is
+    scrubbed via ``taskq.errors.redact.redact_text`` BEFORE the value
+    is returned to the caller, so both the persisted
+    ``task_results.stdout_tail`` / ``stderr_tail`` columns and the
+    structured server logs see only the redacted form.
+    """
     if not stream:
         return ""
     text = stream.decode(errors="replace")
     if len(text) > TAIL_LIMIT:
         text = text[-TAIL_LIMIT:]
-    return text
+    # Local import keeps the runner importable from contexts where the
+    # errors package is unavailable (e.g. some test bootstraps); the
+    # helper is a pure stdlib regex module so the import cannot fail at
+    # runtime.
+    from taskq.errors.redact import redact_text
+
+    return redact_text(text)
 
 
 def _env_int(name: str, default: int) -> int:
