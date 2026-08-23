@@ -293,14 +293,15 @@
     },
     "gate3": {
       "score": 95.68,
-      "quality_complete": true,
+      "quality_complete": false,
       "rounds_used": 4,
       "open_critical": 0,
       "open_high": 0,
       "phase": 4,
       "gate": 3,
       "fr_scope": "all",
-      "overall_score": 95.68
+      "overall_score": 95.68,
+      "commit_landed": false
     },
     "gate4": null
   }

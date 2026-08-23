@@ -20,13 +20,16 @@
           "name": "taskq.api.schemas"
         },
         {
+          "name": "taskq.api.problem"
+        },
+        {
+          "name": "taskq.api.handlers"
+        },
+        {
           "name": "taskq.api.routes.tasks"
         },
         {
           "name": "taskq.api.routes.runs"
-        },
-        {
-          "name": "taskq.api.routes.keys"
         },
         {
           "name": "taskq.api.routes.health"
@@ -58,6 +61,9 @@
         },
         {
           "name": "taskq.service.metrics"
+        },
+        {
+          "name": "taskq.service.executor"
         }
       ],
       "allowed_dependencies": [
@@ -83,6 +89,9 @@
         },
         {
           "name": "taskq.repository.rate_buckets"
+        },
+        {
+          "name": "taskq.repository.metrics"
         }
       ],
       "allowed_dependencies": [
@@ -105,24 +114,20 @@
         },
         {
           "name": "taskq.models.task_result"
-        },
-        {
-          "name": "taskq.models.tag"
-        },
-        {
-          "name": "taskq.models.rate_bucket"
         }
       ],
       "allowed_dependencies": []
     },
     {
       "name": "errors",
+      "modules": [],
+      "allowed_dependencies": []
+    },
+    {
+      "name": "security",
       "modules": [
         {
-          "name": "taskq.errors.problem"
-        },
-        {
-          "name": "taskq.errors.handlers"
+          "name": "taskq.security.redact"
         }
       ],
       "allowed_dependencies": []
@@ -132,9 +137,6 @@
       "modules": [
         {
           "name": "taskq.config.settings"
-        },
-        {
-          "name": "taskq.config.env"
         }
       ],
       "allowed_dependencies": []
@@ -143,22 +145,33 @@
       "name": "cli",
       "modules": [
         {
-          "name": "taskq.cli.main"
-        },
-        {
           "name": "taskq.cli.key_create"
         },
         {
-          "name": "taskq.api.problem"
+          "name": "taskq.api.routes.keys"
         },
         {
-          "name": "taskq.api.handlers"
+          "name": "taskq.models.tag"
+        },
+        {
+          "name": "taskq.models.rate_bucket"
+        },
+        {
+          "name": "taskq.errors.problem"
+        },
+        {
+          "name": "taskq.errors.handlers"
+        },
+        {
+          "name": "taskq.config.env"
+        },
+        {
+          "name": "taskq.cli.main"
         },
         "taskq.api",
         "taskq.api.routes",
         "taskq.service",
         "taskq.repository",
-        "taskq.repository.metrics",
         "taskq.models",
         "taskq.errors",
         "taskq.config",
@@ -242,7 +255,7 @@
       "type": "security",
       "dimension": "security",
       "target": "stdout/stderr/log redact regex hits; no DB URL in logs/metrics",
-      "module": "taskq.errors.handlers"
+      "module": "taskq.security.redact"
     },
     "NFR-05": {
       "type": "documentation",
@@ -301,7 +314,7 @@
       "type": "verifiability",
       "dimension": "execute_verification_target",
       "target": "make verify-system exit 0; stdout verify-system: PASS; round-trip migration verified",
-      "module": "taskq.cli.main"
+      "module": "taskq.cli.key_create"
     }
   },
   "advisory_only": [],
@@ -361,8 +374,8 @@
       "taskq.service.metrics"
     ],
     "FR-10": [
-      "taskq.errors.problem",
-      "taskq.errors.handlers",
+      "taskq.api.problem",
+      "taskq.api.handlers",
       "taskq.api.middleware",
       "taskq.api.schemas"
     ],

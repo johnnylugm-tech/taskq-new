@@ -18,7 +18,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from taskq.models.base import Base
 
 if TYPE_CHECKING:
-    from taskq.models.task_result import TaskResult  # pragma: no cover
+    from taskq.models.task_result import TaskResult
 
 
 def _utc_now() -> datetime:

@@ -400,9 +400,10 @@ sab:
         - name: "taskq.api.deps"
         - name: "taskq.api.middleware"
         - name: "taskq.api.schemas"
+        - name: "taskq.api.problem"
+        - name: "taskq.api.handlers"
         - name: "taskq.api.routes.tasks"
         - name: "taskq.api.routes.runs"
-        - name: "taskq.api.routes.keys"
         - name: "taskq.api.routes.health"
         - name: "taskq.api.routes.metrics"
       allowed_dependencies: ["service", "errors", "config"]
@@ -413,7 +414,8 @@ sab:
         - name: "taskq.service.rate_limit"
         - name: "taskq.service.runner"
         - name: "taskq.service.metrics"
-      allowed_dependencies: ["repository", "errors", "config"]
+        - name: "taskq.service.executor"
+      allowed_dependencies: ["repository", "errors", "config", "security"]
     - name: repository
       modules:
         - name: "taskq.repository.units_of_work"
@@ -421,6 +423,7 @@ sab:
         - name: "taskq.repository.keys"
         - name: "taskq.repository.results"
         - name: "taskq.repository.rate_buckets"
+        - name: "taskq.repository.metrics"
       allowed_dependencies: ["models", "errors", "config"]
     - name: models
       modules:
@@ -428,22 +431,20 @@ sab:
         - name: "taskq.models.task"
         - name: "taskq.models.api_key"
         - name: "taskq.models.task_result"
-        - name: "taskq.models.tag"
-        - name: "taskq.models.rate_bucket"
       allowed_dependencies: []
     - name: errors
+      modules: []
+      allowed_dependencies: []
+    - name: security
       modules:
-        - name: "taskq.errors.problem"
-        - name: "taskq.errors.handlers"
+        - name: "taskq.security.redact"
       allowed_dependencies: []
     - name: config
       modules:
         - name: "taskq.config.settings"
-        - name: "taskq.config.env"
       allowed_dependencies: []
     - name: cli
       modules:
-        - name: "taskq.cli.main"
         - name: "taskq.cli.key_create"
       allowed_dependencies: ["service", "repository", "config"]
 
@@ -488,7 +489,7 @@ sab:
       type: security
       dimension: security
       target: "stdout/stderr/log redact regex hits; no DB URL in logs/metrics"
-      module: taskq.errors.handlers
+      module: taskq.security.redact
     NFR-05:
       type: documentation
       dimension: documentation
@@ -530,7 +531,7 @@ sab:
       type: verifiability
       dimension: execute_verification_target
       target: "make verify-system exit 0; stdout verify-system: PASS; round-trip migration verified"
-      module: taskq.cli.main
+      module: taskq.cli.key_create
 
   advisory_only: []  # AUTO-FILLED by parser — omit or leave []
 
@@ -546,7 +547,7 @@ sab:
     FR-07: ["taskq.migrations.versions"]
     FR-08: ["taskq.service.runner"]
     FR-09: ["taskq.api.routes.health", "taskq.api.routes.metrics", "taskq.service.metrics"]
-    FR-10: ["taskq.errors.problem", "taskq.errors.handlers", "taskq.api.middleware", "taskq.api.schemas"]
+    FR-10: ["taskq.api.problem", "taskq.api.handlers", "taskq.api.middleware", "taskq.api.schemas"]
     FR-99: ["taskq.framework_paths"]
 
   architecture_constraints:
