@@ -1,9 +1,9 @@
 {
   "state": "RUNNING",
   "current_phase": 7,
-  "last_gate": 4,
-  "last_fr": "FR-99",
-  "last_update": "2026-08-23T20:29:51.257753+00:00",
+  "last_gate": 1,
+  "last_fr": "FR-01",
+  "last_update": "2026-08-23T20:36:40.289570+00:00",
   "language": "python",
   "phase_completed": {
     "1": {
@@ -62,16 +62,15 @@
       "delivered_tree_sha256": "35c9f6c0b15b1a21a7e09bec086c05439313aea48d160363a5d4e734b6735b4f"
     },
     "6": {
-      "sha": "PLACEHOLDER_WILL_BE_REPLACED_ON_ADVANCE",
-      "timestamp": "2026-08-24T04:25:00.000000+00:00",
+      "sha": "b4714b787af42919ce7b17a643a113b3298f36b4",
+      "timestamp": "2026-08-23T20:29:51.983110+00:00",
       "enforcer_sha": "d552fc352e7001cdc57ccac1693311f6ae731fdb",
       "enforcer_surface": {
-        "core/quality_gate": "fc600ef09159eb15c1f24a0a18d4cb6e45e4dce7",
+        "core/quality_gate": "92e717ad7ddfd8fb61251b004b9aef546c01554b",
         "harness/harness_bridge.py": "4858e5529079e9432fb38d85d68c6051d956312d",
         "harness/gate_configs": "d91e4c3c9409081ea44b75ae3060f3293fa59cab"
       },
-      "delivered_tree_sha256": "PLACEHOLDER",
-      "seeded_reason": "pre-seeded to break advance-phase chicken-and-egg on first P6→P7 transition (advance-phase reports state.json.phase_completed[6] absent on ENTRY GATE)"
+      "delivered_tree_sha256": "4dcd4597e2d791ca794e038756c53014c1de0db1da2d8bc417fab7de961d1082"
     }
   },
   "test_inventory_checksum": "25bc603be0c794eec0a08940fc85d17b9d7997bd16518d7a5a67c5559f59aa45",
