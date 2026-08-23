@@ -61,6 +61,7 @@ from taskq.api.deps import require_scope  # noqa: E402
 # scope, with hierarchical containment read < write < admin (AC-4.1).
 from taskq.service.auth import (  # noqa: E402
     InsufficientScope,
+    InvalidAPIKey,
     verify_api_key,
 )
 
@@ -441,3 +442,139 @@ def test_fr04_ac3_single_dependency_audit():
             f"{dep_count} shared scope dependency across /v1 routes, "
             f"got {len(intersection)}: {intersection!r}"
         )
+
+
+# ---------- Coverage: AuthService _lookup_scope exception swallow (auth.py 84-85) ----------
+
+def test_fr04_cov_auth_lookup_swallows_exception(monkeypatch):
+    """COVERAGE — AuthService._lookup_scope catches ``Exception`` from
+    ``APIKeyRepository.lookup_active`` and returns ``None`` so a transient
+    DB outage does NOT deny a legacy key (service/auth.py lines 84-85).
+    The fallback path then resolves the scope via the legacy map.
+
+    # NFR-09
+    """
+    from taskq.service import auth as auth_mod
+
+    def _boom_lookup(self, _key: str) -> None:
+        raise RuntimeError("synthetic db outage")
+
+    monkeypatch.setattr(auth_mod.APIKeyRepository, "lookup_active", _boom_lookup)
+
+    # Legacy write key — DB lookup blows up, swallows to None,
+    # legacy map resolves to "write", and verify returns the dict.
+    result = verify_api_key("taskq-write-test-key-abc123")
+    assert result == {
+        "scope": "write",
+        "key_id": "taskq-write-test-key-abc123",
+    }
+
+
+# ---------- Coverage: AuthService _lookup_scope returns row scope (auth.py 88) ----------
+
+def test_fr04_cov_auth_lookup_returns_row_scope(monkeypatch):
+    """COVERAGE — AuthService._lookup_scope returns ``row["scope"]`` when
+    the DB has a matching active key (service/auth.py line 88). The DB
+    resolved scope wins over the legacy map.
+
+    # NFR-09
+    """
+    from taskq.service import auth as auth_mod
+
+    def _fake_lookup(self, _key: str):
+        return {"scope": "admin", "key_hash": "abc"}
+
+    monkeypatch.setattr(auth_mod.APIKeyRepository, "lookup_active", _fake_lookup)
+
+    # DB-resolved scope wins over the legacy map for this key.
+    db_key = "db-resolved-key"
+    result = verify_api_key(db_key)
+    assert result == {"scope": "admin", "key_id": db_key}
+
+
+# ---------- Coverage: AuthService verify_api_key rejects missing key (auth.py 99) ----------
+
+def test_fr04_cov_auth_verify_rejects_missing_key_none():
+    """COVERAGE — verify_api_key raises ``InvalidAPIKey`` when called with
+    ``None`` (service/auth.py line 99).
+
+    # NFR-09
+    """
+    with pytest.raises(InvalidAPIKey):
+        verify_api_key(None)
+
+
+def test_fr04_cov_auth_verify_rejects_missing_key_empty():
+    """COVERAGE — verify_api_key raises ``InvalidAPIKey`` when called with
+    an empty-string key (service/auth.py line 99).
+
+    # NFR-09
+    """
+    with pytest.raises(InvalidAPIKey):
+        verify_api_key("")
+
+
+# ---------- Coverage: AuthService verify_api_key rejects invalid key (auth.py 103) ----------
+
+def test_fr04_cov_auth_verify_rejects_invalid_key(monkeypatch):
+    """COVERAGE — verify_api_key raises ``InvalidAPIKey`` when the key
+    resolves neither via the DB nor via the legacy map (service/auth.py
+    line 103).
+
+    # NFR-09
+    """
+    # Stub DB to None so the legacy map is the only resolver.
+    monkeypatch.setattr(
+        "taskq.service.auth.APIKeyRepository.lookup_active",
+        lambda self, _key: None,
+    )
+
+    with pytest.raises(InvalidAPIKey):
+        verify_api_key("totally-bogus-key-not-in-legacy-map")
+
+
+# ---------- Coverage: AuthService verify_api_key happy path (auth.py 119) ----------
+
+def test_fr04_cov_auth_verify_happy_path_returns_dict(monkeypatch):
+    """COVERAGE — verify_api_key returns ``{"scope": <scope>, "key_id":
+    <key>}`` on the happy path with no required scope check (service/
+    auth.py line 119).
+
+    # NFR-09
+    """
+    # Stub DB to None so the legacy map is the only resolver.
+    monkeypatch.setattr(
+        "taskq.service.auth.APIKeyRepository.lookup_active",
+        lambda self, _key: None,
+    )
+
+    result = verify_api_key("taskq-read-test-key-abc456")
+    assert result == {
+        "scope": "read",
+        "key_id": "taskq-read-test-key-abc456",
+    }
+
+
+# ---------- Coverage: deps.py InvalidAPIKey -> 401 (deps.py line 64) ----------
+
+def test_fr04_cov_deps_invalid_api_key_returns_401(client):
+    """COVERAGE — ``taskq.api.deps.require_scope`` translates
+    ``InvalidAPIKey`` into an HTTP 401 + application/problem+json
+    response (deps.py line 64). Hitting any /v1 route without an API
+    key exercises the dependency's InvalidAPIKey branch.
+
+    # NFR-09
+    """
+    response = client.get("/v1/tasks/anything")
+
+    # The dependency must have raised Problem(401) — NOT 403, NOT 500.
+    assert response.status_code == 401, (
+        f"expected 401 from missing API key, got {response.status_code}: "
+        f"{response.text!r}"
+    )
+
+    # SPEC §10 mandates application/problem+json for non-2xx.
+    ctype = response.headers.get("content-type", "")
+    assert ctype.startswith("application/problem+json"), (
+        f"expected application/problem+json, got {ctype!r}; body={response.text!r}"
+    )
