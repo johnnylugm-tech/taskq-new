@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 8,
-  "fr_id": "FR-02",
+  "fr_id": "FR-03",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -16,26 +16,26 @@
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\": \"1.1.409\", \"time\": \"1787520232727\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.209}}",
+      "tool_evidence": "{\"version\":\"1.1.409\",\"time\":\"1787520404289\",\"generalDiagnostics\":[],\"summary\":{\"filesAnalyzed\":45,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.237}}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 45,
+      "tests_passed": 27,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "============================== 45 passed in 5.16s ============================== | coverage: 100% on 03-development/src/taskq/api/routes/runs.py, 03-development/src/taskq/service/runner.py, 03-development/src/taskq/repository/results.py | required tests present: test_fr02_ac1_run_returns_202_with_run_id, test_fr02_ac2_subprocess_exec_no_shell_true, test_fr02_ac3_state_machine_done, test_fr02_ac3_state_machine_failed, test_fr02_ac3_state_machine_timeout, test_fr02_ac4_results_persisted_to_task_results, test_fr02_ac5_get_runs_newest_first",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-02.txt",
+      "tool_evidence": "Coverage (FR-03 source files, --cov-report=term-missing):\nName                                                            Stmts   Miss  Cover   Missing\n--------------------------------------------------------------------------------------------------------------------\n03-development/src/taskq/cli/key_create.py                          26      0   100%\n03-development/src/taskq/models/api_key.py                          19      0   100%\n03-development/src/taskq/repository/keys.py                         46      0   100%\n03-development/src/taskq/service/auth.py                            28      0   100%\n--------------------------------------------------------------------------------------------------------------------\nTOTAL (FR-03 sources)                                              119      0   100%\nPytest: 27 passed in 0.53s (0 failed, 0 skipped). test_fr03.py 17 tests passed; test_fr04.py 10 tests passed. All 6/6 required FR-03 test functions present and passing (test_fr03_ac1_missing_or_invalid_key_returns_401, test_fr03_ac2_key_hash_sha256_64hex_no_plaintext, test_fr03_ac3_compare_digest_constant_time, test_fr03_ac4_create_prints_plaintext_once, test_fr03_ac5_revoked_key_invalid, test_fr03_ac6_healthz_readyz_no_auth).",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-03.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-02",
+      "coverage_scope_fr": "FR-03",
       "score_source": "framework"
     },
     "architecture_constraints": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT)",
+      "tool_evidence": "Import Linter: Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers, fr01-config-errors-independence, fr01-root-independence all KEPT)",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
     }
@@ -85,23 +85,23 @@
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "3a8e80c956e7ca91ca41248e942b9233201c8f898cf0d765f53a4871be0be29c",
-      "bytes": 186,
-      "head": "{\"version\": \"1.1.409\", \"time\": \"1787520232727\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.209}}"
+      "sha256": "9ac970c3ce8be96ac803e5d3742c13b594774032ef547746d69101c1040afa4b",
+      "bytes": 170,
+      "head": "{\"version\":\"1.1.409\",\"time\":\"1787520404289\",\"generalDiagnostics\":[],\"summary\":{\"filesAnalyzed\":45,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.237}}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "0cf006123ed75ebee840dbe413d00ad7e1ef126bbc99af7d7dc5286b2c0468c6",
-      "bytes": 542,
-      "head": "============================== 45 passed in 5.16s ============================== | coverage: 100% on 03-development/src/taskq/api/routes/runs.py, 03-development/src/taskq/service/runner.py, 03-development/src/taskq/repository/results.py | required tests present: test_fr02_ac1_run_returns_202_with_run_id, test_fr02_ac2_subprocess_exec_no_shell_true, test_fr02_ac3_state_machine_done, test_fr02_ac3_state_machine_failed, test_fr02_ac3_state_machine_timeout, test_fr02_ac4_results_persisted_to_task_results, test_fr02_ac5_get_runs_newest_first"
+      "sha256": "a47017c26cc582b7cdce5625d9f1fa02c3950138111028bff63c7f245a6aa4bd",
+      "bytes": 1241,
+      "head": "Coverage (FR-03 source files, --cov-report=term-missing):\nName                                                            Stmts   Miss  Cover   Missing\n--------------------------------------------------------------------------------------------------------------------\n03-development/src/taskq/cli/key_create.py                          26      0   100%\n03-development/src/taskq/models/api_key.py                          19      0   100%\n03-development/src/taskq/repository/keys.py                         46      0   100%\n03-development/src/taskq/service/auth.py                            28      0   100%\n--------------------------------------------------------------------------------------------------------------------\nTOTAL (FR-03 sources)                                              119      0   100%\nPytest: 27 passed in 0.53s (0 failed, 0 skipped). test_fr03.py 17 tests passed; test_fr04.py 10 tests passed. All 6/6 required FR-03 test functions present and passing (test_fr03_ac1_missing_or_invalid_key_returns_401, test_fr03_ac2_key_hash_sha256_64hex_no_plaintext, test_fr03_ac3_compare_digest_constant_time, test_fr03_ac4_create_prints_plaintext_once, test_fr03_ac5_revoked_key_invalid, test_fr03_ac6_healthz_readyz_no_auth)."
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "fbfcd312514d2afeb7558e03d13bc9387f8eb2043feb3931cc02a49a3cd098b5",
-      "bytes": 150,
-      "head": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT)"
+      "sha256": "3e04eb5da8e2009a56728d80e46e2cb502756bc09c40da5d1abe914fbbb30057",
+      "bytes": 159,
+      "head": "Import Linter: Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers, fr01-config-errors-independence, fr01-root-independence all KEPT)"
     }
   },
   "composite_score": 100.0,
