@@ -1,3 +1,1 @@
-migrate-roundtrip: PASS
-verify-system: PASS (healthz=200 readyz=200)
-exit=0
+verify-system: PASS

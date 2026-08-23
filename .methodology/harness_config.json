@@ -1,4 +1,7 @@
 {
   "crg_cohesion_healthy": 0.15,
-  "crg_excludes": []
+  "crg_excludes": [],
+  "features": {
+    "mutation_testing": true
+  }
 }

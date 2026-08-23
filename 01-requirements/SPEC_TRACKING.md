@@ -49,10 +49,10 @@
 
 | Check | Target | Actual | Status |
 |-------|--------|--------|--------|
-| FR coverage (10 FR) | 100% mapped to SRS.md §3 | 10/10 (FR-01..FR-10) | OK |
-| NFR coverage (12 NFR) | 100% mapped to SRS.md §4 | 12/12 (NFR-01..NFR-12) | OK |
-| AC coverage | Every FR/NFR has at least one AC block in SRS.md | 22/22 sections have AC-* subsections | OK |
-| Source citation | Every row references `SPEC.md` (root) | 22/22 rows | OK |
+| FR coverage (10 FR) | 100% mapped to SRS.md §3 | 10/10 (FR-01..FR-10) | ✅ |
+| NFR coverage (12 NFR) | 100% mapped to SRS.md §4 | 12/12 (NFR-01..NFR-12) | ✅ |
+| AC coverage | Every FR/NFR has at least one AC block in SRS.md | 22/22 sections have AC-* subsections | ✅ |
+| Source citation | Every row references `SPEC.md` (root) | 22/22 rows | ✅ |
 
 ## Downstream Phase References
 

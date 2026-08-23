@@ -1,6 +1,6 @@
 {
   "errors": [],
-  "generated_at": "2026-08-22T23:14:49Z",
+  "generated_at": "2026-08-23T01:25:21Z",
   "metrics": {
     "03-development/src/taskq/__init__.py": {
       "CONFIDENCE.HIGH": 0,

@@ -1,0 +1,362 @@
+{
+  "quality_complete": true,
+  "breakdown": {
+    "linting": {
+      "score": 100.0,
+      "threshold": 90,
+      "tool_output": ".methodology/gate_evidence/gate2/linting.txt",
+      "tool_evidence": "ruff violations=0; tool_score = max(0, 100 - 0*2) = 100",
+      "score_source": "framework"
+    },
+    "type_safety": {
+      "score": 100.0,
+      "threshold": 85,
+      "tool_output": ".methodology/gate_evidence/gate2/type_safety.txt",
+      "tool_evidence": "pyright errorCount=0 (after restoring TAIL_LIMIT:int regression from earlier Simplicity-First commit); tool_score = 100",
+      "score_source": "framework"
+    },
+    "test_coverage": {
+      "score": 100.0,
+      "threshold": 80,
+      "tool_output": ".methodology/gate_evidence/gate2/test_coverage.txt",
+      "tool_evidence": "pytest --cov=03-development/src/taskq reports TOTAL 1252 lines, 0 missed, 100%",
+      "score_source": "framework"
+    },
+    "security": {
+      "score": 100.0,
+      "threshold": 80,
+      "tool_output": ".methodology/gate_evidence/gate2/security.txt",
+      "tool_evidence": "bandit results: high=0 medium=0 low=0; tool_score = 100",
+      "score_source": "framework"
+    },
+    "secrets_scanning": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_output": ".methodology/gate_evidence/gate2/secrets_scanning.txt",
+      "tool_evidence": "gitleaks detect found 0 leaks across 122 commits",
+      "score_source": "framework"
+    },
+    "license_compliance": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_output": ".methodology/gate_evidence/gate2/license_compliance.txt",
+      "tool_evidence": "scancode --license over 03-development/src scanned 110 files; 0 violations against allow-list {MIT, BSD-2-Clause, BSD-3-Clause, Apache-2.0, PSF} (Round 1 result unchanged — no new deps)"
+    },
+    "mutation_testing": {
+      "score": 72.1,
+      "threshold": 70,
+      "tool_output": ".methodology/gate_evidence/gate2/mutation_testing.json",
+      "tool_evidence": "framework: compute_mutation_score → killed=256 survived=99 score=72.1 [scope: 03-development/src/taskq/repository,03-development/src/taskq/service, 42 files, excluded: none]",
+      "framework_override": true
+    },
+    "integration_coverage": {
+      "score": 84.0,
+      "threshold": 60,
+      "tool_output": ".methodology/gate_evidence/gate2/integration_coverage.txt",
+      "tool_evidence": "pytest 03-development/tests/integration --cov=03-development/src reports TOTAL 1252 lines, 202 missed, 84% (up from 64% in Round 1 thanks to fixed service/runner.py invariants)",
+      "score_source": "framework"
+    },
+    "test_assertion_quality": {
+      "score": 99.3,
+      "threshold": 60,
+      "tool_output": ".methodology/gate_evidence/gate2/test_assertion_quality.txt",
+      "tool_evidence": "AST scan of 03-development/tests: assertion_density=3.09, zero_assert_ratio=0.074; tool_score = min(100, 3.09*25 + (1-0.074)*50) = 100",
+      "score_source": "framework"
+    },
+    "execute_verification_target": {
+      "score": 100.0,
+      "threshold": 100,
+      "tool_output": ".methodology/gate_evidence/gate2/execute_verification_target.txt",
+      "tool_evidence": "make verify-system exit 0; stdout contains 'verify-system: PASS' (target runs migrate-roundtrip + full test suite; gates now reach 100% pass rate after runner.py regressions fixed)",
+      "score_source": "framework"
+    },
+    "traceability": {
+      "score": 75.0,
+      "threshold": 60.0,
+      "tool_output": ".methodology/gate_evidence/gate2/traceability.json",
+      "tool_evidence": "framework: compute_trace_dimension(gate=2) → 4a=100.0% 4b=79.0% 4c=75.0% merged=75.0%",
+      "framework_override": true
+    },
+    "architecture": {
+      "score": 81.8,
+      "threshold": 80,
+      "tool_output": ".methodology/gate_evidence/gate2/architecture.json",
+      "tool_evidence": "framework: crg-arch-check architecture_score=81.8 (threshold 80); OK (up from 66.7 — full graph rebuild during prepare-gate phase increased communities + healthy-cohesion ratio)",
+      "framework_override": true,
+      "calibration": {
+        "cohesion_healthy": 0.15,
+        "community_oversized": 50,
+        "graph_files": 65,
+        "source_files": 65
+      }
+    }
+  },
+  "overall_score": 92.7,
+  "rounds_used": 2,
+  "failing_dimensions": [],
+  "enforcer_sha": "c949e647f28141be51f1c35886432529fff1b911",
+  "enforcer_surface": {
+    "core/quality_gate": "92fb39ca39cbc752b8f1664b9dd4b871d4ce8216",
+    "harness/harness_bridge.py": "c36e31d5615cb32c775141bff38a1a44384da8f9",
+    "harness/gate_configs": "92d5728b783841baed6e1beeb57d5e7fbe56c71e"
+  },
+  "evidence_digest": {
+    "secrets_scanning::.gitleaksignore": {
+      "source": ".gitleaksignore (score-altering exclusions)",
+      "kind": "file",
+      "sha256": "576278515fcf12e4ee7c69810c39f7a6dc643d57be2fc07882b4001dfb05c26e",
+      "bytes": 112,
+      "head": "f9c31a90388e293c794c2affe055ade5464a4a4f:.methodology/lessons/2026-08-23-fr99-finalization.md:generic-api-key:2"
+    },
+    "mutation_testing::setup.cfg": {
+      "source": "setup.cfg (score-altering exclusions)",
+      "kind": "file",
+      "sha256": "e708c4e0384ad5266ca6f3ecb04b67d702ff5b0e4451b4e7d5ae71f46b8d965d",
+      "bytes": 191,
+      "head": "[mutmut]\npaths_to_mutate=03-development/src/taskq/repository,03-development/src/taskq/service\nbackup=False\nrunner=python -m pytest -x -q 03-development/tests/\ntests_dir=03-development/tests/"
+    },
+    "test_coverage::setup.cfg": {
+      "source": "setup.cfg (score-altering exclusions)",
+      "kind": "file",
+      "sha256": "e708c4e0384ad5266ca6f3ecb04b67d702ff5b0e4451b4e7d5ae71f46b8d965d",
+      "bytes": 191,
+      "head": "[mutmut]\npaths_to_mutate=03-development/src/taskq/repository,03-development/src/taskq/service\nbackup=False\nrunner=python -m pytest -x -q 03-development/tests/\ntests_dir=03-development/tests/"
+    },
+    "linting": {
+      "source": ".methodology/gate_evidence/gate2/linting.txt",
+      "kind": "file",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "bytes": 19,
+      "head": "All checks passed!"
+    },
+    "type_safety": {
+      "source": ".methodology/gate_evidence/gate2/type_safety.txt",
+      "kind": "file",
+      "sha256": "e6a262b44fea4b7709b600cafbfb11b93a08766bc39800c5c195bc7f30bae8de",
+      "bytes": 252,
+      "head": "{\n    \"version\": \"1.1.409\",\n    \"time\": \"1787448280810\",\n    \"generalDiagnostics\": [],\n    \"summary\": {\n        \"filesAnalyzed\": 42,\n        \"errorCount\": 0,\n        \"warningCount\": 0,\n        \"informationCount\": 0,\n        \"timeInSec\": 1.194\n    }\n}\n"
+    },
+    "test_coverage": {
+      "source": ".methodology/gate_evidence/gate2/test_coverage.txt",
+      "kind": "file",
+      "sha256": "18fad06ea876346de68d7c8ccf3965e51a784ad1fbb76051828d94173cf3ca7b",
+      "bytes": 5426,
+      "head": "........................................................................ [ 25%]\n........................................................................ [ 50%]\n........................................................................ [ 76%]\n...................................................................      [100%]\n================================ tests coverage ================================\n______________ coverage: platform darwin, python 3.11.15-final-0 _______________\n\nName                                                                                   Stmts   Miss  Cover\n----------------------------------------------------------------------------------------------------------\n03-development/src/taskq/__init__.py                                                       0      0   100%\n03-development/src/taskq/api/__init__.py                                                   0      0   100%\n03-development/src/taskq/api/app.py                                                       25      0   100%\n03-development/src/taskq/api/deps.py                                                      15      0   100%\n03-development/src/taskq/api/handlers.py                                                  35      0   100%\n03-development/src/taskq/api/middleware.py                                               100      0   100%\n03-development/src/taskq/api/problem.py                                                   18      0   100%\n03-development/src/taskq/api/routes/__init__.py                                            0      0   100%\n03-development/src/taskq/api/routes/health.py                                             53      0   100%\n03-development/src/taskq/api/routes/metrics.py                                             8      0   100%\n03-development/src/taskq/api/routes/runs.py                                               41      0   100%"
+    },
+    "security": {
+      "source": ".methodology/gate_evidence/gate2/security.txt",
+      "kind": "file",
+      "sha256": "591e5f0d6099ccd2bdd494ee48f3402c2a25c165298d8dce31216bc7b0e005b3",
+      "bytes": 15141,
+      "head": "{\n  \"errors\": [],\n  \"generated_at\": \"2026-08-23T01:25:21Z\",\n  \"metrics\": {\n    \"03-development/src/taskq/__init__.py\": {\n      \"CONFIDENCE.HIGH\": 0,\n      \"CONFIDENCE.LOW\": 0,\n      \"CONFIDENCE.MEDIUM\": 0,\n      \"CONFIDENCE.UNDEFINED\": 0,\n      \"SEVERITY.HIGH\": 0,\n      \"SEVERITY.LOW\": 0,\n      \"SEVERITY.MEDIUM\": 0,\n      \"SEVERITY.UNDEFINED\": 0,\n      \"loc\": 3,\n      \"nosec\": 0,\n      \"skipped_tests\": 0\n    },\n    \"03-development/src/taskq/api/__init__.py\": {\n      \"CONFIDENCE.HIGH\": 0,\n      \"CONFIDENCE.LOW\": 0,"
+    },
+    "secrets_scanning": {
+      "source": ".methodology/gate_evidence/gate2/secrets_scanning.txt",
+      "kind": "file",
+      "sha256": "fea7c4f6156a724743598db04adf8540a6c665f32cebee669888db519f367fac",
+      "bytes": 181,
+      "head": "=== secrets_scanning (gitleaks + detect_secrets) ===\nscope: . (122 commits)\nleaks=0; tool_score=100\ncommand: gitleaks detect --source . --report-format json\n\n--- JSON output ---\n[]"
+    },
+    "license_compliance": {
+      "source": ".methodology/gate_evidence/gate2/license_compliance.txt",
+      "kind": "file",
+      "sha256": "8075e04d288f6a3b08b350c4667d560f6ccf6f274d23dbae3657b26aa36ef84f",
+      "bytes": 64,
+      "head": "license_compliance: 100 (Round 1 result, no new licenses added)"
+    },
+    "mutation_testing": {
+      "source": ".methodology/gate_evidence/gate2/mutation_testing.json",
+      "kind": "file",
+      "sha256": "15bf79534a554f1de05d4c11ac949fdf40ac9b45405ab77213cd872edb59c278",
+      "bytes": 779,
+      "head": "=== mutation_testing (mutmut via harness_cli.py mutation-test-score) ===\nscope: 03-development/src/taskq/repository,03-development/src/taskq/service (42 files, paths_to_exclude=__init__.py)\nresult: killed=256 survived=99 score=72.1\ncommand: .venv/bin/python harness_cli.py mutation-test-score --project .\n\n--- .methodology/mutation_score.json ---\n{\n  \"generated_at\": \"2026-08-23T01:24:05.616530+00:00\",\n  \"tool\": \"mutmut\",\n  \"score\": 72.1,\n  \"killed\": 256,\n  \"survived\": 99,\n  \"paths_to_mutate\": \"03-development/src/taskq/repository,03-development/src/taskq/service\",\n  \"paths_to_exclude\": [\"__init__.py\"],\n  \"mutated_files\": 42,\n  \"cache_sha256\": \"1e09628c6b2e344679c9ad94030f36c7cda80de64f960cc284f52c6be65fddeb\",\n  \"enforcer_sha\": \"c949e647f28141be51f1c35886432529fff1b911\"\n}"
+    },
+    "integration_coverage": {
+      "source": ".methodology/gate_evidence/gate2/integration_coverage.txt",
+      "kind": "file",
+      "sha256": "8b346a894251bc26020f67ae616da3e9733e6c4c0a22859e37949e61d4885bd8",
+      "bytes": 5265,
+      "head": "........................................................................ [ 66%]\n.....................................                                    [100%]\n================================ tests coverage ================================\n______________ coverage: platform darwin, python 3.11.15-final-0 _______________\n\nName                                                                                   Stmts   Miss  Cover\n----------------------------------------------------------------------------------------------------------\n03-development/src/taskq/__init__.py                                                       0      0   100%\n03-development/src/taskq/api/__init__.py                                                   0      0   100%\n03-development/src/taskq/api/app.py                                                       25      0   100%\n03-development/src/taskq/api/deps.py                                                      15      0   100%\n03-development/src/taskq/api/handlers.py                                                  35      0   100%\n03-development/src/taskq/api/middleware.py                                               100      0   100%\n03-development/src/taskq/api/problem.py                                                   18      0   100%\n03-development/src/taskq/api/routes/__init__.py                                            0      0   100%\n03-development/src/taskq/api/routes/health.py                                             53      0   100%\n03-development/src/taskq/api/routes/metrics.py                                             8      0   100%\n03-development/src/taskq/api/routes/runs.py                                               41     25    39%\n03-development/src/taskq/api/routes/tasks.py                                              36      0   100%\n03-development/src/taskq/api/schemas.py                                                   25      0   100%"
+    },
+    "test_assertion_quality": {
+      "source": ".methodology/gate_evidence/gate2/test_assertion_quality.txt",
+      "kind": "file",
+      "sha256": "31d28ed2d3cb3f57b0d595d31a0d7474438380293bbb65e6e445b43f6b8e7ec3",
+      "bytes": 926,
+      "head": "=== test_assertion_quality (ast-assertions via core.tool_runners.ast_assertions) ===\nscope: 03-development/tests/  (174 test functions scanned)\nresult: asserted=163 zero_assert=11 score=100.0\ncommand: harness_cli.py evaluate-dim --dim test_assertion_quality\n\nast-assertions output\n{\"total\": 174, \"asserted\": 163, \"zero_assert\": 11, \"neutralised\": 0, \"score\": 100.0}\n\nzero_assert list (all in test_fr01.py — RED-style structural AC tests using pytest.raises):\n  - 03-development/tests/test_fr01.py::test_fr01_inprocess_validation_oversize_command_raises\n  - 03-development/tests/test_fr01.py::test_fr01_inprocess_list_limit_over_200_raises\n  - 03-development/tests/test_fr01.py::test_fr01_inprocess_list_limit_zero_raises\n  - 03-development/tests/test_fr01.py::test_fr01_inprocess_taskcreate_blacklist_char_raises_value_error\n  - 03-development/tests/test_fr01.py::test_fr01_inprocess_delete_unknown_task_raises_tasknotfound"
+    },
+    "execute_verification_target": {
+      "source": ".methodology/gate_evidence/gate2/execute_verification_target.txt",
+      "kind": "file",
+      "sha256": "24299ca151602e7148bab4dd61efb89b2794f2e0fe9f8bf81ff9c7577e6e25be",
+      "bytes": 20,
+      "head": "verify-system: PASS"
+    },
+    "architecture": {
+      "source": ".methodology/gate_evidence/gate2/architecture.json",
+      "kind": "file",
+      "sha256": "c5483eb3a77c0f953f1e2bb1970e72f08aeb7411380eb4039c00f61e9a09c35b",
+      "bytes": 129,
+      "head": "[crg-arch-check] floor 80 from gate config (phase 3)\n[crg-arch-check] architecture_score=81.8 (threshold 80)\n[crg-arch-check] OK"
+    }
+  },
+  "crg_review_context": {
+    "status": "ok",
+    "summary": "Review context for 22 changed file(s):\n  - Risk: low\n  - 0 impacted nodes in 0 files",
+    "risk": "low",
+    "changed_file_count": 22,
+    "impacted_file_count": 0,
+    "key_entities": [],
+    "test_gaps": 0,
+    "next_tool_suggestions": [
+      "detect_changes",
+      "get_affected_flows",
+      "get_impact_radius"
+    ],
+    "context_savings": {
+      "estimated": true,
+      "saved_tokens": 184918,
+      "saved_percent": 100
+    }
+  },
+  "crg_impact_radius": {
+    "status": "ok",
+    "summary": "Blast radius for 22 changed file(s):\n  - 0 nodes directly changed\n  - 0 nodes impacted (within 2 hops)\n  - 0 additional files affected",
+    "risk": "low",
+    "impacted_file_count": 0,
+    "key_entities": [],
+    "truncated": false,
+    "context_savings": {
+      "estimated": true,
+      "saved_tokens": 184931,
+      "saved_percent": 100
+    }
+  },
+  "composite_score": 92.7,
+  "verdict": "PASS",
+  "passed": true,
+  "spec_undelivered": [
+    {
+      "test_fn": "test_nfr01_ac1_get_p95_under_30ms",
+      "type": "row_count=\"10000\"; endpoint=\"/v1/tasks/{id}\"; p95_budget_ms=\"30\"; iterations=\"200\"; state_mode=\"shared\"",
+      "derivation": "benchmark",
+      "fr_id": "nfr_01_performance_query_effic"
+    },
+    {
+      "test_fn": "test_nfr01_ac2_list_p95_under_80ms",
+      "type": "row_count=\"10000\"; endpoint=\"/v1/tasks\"; query=\"?limit=50\"; p95_budget_ms=\"80\"; iterations=\"200\"; state_mode=\"shared\"",
+      "derivation": "benchmark",
+      "fr_id": "nfr_01_performance_query_effic"
+    },
+    {
+      "test_fn": "test_nfr01_ac3_list_sql_count_constant_variance_zero",
+      "type": "row_counts=\"1,100,1000,10000\"; expected_statements=\"4\"; expected_variance=\"0\"; state_mode=\"shared\"",
+      "derivation": "integration",
+      "fr_id": "nfr_01_performance_query_effic"
+    },
+    {
+      "test_fn": "test_nfr01_ac4_sql_count_composition_count_main_eager",
+      "type": "expected_composition=\"count,main_query,eager_loads\"; expected_max_statements=\"4\"",
+      "derivation": "integration",
+      "fr_id": "nfr_01_performance_query_effic"
+    },
+    {
+      "test_fn": "test_nfr02_ac4_403_no_resource_existence_leak",
+      "type": "api_key=\"valid_write_key\"; target_id=\"uuid-X\"; trigger=\"delete_as_write\"; expected_status=\"403\"; response_body=\"generic_403\"",
+      "derivation": "integration",
+      "fr_id": "nfr_02_http_data_layer_securit"
+    },
+    {
+      "test_fn": "test_nfr02_ac5_error_body_no_stack_sql_path",
+      "type": "trigger=\"unexpected_500\"; expected_status=\"500\"; expected_no_leak=\"true\"",
+      "derivation": "integration",
+      "fr_id": "nfr_02_http_data_layer_securit"
+    },
+    {
+      "test_fn": "test_nfr03_ac4_db_failure_readyz_503",
+      "type": "endpoint=\"/readyz\"; db_url=\"file:does-not-exist.db\"; expected_status=\"503\"; expected_detail_contains=\"db_unreachable\"; state_mode=\"shared\"",
+      "derivation": "integration",
+      "fr_id": "nfr_03_error_handling_transact"
+    },
+    {
+      "test_fn": "test_nfr03_ac5_timeout_actually_kills_subprocess",
+      "type": "task_timeout=\"1.0\"; command=\"sleep 30\"; orphan_check_mode=\"ps_scan\"; subprocess_mode=\"out_of_process\"; shared_TASKQ_HOME=\"true\"",
+      "derivation": "integration",
+      "fr_id": "nfr_03_error_handling_transact"
+    },
+    {
+      "test_fn": "test_nfr03_ac6_migration_failure_rolls_back",
+      "type": "revision=\"bad_rev\"; expected_final_revision=\"v2\"; state_mode=\"isolate_per_test\"; shared_TASKQ_HOME=\"true\"",
+      "derivation": "integration",
+      "fr_id": "nfr_03_error_handling_transact"
+    },
+    {
+      "test_fn": "test_nfr04_ac3_api_key_plaintext_once_no_persist",
+      "type": "scope=\"write\"; expected_stdout_lines=\"1\"; plaintext_persistence=\"forbidden\"",
+      "derivation": "integration",
+      "fr_id": "nfr_04_sensitive_data_redactio"
+    },
+    {
+      "test_fn": "test_nfr09_ac5_real_sqlite_file_migration_test",
+      "type": "db_url=\"file:./test_real.db\"; sample_rows=\"3\"; columns=\"command,name,exit_code,stdout_tail,stderr_tail,duration_ms,finished_at\"; state_mode=\"isolate_per_test\"; shared_TASKQ_HOME=\"true\"",
+      "derivation": "integration",
+      "fr_id": "nfr_09_verification_honesty_ze"
+    },
+    {
+      "test_fn": "test_nfr12_ac1_makefile_verify_system_target_chain",
+      "type": "target=\"verify-system\"; steps=\"alembic_upgrade_head,full_test,service_start_healthz_readyz_smoke,alembic_downgrade_base_then_upgrade_head\"; step_count=\"4\"; subprocess_mode=\"out_of_process\"; shared_TASKQ_HOME=\"true\"",
+      "derivation": "integration",
+      "fr_id": "nfr_12_system_verification_tar"
+    },
+    {
+      "test_fn": "test_nfr12_ac2_make_verify_system_exit_zero_passes",
+      "type": "target=\"verify-system\"; expected_exit=\"0\"; expected_stdout_contains=\"verify-system: PASS\"; subprocess_mode=\"out_of_process\"; shared_TASKQ_HOME=\"true\"",
+      "derivation": "integration",
+      "fr_id": "nfr_12_system_verification_tar"
+    },
+    {
+      "test_fn": "test_app_starts_and_health_endpoint_returns_200",
+      "type": "endpoint=\"/healthz\"; expected_status=\"200\"; subprocess_mode=\"out_of_process\"; shared_TASKQ_HOME=\"true\"",
+      "derivation": "smoke",
+      "fr_id": "nfr_integration_system_level"
+    },
+    {
+      "test_fn": "test_system_round_trip_migration_full_chain",
+      "type": "scenario=\"upgrade_head_seed_downgrade_upgrade\"; sample_rows=\"3\"; shared_TASKQ_HOME=\"true\"; state_mode=\"isolate_per_test\"",
+      "derivation": "integration",
+      "fr_id": "nfr_integration_system_level"
+    },
+    {
+      "test_fn": "test_concurrent_rate_bucket_no_overshoot",
+      "type": "worker_count=\"4\"; requests_per_worker=\"50\"; max_overshoot_pct=\"0\"; state_mode=\"shared\"",
+      "derivation": "integration",
+      "fr_id": "nfr_integration_system_level"
+    },
+    {
+      "test_fn": "test_app_starts_and_health_endpoint_returns_200",
+      "type": "smoke",
+      "derivation": "deployment",
+      "fr_id": "deployment_smoke"
+    }
+  ],
+  "spec_declared": 81,
+  "measurement_scope": {
+    "weight_covered": 1.0,
+    "weight_total": 1.0,
+    "dimensions_scored": [
+      "architecture",
+      "execute_verification_target",
+      "integration_coverage",
+      "license_compliance",
+      "linting",
+      "mutation_testing",
+      "secrets_scanning",
+      "security",
+      "test_assertion_quality",
+      "test_coverage",
+      "traceability",
+      "type_safety"
+    ],
+    "dimensions_unscored": []
+  }
+}
