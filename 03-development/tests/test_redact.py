@@ -1,6 +1,6 @@
 """Bug-hunt regression tests for NFR-04 subprocess output redaction.
 
-These tests lock in the contract that ``taskq.errors.redact.redact_text``
+These tests lock in the contract that ``taskq.security.redact.redact_text``
 scrubs secret-shaped substrings (sk-… tokens, Bearer … JWTs,
 postgres:// DSNs, password=… pairs) before subprocess output reaches
 ``task_results.stdout_tail`` / ``stderr_tail``. Reproduces the bug
@@ -19,7 +19,7 @@ _SRC_DIR = _THIS_DIR / "src"
 if str(_SRC_DIR) not in sys.path:
     sys.path.insert(0, str(_SRC_DIR))
 
-from taskq.errors.redact import redact_text, _REDACTION_MARKER  # noqa: E402
+from taskq.security.redact import redact_text, _REDACTION_MARKER  # noqa: E402
 from taskq.service.runner import TaskRunner  # noqa: E402
 
 

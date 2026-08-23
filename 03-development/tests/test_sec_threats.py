@@ -22,7 +22,7 @@ Threat / boundary coverage recap:
                    (``taskq.service.runner``).
   - T-07 / TB-03:  SQL string composition absent under ``src/``.
   - T-08 / TB-03:  postgres:// / token= substrings scrubbed by
-                   ``taskq.errors.redact.redact_text``.
+                   ``taskq.security.redact.redact_text``.
   - T-09 / TB-04:  ``api_keys.key_hash`` is sha256 hex (no plaintext
                    persisted — ``taskq.repository.keys``).
   - T-10 / TB-04:  subprocess stdout / stderr redacted before persistence
@@ -398,13 +398,13 @@ def test_sec_t08_db_url_redacted_in_logs(monkeypatch, caplog):
     password= / token= shapes before they reach a log line, an error
     body, or the ``/v1/metrics`` payload.
 
-    Specifically: ``taskq.errors.redact.redact_text`` MUST transform
+    Specifically: ``taskq.security.redact.redact_text`` MUST transform
     each forbidden substring into the ``[REDACTED]`` marker (NFR-04),
     and the metrics primitives on the read-side MUST NOT echo the
     DSN. We exercise the helpers directly so this test does not
     require a real DB or a live metrics endpoint.
     """
-    from taskq.errors.redact import _REDACTION_MARKER, redact_text
+    from taskq.security.redact import _REDACTION_MARKER, redact_text
 
     SECRET_PW = "hunter2-secret-DO-NOT-LEAK"
     DSN = f"postgres://app:{SECRET_PW}@db.internal:5432/taskq"
@@ -497,7 +497,7 @@ def test_sec_t10_subprocess_output_redacted(monkeypatch):
     reaches the ``TaskResult``-shaped dictionary the runner returns
     (SAD §6 T-10; NFR-04).
     """
-    from taskq.errors.redact import _REDACTION_MARKER, redact_text
+    from taskq.security.redact import _REDACTION_MARKER, redact_text
     from taskq.service.runner import TaskRunner
 
     class _FakeProc:

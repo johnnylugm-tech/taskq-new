@@ -1,10 +1,10 @@
-"""taskq.errors.redact — NFR-04 secret-shaped substring scrubber.
+"""taskq.security.redact — NFR-04 secret-shaped substring scrubber.
 
 [FR-02 / SAD §6 T-10] Subprocess stdout/stderr MAY carry secret-shaped
 strings (sk-… tokens, Bearer … JWTs, postgres:// connection URLs).
 Before those bytes are persisted to ``task_results.stdout_tail`` /
-``stderr_tail`` (FR-07 v3 schema) and surfaced via ``GET
-/v1/tasks/{id}/runs``, every line MUST be scrubbed via the regex
+``stderr_tail`` (FR-07 v3 schema) and surfaced via GET
+``/v1/tasks/{id}/runs``, every line MUST be scrubbed via the regex
 patterns declared here.
 
 The regex set is intentionally conservative: any token-shaped substring
@@ -16,6 +16,11 @@ Layer contract: this module is a leaf helper imported by
 ``taskq.service.runner._decode`` BEFORE the result dict is handed to
 ``TaskResultRepository``. It owns NO SQL and depends only on the
 standard library so the import cannot fail at runtime.
+
+Lives in ``taskq.security`` rather than ``taskq.errors`` so that
+``taskq.api`` (which depends on ``taskq.service``) does not transitively
+import ``taskq.errors`` — preserving the
+``fr01-config-errors-independence`` import-linter contract.
 """
 from __future__ import annotations
 

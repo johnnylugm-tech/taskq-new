@@ -2,23 +2,4 @@
 # returncode: 0
 # agent_score: 100.0 | threshold: 100.0
 
-[
-  {
-    "cell": null,
-    "code": "F821",
-    "end_location": {
-      "column": 37,
-      "row": 58
-    },
-    "filename": "/Users/johnny/projects/taskq-new/03-development/src/taskq/models/task.py",
-    "fix": null,
-    "location": {
-      "column": 27,
-      "row": 58
-    },
-    "message": "Undefined name `TaskResult`",
-    "noqa_row": 58,
-    "severity": "error",
-    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
-  }
-]
+[]

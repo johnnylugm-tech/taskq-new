@@ -1,33 +1,16 @@
 # Harness-executed: pyright
-# returncode: 1
+# returncode: 0
 # agent_score: 100.0 | threshold: 100.0
 
 {
     "version": "1.1.409",
-    "time": "1787498208033",
-    "generalDiagnostics": [
-        {
-            "file": "/Users/johnny/projects/taskq-new/03-development/src/taskq/models/task.py",
-            "severity": "error",
-            "message": "\"TaskResult\" is not defined",
-            "range": {
-                "start": {
-                    "line": 57,
-                    "character": 26
-                },
-                "end": {
-                    "line": 57,
-                    "character": 36
-                }
-            },
-            "rule": "reportUndefinedVariable"
-        }
-    ],
+    "time": "1787498973982",
+    "generalDiagnostics": [],
     "summary": {
         "filesAnalyzed": 44,
-        "errorCount": 1,
+        "errorCount": 0,
         "warningCount": 0,
         "informationCount": 0,
-        "timeInSec": 1.195
+        "timeInSec": 1.205
     }
 }
