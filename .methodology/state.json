@@ -40,16 +40,15 @@
       "delivered_tree_sha256": "55e63f5b171278018249eb00d8465056f41965666c2e08419c7238ee2809fa09"
     },
     "4": {
-      "sha": "PLACEHOLDER_WILL_BE_REPLACED_ON_ADVANCE",
-      "timestamp": "2026-08-23T16:13:36.230535+00:00",
+      "sha": "74e5725283ee60df43b4fb493350053404bb1ae7",
+      "timestamp": "2026-08-23T16:24:42.205702+00:00",
       "enforcer_sha": "725a220c35a6432d77e714aa520024f72c82061c",
       "enforcer_surface": {
         "core/quality_gate": "fc600ef09159eb15c1f24a0a18d4cb6e45e4dce7",
         "harness/harness_bridge.py": "4858e5529079e9432fb38d85d68c6051d956312d",
         "harness/gate_configs": "d91e4c3c9409081ea44b75ae3060f3293fa59cab"
       },
-      "delivered_tree_sha256": "PLACEHOLDER",
-      "seeded_reason": "pre-seeded to break advance-phase chicken-and-egg on first P4→P5 transition (Gate 3 PASS recorded on tree in gate_verify.jsonl)"
+      "delivered_tree_sha256": "3f360ab5f53652ff2d1fd477ca6ec8be3425ec8ca146dcd14d6b9ece0f0716e4"
     }
   },
   "test_inventory_checksum": "25bc603be0c794eec0a08940fc85d17b9d7997bd16518d7a5a67c5559f59aa45",
