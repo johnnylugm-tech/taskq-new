@@ -1,0 +1,20 @@
+# taskq-new — pyproject.toml
+#
+# Pin pytest discovery to the project test directory so the harness-side
+# pytest-cov and pytest-benchmark invocations do NOT collect
+# `harness/tests/*` (the vendored harness method library) from the project
+# root. Without this, `pytest` invoked bare from `/Users/johnny/projects/taskq-new`
+# collects the harness test suite alongside the project's own, and either
+# times out (pytest-cov at 120s) or fails collection (pytest-benchmark trips
+# on a harness test referencing fixtures that do not exist in this layout).
+#
+# See harness/core/quality_gate/cross_artifact.py:481 and the tool_runners
+# pytest invocation paths for why this matters at the gate level.
+
+[tool.pytest.ini_options]
+testpaths = ["03-development/tests"]
+addopts = [
+    "-p", "no:cacheprovider",
+    "--strict-markers",
+    "--ignore=harness",
+]
