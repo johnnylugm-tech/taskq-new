@@ -14,14 +14,16 @@
   },
   "coverage": {
     "omit": [],
-    "statements_measured": 198,
+    "statements_measured": 82,
     "statements_omitted": 0
   },
   "gate": 1,
   "phase": 4,
   "stubbed_boundaries": {
-    "count": 0,
-    "modules": []
+    "count": 1,
+    "modules": [
+      "taskq.api.deps"
+    ]
   },
   "verify_system": {
     "obligations_unmet": [],

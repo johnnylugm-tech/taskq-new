@@ -35,7 +35,6 @@ Name                                                                            
 03-development/src/taskq/config/__init__.py                                                0      0   100%
 03-development/src/taskq/config/settings.py                                               24      0   100%
 03-development/src/taskq/errors/__init__.py                                                0      0   100%
-03-development/src/taskq/errors/redact.py                                                 12      0   100%
 03-development/src/taskq/framework_paths.py                                                8      0   100%
 03-development/src/taskq/migrations/__init__.py                                            1      0   100%
 03-development/src/taskq/migrations/env.py                                                27      0   100%
@@ -55,6 +54,8 @@ Name                                                                            
 03-development/src/taskq/repository/results.py                                            55      0   100%
 03-development/src/taskq/repository/tasks.py                                             122      0   100%
 03-development/src/taskq/repository/units_of_work.py                                      26      0   100%
+03-development/src/taskq/security/__init__.py                                              0      0   100%
+03-development/src/taskq/security/redact.py                                               12      0   100%
 03-development/src/taskq/service/__init__.py                                               0      0   100%
 03-development/src/taskq/service/auth.py                                                  28      0   100%
 03-development/src/taskq/service/executor.py                                              98      0   100%
@@ -68,12 +69,12 @@ TOTAL                                                                           
 --------------------------------------------------------------------------------------------------- benchmark: 3 tests --------------------------------------------------------------------------------------------------
 Name (time in us)                             Min                   Max                  Mean              StdDev                Median                 IQR            Outliers         OPS            Rounds  Iterations
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-test_bench_list_default                  127.8330 (1.0)        583.5000 (1.0)        132.8933 (1.0)       13.8232 (1.0)        131.3330 (1.0)        2.5420 (1.0)         34;98  7,524.8352 (1.0)        1263           1
-test_nfr01_ac1_get_p95_under_30ms      4,290.3750 (33.56)    7,553.1670 (12.94)    4,654.1413 (35.02)    530.8720 (38.40)    4,450.6250 (33.89)    201.5717 (79.30)       23;28    214.8624 (0.03)        181           1
-test_nfr01_ac2_list_p95_under_80ms     5,229.7920 (40.91)    7,483.2920 (12.82)    5,462.9205 (41.11)    349.2399 (25.26)    5,359.8750 (40.81)    136.0313 (53.51)       11;16    183.0523 (0.02)        163           1
+test_bench_list_default                  127.4170 (1.0)        589.3330 (1.0)        132.4828 (1.0)       13.3118 (1.0)        131.1250 (1.0)        2.4590 (1.0)        36;105  7,548.1477 (1.0)        1386           1
+test_nfr01_ac1_get_p95_under_30ms      4,290.4580 (33.67)    6,468.0830 (10.98)    4,488.3824 (33.88)    273.0495 (20.51)    4,414.2915 (33.66)    118.0840 (48.02)       14;19    222.7974 (0.03)        174           1
+test_nfr01_ac2_list_p95_under_80ms     5,214.8330 (40.93)    7,415.6670 (12.58)    5,455.0293 (41.18)    341.3658 (25.64)    5,350.1660 (40.80)    143.3540 (58.30)       10;16    183.3171 (0.02)        141           1
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Legend:
   Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
   OPS: Operations Per Second, computed as 1 / Mean
-342 passed, 1 warning in 28.46s
+342 passed, 1 warning in 28.26s
