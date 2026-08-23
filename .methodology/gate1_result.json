@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 5,
-  "fr_id": "FR-01",
+  "fr_id": "FR-02",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -16,20 +16,20 @@
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.232}}",
+      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.204}}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 65,
+      "tests_passed": 45,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "65 passed in 1.66s\n============================== test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2, pluggy-1.6.0\nrootdir: /Users/johnny/projects/taskq-new\nconfigfile: pyproject.toml\ncollected 65 items\n\n03-development/tests/test_fr01.py ........................               [ 36%]\n03-development/tests/test_fr06.py .....................                  [ 69%]\n03-development/tests/test_fr10.py ....................                   [100%]\n\n============================== 65 passed in 1.66s ==============================\nCoverage JSON: totals percent_covered=100.0 (219/219 statements, 0 missing_lines) across all 4 FR source files",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-01.txt",
+      "tool_evidence": "45 passed in 5.13s\n============================== test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2, pluggy-8.4.2\nrootdir: /Users/johnny/projects/taskq-new\nconfigfile: pyproject.toml\ncollected 45 items\n\n03-development/tests/test_fr02.py ......................                 [ 48%]\n03-development/tests/test_fr08.py .......................                [100%]\n\n============================== 45 passed in 5.13s ==============================\nCoverage JSON: totals percent_covered=100.0 (182/182 statements, 0 missing_lines) across FR-02 source files (runs.py, runner.py, results.py). All 7/7 required FR-02 tests present (ac1, ac2, ac3_done, ac3_failed, ac3_timeout, ac4, ac5).",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-02.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-01",
+      "coverage_scope_fr": "FR-02",
       "score_source": "framework"
     },
     "architecture_constraints": {
@@ -85,16 +85,16 @@
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "fda2e5d3d1af094a073fbcdd3bc33cab601ca58d02bc76c3b4fd3e5d1029d847",
+      "sha256": "8f32580db8d2778f4c30c9d47c067eafde93e8fa08fdbbfd6d3b8249ce4ccd99",
       "bytes": 135,
-      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.232}}"
+      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.204}}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "96af69cc5c72e7e545914b17e292dce000ca2215736b8071a105b9d1a363232e",
-      "bytes": 684,
-      "head": "65 passed in 1.66s\n============================== test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2, pluggy-1.6.0\nrootdir: /Users/johnny/projects/taskq-new\nconfigfile: pyproject.toml\ncollected 65 items\n\n03-development/tests/test_fr01.py ........................               [ 36%]\n03-development/tests/test_fr06.py .....................                  [ 69%]\n03-development/tests/test_fr10.py ....................                   [100%]\n\n============================== 65 passed in 1.66s ==============================\nCoverage JSON: totals percent_covered=100.0 (219/219 statements, 0 missing_lines) across all 4 FR source files"
+      "sha256": "54e65b281fdc2dc33f69e7664e9bf027f9b68522546a3f9d497c5d71dc8eff4a",
+      "bytes": 729,
+      "head": "45 passed in 5.13s\n============================== test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2, pluggy-8.4.2\nrootdir: /Users/johnny/projects/taskq-new\nconfigfile: pyproject.toml\ncollected 45 items\n\n03-development/tests/test_fr02.py ......................                 [ 48%]\n03-development/tests/test_fr08.py .......................                [100%]\n\n============================== 45 passed in 5.13s ==============================\nCoverage JSON: totals percent_covered=100.0 (182/182 statements, 0 missing_lines) across FR-02 source files (runs.py, runner.py, results.py). All 7/7 required FR-02 tests present (ac1, ac2, ac3_done, ac3_failed, ac3_timeout, ac4, ac5)."
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
