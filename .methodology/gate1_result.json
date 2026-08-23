@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 7,
-  "fr_id": "FR-01",
+  "fr_id": "FR-02",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -16,26 +16,26 @@
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\":\"1.1.409\",\"time\":\"1787517311871\",\"generalDiagnostics\":[],\"summary\":{\"filesAnalyzed\":45,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.34}}",
+      "tool_evidence": "{\"version\":\"1.1.409\",\"summary\":{\"filesAnalyzed\":45,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.24}}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 65,
+      "tests_passed": 45,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "============================= test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2, pluggy-1.6.0\nbenchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)\nrootdir: /Users/johnny/projects/taskq-new\nconfigfile: pyproject.toml\nplugins: benchmark-5.2.3, cov-7.1.0, hypothesis-6.124.7, anyio-4.14.2\ncollected 65 items\n03-development/tests/test_fr01.py ........................               [ 36%]\n03-development/tests/test_fr06.py .....................                  [ 69%]\n03-development/tests/test_fr10.py ....................                   [100%]\n============================== 65 passed in 1.86s ==============================",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-01.txt",
+      "tool_evidence": "============================== 45 passed in 4.89s ============================== coverage 100% (182/182 statements) across runs.py, runner.py, results.py",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-02.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-01",
+      "coverage_scope_fr": "FR-02",
       "score_source": "framework"
     },
     "architecture_constraints": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "Import Linter\nContracts\nAnalyzed 44 files, 62 dependencies.\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\nContracts: 3 kept, 0 broken.",
+      "tool_evidence": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers, fr01-config-errors-independence, fr01-root-independence all KEPT)",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
     }
@@ -85,23 +85,23 @@
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "923ae95839ae35b2f6835694cc11392f98c098028d06a16892766b1d8121af3a",
-      "bytes": 169,
-      "head": "{\"version\":\"1.1.409\",\"time\":\"1787517311871\",\"generalDiagnostics\":[],\"summary\":{\"filesAnalyzed\":45,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.34}}"
+      "sha256": "09a5341120783a5d09afdf8d041f4abd1a31130ac6164deb3f8bf2fe6d38e12d",
+      "bytes": 122,
+      "head": "{\"version\":\"1.1.409\",\"summary\":{\"filesAnalyzed\":45,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.24}}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "dece1f9ad3aba4f87a75652cb5fa7ab8f78980d20a70d0fc32d55603412bd770",
-      "bytes": 798,
-      "head": "============================= test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2, pluggy-1.6.0\nbenchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)\nrootdir: /Users/johnny/projects/taskq-new\nconfigfile: pyproject.toml\nplugins: benchmark-5.2.3, cov-7.1.0, hypothesis-6.124.7, anyio-4.14.2\ncollected 65 items\n03-development/tests/test_fr01.py ........................               [ 36%]\n03-development/tests/test_fr06.py .....................                  [ 69%]\n03-development/tests/test_fr10.py ....................                   [100%]\n============================== 65 passed in 1.86s =============================="
+      "sha256": "ede9c25c2883252306a9241c6bd95a116e61f372ee8bf76514f4102b72acc298",
+      "bytes": 153,
+      "head": "============================== 45 passed in 4.89s ============================== coverage 100% (182/182 statements) across runs.py, runner.py, results.py"
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "ed7b558c6c9203df2e90d4c7e2eaf12f4770498c5dbacb6f3a2359318974699a",
-      "bytes": 170,
-      "head": "Import Linter\nContracts\nAnalyzed 44 files, 62 dependencies.\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\nContracts: 3 kept, 0 broken."
+      "sha256": "86e6da8bf5696f739c69118d7fe2eaead23da552927773fd36864a26a61b1a8c",
+      "bytes": 144,
+      "head": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers, fr01-config-errors-independence, fr01-root-independence all KEPT)"
     }
   },
   "composite_score": 100.0,
