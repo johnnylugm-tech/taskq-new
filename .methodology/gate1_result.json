@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 7,
-  "fr_id": "FR-03",
+  "fr_id": "FR-04",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -9,14 +9,14 @@
     "linting": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "All checks passed!",
+      "tool_evidence": "$ python3 -m ruff check 03-development/src/ --extend-ignore RUF001,RUF002,RUF003\nAll checks passed!",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/linting_harness.txt"
     },
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.285}}",
+      "tool_evidence": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.258}, \"generalDiagnostics\": []}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
@@ -26,10 +26,10 @@
       "tests_passed": 27,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "27 passed in 0.41s\nCoverage: 100.0% (119/119 lines)\ntest_fr03.py ................. [ 62%]\ntest_fr04.py .......... [100%]",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-03.txt",
+      "tool_evidence": "============================== 27 passed in 0.44s ==============================\nName                                       Stmts   Miss  Cover   Missing\n------------------------------------------------------------------------\n03-development/src/taskq/api/deps.py          15      0   100%\n03-development/src/taskq/service/auth.py      28      0   100%\n------------------------------------------------------------------------\nTOTAL                                         43      0   100%",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-04.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-03",
+      "coverage_scope_fr": "FR-04",
       "score_source": "framework"
     },
     "architecture_constraints": {
@@ -78,23 +78,23 @@
     "linting": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "f0d0b1081d9d3ebb26c4c93543053ecdc0a58998f22c071dc4ddb26021b57645",
-      "bytes": 18,
-      "head": "All checks passed!"
+      "sha256": "fad7bf8fec552781f58e1c0ffeca42f9112045994a8b691d1b407d6151442b6f",
+      "bytes": 99,
+      "head": "$ python3 -m ruff check 03-development/src/ --extend-ignore RUF001,RUF002,RUF003\nAll checks passed!"
     },
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "c5bad016e37a7b5878d473341e99bda20c76262ec1f6a93bfbae548e173b2166",
-      "bytes": 113,
-      "head": "{\"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.285}}"
+      "sha256": "294c7e6332c4f953a1b5d58245b5ef898615541bfab28ef9f6a8e11126690b23",
+      "bytes": 161,
+      "head": "{\"version\": \"1.1.409\", \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.258}, \"generalDiagnostics\": []}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "22dedf2cb4555f5cdcce6cf1cc13c7f677578dba51a0eca73c7367936dba5b2d",
-      "bytes": 120,
-      "head": "27 passed in 0.41s\nCoverage: 100.0% (119/119 lines)\ntest_fr03.py ................. [ 62%]\ntest_fr04.py .......... [100%]"
+      "sha256": "c3e9704ce70ac79fd87c73bc7faad2c150f068c8dc35e92bf070553c59a91f7d",
+      "bytes": 488,
+      "head": "============================== 27 passed in 0.44s ==============================\nName                                       Stmts   Miss  Cover   Missing\n------------------------------------------------------------------------\n03-development/src/taskq/api/deps.py          15      0   100%\n03-development/src/taskq/service/auth.py      28      0   100%\n------------------------------------------------------------------------\nTOTAL                                         43      0   100%"
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
