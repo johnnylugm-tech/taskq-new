@@ -271,12 +271,17 @@
   },
   "crg_review_context": {
     "status": "ok",
-    "summary": "Review context for 9 changed file(s):\n  - Risk: low\n  - 0 impacted nodes in 0 files",
-    "risk": "low",
-    "changed_file_count": 9,
-    "impacted_file_count": 0,
-    "key_entities": [],
-    "test_gaps": 0,
+    "summary": "Review context for 13 changed file(s):\n  - Risk: high\n  - 147 impacted nodes in 59 files",
+    "risk": "high",
+    "changed_file_count": 13,
+    "impacted_file_count": 59,
+    "key_entities": [
+      "/Users/johnny/projects/taskq-new/03-development/src/taskq/models/task.py",
+      "Task",
+      "_new_uuid",
+      "_utc_now"
+    ],
+    "test_gaps": 2,
     "next_tool_suggestions": [
       "detect_changes",
       "get_affected_flows",
@@ -284,65 +289,35 @@
     ],
     "context_savings": {
       "estimated": true,
-      "saved_tokens": 133647,
+      "saved_tokens": 141581,
       "saved_percent": 100
     }
   },
   "crg_impact_radius": {
     "status": "ok",
-    "summary": "Blast radius for 9 changed file(s):\n  - 0 nodes directly changed\n  - 0 nodes impacted (within 2 hops)\n  - 0 additional files affected",
-    "risk": "low",
-    "impacted_file_count": 0,
-    "key_entities": [],
+    "summary": "Blast radius for 13 changed file(s):\n  - 4 nodes directly changed\n  - 147 nodes impacted (within 2 hops)\n  - 59 additional files affected",
+    "risk": "high",
+    "impacted_file_count": 59,
+    "key_entities": [
+      "/Users/johnny/projects/taskq-new/03-development/conftest.py",
+      "/Users/johnny/projects/taskq-new/03-development/src/taskq/api/app.py",
+      "/Users/johnny/projects/taskq-new/03-development/src/taskq/api/deps.py",
+      "/Users/johnny/projects/taskq-new/03-development/src/taskq/api/handlers.py",
+      "/Users/johnny/projects/taskq-new/03-development/src/taskq/api/middleware.py"
+    ],
     "truncated": false,
     "context_savings": {
       "estimated": true,
-      "saved_tokens": 133660,
+      "saved_tokens": 141531,
       "saved_percent": 100
     }
   },
   "crg_affected_flows": {
-    "total": 13,
+    "total": 1,
     "flows": [
       {
-        "name": "trigger_run",
-        "criticality": 0.645
-      },
-      {
-        "name": "create_pending_result",
-        "criticality": 0.4975
-      },
-      {
-        "name": "record_result",
+        "name": "create",
         "criticality": 0.485
-      },
-      {
-        "name": "_handle_request",
-        "criticality": 0.485
-      },
-      {
-        "name": "__init__",
-        "criticality": 0.4775
-      },
-      {
-        "name": "run_until_drained",
-        "criticality": 0.465
-      },
-      {
-        "name": "submit",
-        "criticality": 0.455
-      },
-      {
-        "name": "list_results_for_task",
-        "criticality": 0.4433
-      },
-      {
-        "name": "__init__",
-        "criticality": 0.435
-      },
-      {
-        "name": "update_result",
-        "criticality": 0.4225
       }
     ]
   },
