@@ -1,9 +1,9 @@
 {
   "state": "RUNNING",
   "current_phase": 4,
-  "last_gate": 2,
-  "last_fr": "FR-99",
-  "last_update": "2026-08-23T02:29:22.270158+00:00",
+  "last_gate": 1,
+  "last_fr": "FR-01",
+  "last_update": "2026-08-23T02:35:58.640446+00:00",
   "language": "python",
   "phase_completed": {
     "1": {
@@ -29,16 +29,15 @@
       "delivered_tree_sha256": "18eb8a581104312a3b56229901ebe38b10120def4ac82714655918b48a9fc882"
     },
     "3": {
-      "sha": "6e034f1c78e085326da46471787d8130e355fd40",
-      "timestamp": "2026-08-23T02:28:49.952214+00:00",
+      "sha": "c15966f250d72b4974309024b2d18b59a28493ff",
+      "timestamp": "2026-08-23T02:29:22.913098+00:00",
       "enforcer_sha": "8bfaf12625d62e813f37e24e40cfb7cbbb3bfd0f",
       "enforcer_surface": {
         "core/quality_gate": "449eb3c8eb04168e16922b6c7f67bf74a400749f",
         "harness/harness_bridge.py": "c36e31d5615cb32c775141bff38a1a44384da8f9",
         "harness/gate_configs": "92d5728b783841baed6e1beeb57d5e7fbe56c71e"
       },
-      "delivered_tree_sha256": "ca51187567b88c7aec42c14a299d1dbd2b9247f8",
-      "seeded_reason": "pre-seeded to break advance-phase chicken-and-egg on first P3→P4 transition"
+      "delivered_tree_sha256": "55e63f5b171278018249eb00d8465056f41965666c2e08419c7238ee2809fa09"
     }
   },
   "test_inventory_checksum": "25bc603be0c794eec0a08940fc85d17b9d7997bd16518d7a5a67c5559f59aa45",

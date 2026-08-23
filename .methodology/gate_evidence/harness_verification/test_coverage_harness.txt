@@ -1,11 +1,11 @@
 # Harness-executed: pytest-cov
-# returncode: 0
+# returncode: 1
 # agent_score: 100.0 | threshold: 80.0
 
 ........................................................................ [ 25%]
 ........................................................................ [ 50%]
 ........................................................................ [ 76%]
-...................................................................      [100%]
+.....F..............................................................     [100%]
 ================================ tests coverage ================================
 ______________ coverage: platform darwin, python 3.11.15-final-0 _______________
 
@@ -16,7 +16,7 @@ Name                                                                            
 03-development/src/taskq/api/app.py                                                       25      0   100%
 03-development/src/taskq/api/deps.py                                                      15      0   100%
 03-development/src/taskq/api/handlers.py                                                  35      0   100%
-03-development/src/taskq/api/middleware.py                                               100      0   100%
+03-development/src/taskq/api/middleware.py                                                99      0   100%
 03-development/src/taskq/api/problem.py                                                   18      0   100%
 03-development/src/taskq/api/routes/__init__.py                                            0      0   100%
 03-development/src/taskq/api/routes/health.py                                             53      0   100%
@@ -30,7 +30,7 @@ Name                                                                            
 03-development/src/taskq/errors/__init__.py                                                0      0   100%
 03-development/src/taskq/framework_paths.py                                                8      0   100%
 03-development/src/taskq/migrations/__init__.py                                            1      0   100%
-03-development/src/taskq/migrations/env.py                                                29      0   100%
+03-development/src/taskq/migrations/env.py                                                27      0   100%
 03-development/src/taskq/migrations/versions/__init__.py                                   6      0   100%
 03-development/src/taskq/migrations/versions/v1_initial_tasks_api_keys.py                 16      0   100%
 03-development/src/taskq/migrations/versions/v2_add_tags_task_tags_unique.py              18      0   100%
@@ -54,5 +54,7 @@ Name                                                                            
 03-development/src/taskq/service/runner.py                                               174      0   100%
 03-development/src/taskq/service/tasks.py                                                 36      0   100%
 --------------------------------------------------------------------------------------------------------------------
-TOTAL                                                                                   1252      0   100%
-283 passed in 17.50s
+TOTAL                                                                                   1249      0   100%
+=========================== short test summary info ============================
+FAILED 03-development/tests/test_fr08.py::test_fr08_ac3_timeout_kills_subprocess_no_orphans
+1 failed, 283 passed in 18.10s
