@@ -2,7 +2,7 @@
 
 **Checkpoint**: `P3-post-gate2-20260823`  
 **Phase**: P3 — Implementation  
-**Generated**: 2026-08-23T01:57:46Z
+**Generated**: 2026-08-23T02:24:10Z
 
 > ⚠️  **開始下一個工作階段前，請先執行 `/compact` 壓縮上下文**，再從「接下來的工作」繼續。
 
@@ -171,26 +171,26 @@ Gate 2 PASS + all 11 FR(s) Gate 1 PASS [FR-01,FR-02,FR-03,FR-04,FR-05,…+6]. Ph
   - ? / preview-next-phase-r3: **complete**
 
 **Recently Committed Files:**
-  - `.methodology/crg_baseline_p3.json`
-  - `.methodology/decision_logs/2026-08-22/GATE_3_69f54217.yaml`
-  - `.methodology/decision_logs/2026-08-23/GATE_3_72df2917.yaml`
-  - `.methodology/decision_logs/2026-08-23/GATE_3_7abe274c.yaml`
-  - `.methodology/decision_logs/2026-08-23/GATE_3_a8f647e8.yaml`
-  - `.methodology/degradations.jsonl`
-  - `.methodology/effort_metrics.db`
-  - `.methodology/gate2_result.json`
-  - `.methodology/gate_evidence/gate2/architecture.json`
-  - `.methodology/gate_evidence/gate2/execute_verification_target.txt`
-  - `.methodology/gate_evidence/gate2/integration_coverage.txt`
-  - `.methodology/gate_evidence/gate2/license_compliance.txt`
-  - `.methodology/gate_evidence/gate2/linting.txt`
-  - `.methodology/gate_evidence/gate2/mutation_testing.json`
-  - `.methodology/gate_evidence/gate2/secrets_scanning.txt`
-  - `.methodology/gate_evidence/gate2/security.txt`
-  - `.methodology/gate_evidence/gate2/test_assertion_quality.txt`
-  - `.methodology/gate_evidence/gate2/test_coverage.txt`
-  - `.methodology/gate_evidence/gate2/type_safety.txt`
-  - `.methodology/gate_evidence/harness_verification/integration_coverage_harness.txt`
+  - `03-development/conftest.py`
+  - `03-development/tests/integration/conftest.py`
+  - `03-development/tests/integration/test_integration_fr03.py`
+  - `03-development/tests/test_fr03.py`
+  - `03-development/tests/test_fr07.py`
+  - `01-requirements/SPEC_TRACKING.md`
+  - `01-requirements/TRACEABILITY_MATRIX.md`
+  - `TEST_INVENTORY.yaml`
+  - `03-development/src/taskq/migrations/versions/v3_split_result_json_to_task_results.py`
+  - `03-development/tests/integration/test_integration_migrations.py`
+  - `03-development/tests/integration/test_integration_runner.py`
+  - `harness`
+  - `.hypothesis/examples/8a7652ae9e4d57c9/dd0a36d3a97003cd`
+  - `.hypothesis/unicode_data/14.0.0/charmap.json.gz`
+  - `.methodology/SAB.json`
+  - `.methodology/gate_verify.jsonl`
+  - `.methodology/state.json`
+  - `.methodology/trace/attestation.json`
+  - `02-architecture/ADR.md`
+  - `03-development/.hypothesis/examples/18673a881c95c977/53b920c09abec817`
 
 ## 接下來的工作
 
