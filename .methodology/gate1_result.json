@@ -40,11 +40,11 @@
       "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
     }
   },
-  "enforcer_sha": "8bfaf12625d62e813f37e24e40cfb7cbbb3bfd0f",
+  "enforcer_sha": "725a220c35a6432d77e714aa520024f72c82061c",
   "enforcer_surface": {
-    "core/quality_gate": "449eb3c8eb04168e16922b6c7f67bf74a400749f",
-    "harness/harness_bridge.py": "c36e31d5615cb32c775141bff38a1a44384da8f9",
-    "harness/gate_configs": "92d5728b783841baed6e1beeb57d5e7fbe56c71e"
+    "core/quality_gate": "fc600ef09159eb15c1f24a0a18d4cb6e45e4dce7",
+    "harness/harness_bridge.py": "4858e5529079e9432fb38d85d68c6051d956312d",
+    "harness/gate_configs": "d91e4c3c9409081ea44b75ae3060f3293fa59cab"
   },
   "evidence_digest": {
     "secrets_scanning::.gitleaksignore": {

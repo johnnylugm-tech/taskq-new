@@ -132,8 +132,9 @@ Every functional requirement (SPEC §3) maps to at least one module. High-risk m
 | **FR-08** | Async executor | `taskq.service.runner` ★ | `asyncio.TaskGroup`, `TASKQ_MAX_CONCURRENT`, `wait_for`+`kill()`+`wait()`, graceful drain, `CancelledError` propagated |
 | **FR-09** | Health & observability | `taskq.api.routes.health`, `taskq.api.routes.metrics`, `taskq.service.metrics` | `/healthz` liveness; `/readyz` DB+alembic head; `/v1/metrics` counters+p95 (admin) |
 | **FR-10** | RFC 7807 error contract | `taskq.errors.problem`, `taskq.errors.handlers`, `taskq.api.middleware`, `taskq.api.schemas` | every non-2xx is `application/problem+json`; `correlation_id` in header+log; `detail` whitelist |
+| **FR-99** | Framework-owned path registry | `taskq.framework_paths` | PLACEHOLDER per SPEC §10 「角色不變,路徑變」; pins the four role-name → module-path bindings for FR-04 / FR-06 / FR-07 / FR-08; no new functional behaviour |
 
-**Cross-reference (every FR covered):** FR-01..FR-10 all present; no FR mapped to a missing module.
+**Cross-reference (every FR covered):** FR-01..FR-10 + FR-99 all present; no FR mapped to a missing module.
 
 ### 2.3 Module Specifications
 
@@ -546,6 +547,7 @@ sab:
     FR-08: ["taskq.service.runner"]
     FR-09: ["taskq.api.routes.health", "taskq.api.routes.metrics", "taskq.service.metrics"]
     FR-10: ["taskq.errors.problem", "taskq.errors.handlers", "taskq.api.middleware", "taskq.api.schemas"]
+    FR-99: ["taskq.framework_paths"]
 
   architecture_constraints:
     - "no_circular_dependencies"

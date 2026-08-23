@@ -1,5 +1,5 @@
 # Harness-executed: import-linter
-# returncode: 0
+# returncode: 1
 # agent_score: 100.0 | threshold: 100.0
 
 [1m=============[0m
@@ -10,11 +10,26 @@
 [1mContracts[0m
 [1m---------[0m
 [22m[0m
-[1mAnalyzed 41 files, 55 dependencies.[0m
+[1mAnalyzed 43 files, 61 dependencies.[0m
 [1m-----------------------------------[0m
 [22m[0m
 [22mfr01-layers [0m[32m[22mKEPT[0m[33m[22m[0m[22m[0m
-[22mfr01-config-errors-independence [0m[32m[22mKEPT[0m[33m[22m[0m[22m[0m
+[22mfr01-config-errors-independence [0m[31m[22mBROKEN[0m[33m[22m[0m[22m[0m
 [22mfr01-root-independence [0m[32m[22mKEPT[0m[33m[22m[0m[22m[0m
 [22m[0m
-[22mContracts: 3 kept, 0 broken.[0m
+[22mContracts: 2 kept, 1 broken.[0m
+[22m[0m
+[22m[0m
+[31m[1m----------------[0m
+[31m[1mBroken contracts[0m
+[31m[1m----------------[0m
+[22m[0m
+[31m[1mfr01-config-errors-independence[0m
+[31m[1m-------------------------------[0m
+[22m[0m
+[22mtaskq.api is not allowed to import taskq.errors:[0m
+[22m[0m
+[31m[22m- taskq.api.routes.runs -> taskq.service.runner (l.46)[0m
+[31m[22m  taskq.service.runner -> taskq.errors.redact (l.101)[0m
+[22m[0m
+[22m[0m
