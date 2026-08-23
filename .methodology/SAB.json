@@ -36,7 +36,9 @@
         },
         {
           "name": "taskq.api.routes.metrics"
-        }
+        },
+        "taskq.api",
+        "taskq.api.routes"
       ],
       "allowed_dependencies": [
         "service",
@@ -64,7 +66,8 @@
         },
         {
           "name": "taskq.service.executor"
-        }
+        },
+        "taskq.service"
       ],
       "allowed_dependencies": [
         "repository",
@@ -92,7 +95,8 @@
         },
         {
           "name": "taskq.repository.metrics"
-        }
+        },
+        "taskq.repository"
       ],
       "allowed_dependencies": [
         "models",
@@ -114,13 +118,16 @@
         },
         {
           "name": "taskq.models.task_result"
-        }
+        },
+        "taskq.models"
       ],
       "allowed_dependencies": []
     },
     {
       "name": "errors",
-      "modules": [],
+      "modules": [
+        "taskq.errors"
+      ],
       "allowed_dependencies": []
     },
     {
@@ -128,7 +135,8 @@
       "modules": [
         {
           "name": "taskq.security.redact"
-        }
+        },
+        "taskq.security"
       ],
       "allowed_dependencies": []
     },
@@ -137,7 +145,8 @@
       "modules": [
         {
           "name": "taskq.config.settings"
-        }
+        },
+        "taskq.config"
       ],
       "allowed_dependencies": []
     },
@@ -147,7 +156,14 @@
         {
           "name": "taskq.cli.key_create"
         },
-        "taskq.framework_paths"
+        "taskq.framework_paths",
+        "taskq",
+        "taskq.migrations",
+        "taskq.migrations.env",
+        "taskq.migrations.versions",
+        "taskq.migrations.versions.v1_initial_tasks_api_keys",
+        "taskq.migrations.versions.v2_add_tags_task_tags_unique",
+        "taskq.migrations.versions.v3_split_result_json_to_task_results"
       ],
       "allowed_dependencies": [
         "service",
