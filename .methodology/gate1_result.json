@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 8,
-  "fr_id": "FR-01",
+  "fr_id": "FR-02",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -16,26 +16,26 @@
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\": \"1.1.409\", \"time\": \"1787520096008\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.189}}",
+      "tool_evidence": "{\"version\": \"1.1.409\", \"time\": \"1787520232727\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.209}}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 65,
+      "tests_passed": 45,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "65 passed in 1.66s. Coverage: routes/tasks.py 100%, schemas.py 100%, repository/tasks.py 100%, service/tasks.py 100%. Totals: 219/219 statements covered (100%).",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-01.txt",
+      "tool_evidence": "============================== 45 passed in 5.16s ============================== | coverage: 100% on 03-development/src/taskq/api/routes/runs.py, 03-development/src/taskq/service/runner.py, 03-development/src/taskq/repository/results.py | required tests present: test_fr02_ac1_run_returns_202_with_run_id, test_fr02_ac2_subprocess_exec_no_shell_true, test_fr02_ac3_state_machine_done, test_fr02_ac3_state_machine_failed, test_fr02_ac3_state_machine_timeout, test_fr02_ac4_results_persisted_to_task_results, test_fr02_ac5_get_runs_newest_first",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-02.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-01",
+      "coverage_scope_fr": "FR-02",
       "score_source": "framework"
     },
     "architecture_constraints": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "Analyzed 44 files, 62 dependencies. fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT. Contracts: 3 kept, 0 broken.",
+      "tool_evidence": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT)",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
     }
@@ -85,23 +85,23 @@
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "84908c7a4fa69604a02b82d2117206a64a64486af938d0f03f22bad6aef51edb",
+      "sha256": "3a8e80c956e7ca91ca41248e942b9233201c8f898cf0d765f53a4871be0be29c",
       "bytes": 186,
-      "head": "{\"version\": \"1.1.409\", \"time\": \"1787520096008\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.189}}"
+      "head": "{\"version\": \"1.1.409\", \"time\": \"1787520232727\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.209}}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "33f4b2a3c77c8218d6dc53705fd5b2d58a966d1b27969e9117a031c277c76b46",
-      "bytes": 160,
-      "head": "65 passed in 1.66s. Coverage: routes/tasks.py 100%, schemas.py 100%, repository/tasks.py 100%, service/tasks.py 100%. Totals: 219/219 statements covered (100%)."
+      "sha256": "0cf006123ed75ebee840dbe413d00ad7e1ef126bbc99af7d7dc5286b2c0468c6",
+      "bytes": 542,
+      "head": "============================== 45 passed in 5.16s ============================== | coverage: 100% on 03-development/src/taskq/api/routes/runs.py, 03-development/src/taskq/service/runner.py, 03-development/src/taskq/repository/results.py | required tests present: test_fr02_ac1_run_returns_202_with_run_id, test_fr02_ac2_subprocess_exec_no_shell_true, test_fr02_ac3_state_machine_done, test_fr02_ac3_state_machine_failed, test_fr02_ac3_state_machine_timeout, test_fr02_ac4_results_persisted_to_task_results, test_fr02_ac5_get_runs_newest_first"
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "cdc81d804ce8366ebeda875c63efddc0026ab4a41317f6133956347978350bd3",
-      "bytes": 149,
-      "head": "Analyzed 44 files, 62 dependencies. fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT. Contracts: 3 kept, 0 broken."
+      "sha256": "fbfcd312514d2afeb7558e03d13bc9387f8eb2043feb3931cc02a49a3cd098b5",
+      "bytes": 150,
+      "head": "Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT)"
     }
   },
   "composite_score": 100.0,
