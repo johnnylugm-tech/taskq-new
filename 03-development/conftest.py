@@ -67,7 +67,7 @@ class _InspectShimModule:  # noqa: D401 — simple callable proxy
         return getattr(self._STDLIB_INSPECT, name)
 
 
-sys.modules["inspect"] = _InspectShimModule()
+sys.modules["inspect"] = _InspectShimModule()  # type: ignore[assignment]
 
 
 # ---- alembic MigrationContext shim ----
@@ -94,7 +94,7 @@ sys.modules["inspect"] = _InspectShimModule()
 from alembic.runtime import migration as _alembic_runtime_migration  # noqa: E402 -- intentionally late (shim install order)
 
 _Real_MC = _alembic_runtime_migration.MigrationContext
-_Real_MC_configure = _Real_MC.configure.__func__
+_Real_MC_configure = _Real_MC.configure.__func__  # type: ignore[attr-defined]
 
 
 def _patched_mc_configure(cls, **kwargs):
@@ -127,7 +127,7 @@ def _patched_mc_configure(cls, **kwargs):
     return _Real_MC_configure(cls, **kwargs)
 
 
-_Real_MC.configure = classmethod(_patched_mc_configure)
+_Real_MC.configure = classmethod(_patched_mc_configure)  # type: ignore[method-assign,assignment]
 
 
 # ---- httpx ASGITransport compatibility shim ----
@@ -160,7 +160,7 @@ def _install_asgi_handle_request() -> None:
 
         return asyncio.run(_drive())
 
-    httpx.ASGITransport.handle_request = _handle_request
+    httpx.ASGITransport.handle_request = _handle_request  # type: ignore[attr-defined]
 
 
 _install_asgi_handle_request()

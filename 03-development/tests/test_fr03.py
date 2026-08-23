@@ -564,7 +564,7 @@ def test_fr03_cov_repo_create_rollback_on_commit_error(monkeypatch):
         """Stand-in Session whose commit() always raises."""
 
         def __init__(self) -> None:
-            self.added = []
+            self.added = []  # type: ignore[var-annotated]
             self.rolled_back = False
             self.closed = False
 

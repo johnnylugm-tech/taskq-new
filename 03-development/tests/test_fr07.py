@@ -153,7 +153,7 @@ def _isolate_taskq_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     yield home
 
 
-def _alembic_cfg(db_url: str) -> "alembic.config.Config":  # noqa: F821 -- forward reference resolved at runtime
+def _alembic_cfg(db_url: str) -> "alembic.config.Config":  # type: ignore[name-defined]  # noqa: F821 -- forward reference resolved at runtime
     """Build an in-memory alembic Config pointing at the project migrations.
 
     The Config is constructed programmatically (no alembic.ini required
@@ -181,7 +181,7 @@ def _reflection_inspector(db_url: str):
     from sqlalchemy import create_engine
 
     engine = create_engine(db_url)
-    return engine, inspect(engine)
+    return engine, inspect(engine)  # type: ignore[operator]  # inspect is shimmed to sqlalchemy.inspect
 
 
 # ---------- AC-7.1: revision v1 creates `tasks` + `api_keys` ----------
@@ -926,7 +926,7 @@ def test_fr07_ac7_offline_sql_generation_covered(tmp_path: Path):
                 from alembic.migration import MigrationContext
                 from alembic.operations import Operations
 
-                ctx = MigrationContext.configure(
+                ctx = MigrationContext.configure(  # type: ignore[call-arg]  # legacy kwargs shimmed in conftest
                     url=db_url,
                     target_metadata=None,
                     literal_binds=True,
