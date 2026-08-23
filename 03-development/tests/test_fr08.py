@@ -461,10 +461,18 @@ def test_fr08_ac3_timeout_kills_subprocess_no_orphans():
 
     # Sub-assertion AC8.3-orphan-ps-scan: orphan_check_mode == "ps_scan".
     # After the child exited, scan the process table for any leftover
-    # ``sleep 30`` whose parent is not us — there must be NONE. We
-    # use ``ps -eo pid,args`` (POSIX-portable, no -ef BSD-isms).
+    # ``sleep 30`` that was reparented to init (PPID == 1) — there must
+    # be NONE. Use ``ps -eo pid,ppid,args`` (POSIX-portable, no -ef
+    # BSD-isms). Filtering by PPID == 1 isolates FR-08's own hard-kill
+    # boundary: a ``sleep 30`` that survived the executor's
+    # ``proc.kill()`` + ``await proc.wait()`` path would be reparented
+    # to launchd/init once its parent (the FR-08 child Python) exited.
+    # ``sleep 30`` processes that still have a live parent (e.g. polling
+    # zsh wrappers from unrelated tooling whose command line happens to
+    # contain ``sleep 30``) are NOT orphans from FR-08 and are filtered
+    # out by the PPID check.
     ps = subprocess.run(
-        ["ps", "-eo", "pid,args"],
+        ["ps", "-eo", "pid,ppid,args"],
         check=False,
         capture_output=True,
         text=True,
@@ -477,7 +485,21 @@ def test_fr08_ac3_timeout_kills_subprocess_no_orphans():
         # ``sleep 30`` processes (the parent shell's own ps line
         # never matches because its arg starts with ``ps``).
         stripped = line.strip()
-        if "sleep 30" in stripped and "grep" not in stripped:
+        if "sleep 30" not in stripped or "grep" in stripped:
+            continue
+        # Parse ``pid ppid args`` (positional, space-separated).
+        parts = stripped.split(None, 2)
+        if len(parts) < 3:
+            continue
+        try:
+            ppid = int(parts[1])
+        except ValueError:
+            # Header line (``PID PPID ARGS``) — skip.
+            continue
+        # Only flag truly-orphaned ``sleep 30`` (PPID == 1, i.e.
+        # reparented to launchd/init). Live-parent ``sleep 30`` lines
+        # are unrelated tooling and are intentionally not flagged.
+        if ppid == 1:
             orphan_lines.append(stripped)
     assert not orphan_lines, (
         f"FR-08 timeout must hard-kill the child subprocess (NFR-03); "
