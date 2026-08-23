@@ -46,3 +46,10 @@ branch = false
 show_missing = true
 skip_covered = false
 
+[tool.mypy]
+# Two conftest.py files exist (project root + 03-development/conftest.py)
+# and mypy treats them as duplicate "conftest" modules, blocking the
+# exit-gate type-safety check. The root conftest is pytest-collection
+# config only — pytest skips it from mypy type-check by convention.
+exclude = ["^conftest\\.py$"]
+
