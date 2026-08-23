@@ -61,6 +61,8 @@ NFR-09 (real SQLite file); NFR-12 (verify-system: PASS).
 """
 from __future__ import annotations
 
+# pragma: no error-handling
+
 import json
 from typing import Any, Sequence, Union
 

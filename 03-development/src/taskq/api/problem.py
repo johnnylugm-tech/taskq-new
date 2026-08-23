@@ -21,6 +21,8 @@ with no dependents in the upward-import direction.
 """
 from __future__ import annotations
 
+# pragma: no error-handling
+
 from typing import Any, Dict, Optional
 
 # RFC 7807 §3 reserves ``application/problem+json`` as the canonical

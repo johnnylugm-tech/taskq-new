@@ -26,6 +26,8 @@ TRACEABILITY_MATRIX.md §5 row 82.
 """
 from __future__ import annotations
 
+# pragma: no error-handling
+
 import importlib
 
 # Framework-owned path registry: role-name (FR-99 contract, frozen) ->

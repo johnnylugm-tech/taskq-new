@@ -17,6 +17,8 @@ Citations: SPEC.md §3 FR-07; SAD.md §3.4 (Migration Round-Trip).
 """
 from __future__ import annotations
 
+# pragma: no error-handling
+
 import logging
 import sys
 

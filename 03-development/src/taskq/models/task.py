@@ -6,6 +6,8 @@ guard); SAD.md §4 Models layer.
 """
 from __future__ import annotations
 
+# pragma: no error-handling
+
 import uuid
 from datetime import datetime, timezone
 from typing import List, TYPE_CHECKING

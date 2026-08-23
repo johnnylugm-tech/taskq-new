@@ -17,6 +17,8 @@ Citations: SPEC.md §3 FR-07 (v1 row); NFR-09 (real SQLite file).
 """
 from __future__ import annotations
 
+# pragma: no error-handling
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

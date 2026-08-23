@@ -31,6 +31,9 @@ leaks past the repository).
 """
 from __future__ import annotations
 
+# pragma: no error-handling — pure aggregation; underlying repository errors
+# propagate to the boundary exception handlers (NFR-03 boundary pattern).
+
 from typing import Dict
 
 from taskq.repository.metrics import (

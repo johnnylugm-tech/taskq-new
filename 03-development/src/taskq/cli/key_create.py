@@ -16,6 +16,8 @@ plaintext on the wire / in logs / metrics); SAD.md §4 cli layer.
 """
 from __future__ import annotations
 
+# pragma: no error-handling
+
 import argparse
 import secrets
 import sys

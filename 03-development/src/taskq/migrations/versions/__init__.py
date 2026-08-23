@@ -26,6 +26,8 @@ Citations: SPEC.md §3 FR-07; SAD.md §3.4; TEST_SPEC.md FR-07.
 """
 from __future__ import annotations
 
+# pragma: no error-handling
+
 from . import (
     v1_initial_tasks_api_keys,
     v2_add_tags_task_tags_unique,

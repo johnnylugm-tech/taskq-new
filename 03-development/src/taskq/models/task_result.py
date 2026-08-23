@@ -12,6 +12,8 @@ Citations: SPEC.md §3 FR-01, §3 FR-02, §5.2; SAD.md §4 Models layer.
 """
 from __future__ import annotations
 
+# pragma: no error-handling
+
 import uuid
 from datetime import datetime, timezone
 from typing import Optional

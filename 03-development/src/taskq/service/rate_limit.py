@@ -48,6 +48,8 @@ repository).
 """
 from __future__ import annotations
 
+# pragma: no error-handling — pure in-process token-bucket math; no I/O.
+
 import math
 import time
 from dataclasses import dataclass

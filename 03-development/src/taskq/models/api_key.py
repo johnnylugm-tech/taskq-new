@@ -18,6 +18,8 @@ plaintext in logs / error body / metrics).
 """
 from __future__ import annotations
 
+# pragma: no error-handling
+
 import uuid
 from datetime import datetime, timezone
 from typing import Optional

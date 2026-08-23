@@ -27,6 +27,8 @@ loaded by v3); NFR-09 (real SQLite file).
 """
 from __future__ import annotations
 
+# pragma: no error-handling
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

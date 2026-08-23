@@ -1,0 +1,1 @@
+{"total": 347, "asserted": 345, "zero_assert": ["03-development/tests/test_fr08.py::test_fr08_hard_kill_process_already_dead", "03-development/tests/test_fr08.py::test_fr08_hard_kill_process_wait_raises"], "neutralised": []}

@@ -15,12 +15,16 @@ layer, §4 NFR-03 enforcement site.
 """
 from __future__ import annotations
 
+import asyncio
+import logging
 from contextlib import contextmanager
 from typing import Iterator
 
 from sqlalchemy.orm import Session
 
 from taskq.repository.tasks import get_session_factory
+
+logger = logging.getLogger("taskq.repository.units_of_work")
 
 
 @contextmanager
@@ -41,26 +45,33 @@ def unit_of_work() -> Iterator[Session]:
     If the body raises, the transaction is rolled back and the
     exception is re-raised unchanged so callers see the original
     failure.
+
+    CancelledError (asyncio cancellation) is caught explicitly alongside
+    ``Exception`` so the transaction is rolled back on cancellation
+    while the cancellation itself still propagates to the caller
+    (NFR-03 — CancelledError must propagate, never be swallowed).
     """
     factory = get_session_factory()
     session: Session = factory()
     try:
         yield session
         session.commit()
-    except BaseException:
+    except (Exception, asyncio.CancelledError):
         try:
             session.rollback()
         except Exception:
             # Rollback itself failed — preserve the original exception
             # so the caller sees the real failure, not the rollback
             # noise.
-            pass  # nosec B110 -- preserve original exception
+            logger.debug("rollback failed; preserving original exception",
+                         exc_info=True)
         raise
     finally:
         try:
             session.close()
         except Exception:
-            pass  # nosec B110 -- best-effort cleanup
+            # Best-effort cleanup; session will be GC'd regardless.
+            logger.debug("session.close failed; relying on GC", exc_info=True)
 
 
 __all__ = ["unit_of_work"]

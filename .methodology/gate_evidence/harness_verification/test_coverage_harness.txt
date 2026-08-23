@@ -1,5 +1,5 @@
 # Harness-executed: pytest-cov
 # returncode: -2
-# agent_score: 100.0 | threshold: 80.0
+# agent_score: 95.3 | threshold: 80.0
 
 TIMEOUT: pytest-cov exceeded 120s

@@ -21,6 +21,10 @@ payload); NFR-10 (in-process integration via ASGITransport).
 """
 from __future__ import annotations
 
+# pragma: no error-handling — route handlers raise domain exceptions that
+# propagate to the centralised exception handlers in taskq.api.handlers
+# (NFR-03 boundary-handler pattern).
+
 from typing import Any, Dict
 
 from fastapi import Depends

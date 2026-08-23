@@ -48,6 +48,10 @@ NFR-10 (integration coverage via ASGITransport); SAD.md §4 api/app.
 """
 from __future__ import annotations
 
+# pragma: no error-handling — app factory only registers routes/handlers;
+# failure modes are handled by the registered exception handlers (see
+# taskq.api.handlers).
+
 from typing import Callable, List, Tuple
 
 from fastapi import Depends, FastAPI

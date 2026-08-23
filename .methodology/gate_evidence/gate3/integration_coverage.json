@@ -1,0 +1,53 @@
+........................................................................ [ 66%]
+.....................................                                    [100%]
+================================ tests coverage ================================
+______________ coverage: platform darwin, python 3.11.15-final-0 _______________
+
+Name                                                                    Stmts   Miss  Cover
+-------------------------------------------------------------------------------------------
+src/taskq/__init__.py                                                       0      0   100%
+src/taskq/api/__init__.py                                                   0      0   100%
+src/taskq/api/app.py                                                       25      0   100%
+src/taskq/api/deps.py                                                      15      0   100%
+src/taskq/api/handlers.py                                                  35      0   100%
+src/taskq/api/middleware.py                                                99      0   100%
+src/taskq/api/problem.py                                                   18      0   100%
+src/taskq/api/routes/__init__.py                                            0      0   100%
+src/taskq/api/routes/health.py                                             53      0   100%
+src/taskq/api/routes/metrics.py                                             8      0   100%
+src/taskq/api/routes/runs.py                                               41     25    39%
+src/taskq/api/routes/tasks.py                                              36      0   100%
+src/taskq/api/schemas.py                                                   25      0   100%
+src/taskq/cli/key_create.py                                                26      0   100%
+src/taskq/config/__init__.py                                                0      0   100%
+src/taskq/config/settings.py                                               24      5    79%
+src/taskq/errors/__init__.py                                                0      0   100%
+src/taskq/errors/redact.py                                                 12      1    92%
+src/taskq/framework_paths.py                                                8      8     0%
+src/taskq/migrations/__init__.py                                            1      0   100%
+src/taskq/migrations/env.py                                                27     27     0%
+src/taskq/migrations/versions/__init__.py                                   6      0   100%
+src/taskq/migrations/versions/v1_initial_tasks_api_keys.py                 16      6    62%
+src/taskq/migrations/versions/v2_add_tags_task_tags_unique.py              18      8    56%
+src/taskq/migrations/versions/v3_split_result_json_to_task_results.py      34     16    53%
+src/taskq/models/__init__.py                                                0      0   100%
+src/taskq/models/api_key.py                                                19      0   100%
+src/taskq/models/base.py                                                    4      0   100%
+src/taskq/models/task.py                                                   20      0   100%
+src/taskq/models/task_result.py                                            24      0   100%
+src/taskq/repository/__init__.py                                            0      0   100%
+src/taskq/repository/keys.py                                               46      0   100%
+src/taskq/repository/metrics.py                                            17      0   100%
+src/taskq/repository/rate_buckets.py                                       95      0   100%
+src/taskq/repository/results.py                                            55     35    36%
+src/taskq/repository/tasks.py                                             122      0   100%
+src/taskq/repository/units_of_work.py                                      26     26     0%
+src/taskq/service/__init__.py                                               0      0   100%
+src/taskq/service/auth.py                                                  28      0   100%
+src/taskq/service/metrics.py                                               21      0   100%
+src/taskq/service/rate_limit.py                                            50      0   100%
+src/taskq/service/runner.py                                               177     47    73%
+src/taskq/service/tasks.py                                                 36      0   100%
+-------------------------------------------------------------------------------------------
+TOTAL                                                                    1267    204    84%
+109 passed in 5.08s

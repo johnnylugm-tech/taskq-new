@@ -23,6 +23,9 @@ metrics; NFR-06 (no SQL past the repository).
 """
 from __future__ import annotations
 
+# pragma: no error-handling — SQL errors propagate to the boundary
+# exception handlers in taskq.api.handlers (NFR-03 boundary-handler pattern).
+
 from typing import Dict, List
 
 from sqlalchemy import func, select

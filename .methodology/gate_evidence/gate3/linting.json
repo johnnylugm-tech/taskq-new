@@ -1,0 +1,8 @@
+ruff check 03-development/src/ --output-format json --exit-zero (Round 2):
+
+[]
+ruff check 03-development/src/ (text, Round 2):
+
+All checks passed!
+
+tool_score = max(0, 100 - 0 violations * 2) = 100

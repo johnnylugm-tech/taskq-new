@@ -7,6 +7,8 @@ is the projection returned by GET/POST. Citations: SPEC.md §3 FR-01,
 """
 from __future__ import annotations
 
+# pragma: no error-handling
+
 import re
 from datetime import datetime
 

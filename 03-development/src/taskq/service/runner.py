@@ -39,6 +39,7 @@ from __future__ import annotations
 
 import asyncio
 import collections
+import logging
 import os
 import shlex
 import time
@@ -140,7 +141,11 @@ async def _hard_kill_process(proc: asyncio.subprocess.Process) -> None:
     try:
         await proc.wait()
     except Exception:
-        pass  # nosec B110 -- drain after kill is best-effort
+        logger.debug("proc.wait after kill failed; relying on asyncio cleanup",
+                     exc_info=True)
+
+
+logger = logging.getLogger("taskq.service.runner")
 
 
 class TaskRunner:

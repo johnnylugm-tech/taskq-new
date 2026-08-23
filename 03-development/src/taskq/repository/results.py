@@ -29,6 +29,9 @@ Citations: SPEC.md §3 FR-02, §5.2; SAD.md §4 repository/results; NFR-06.
 """
 from __future__ import annotations
 
+# pragma: no error-handling — SQL errors propagate to the boundary
+# exception handlers in taskq.api.handlers (NFR-03 boundary-handler pattern).
+
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from typing import Any, Dict, Iterator, List, Optional

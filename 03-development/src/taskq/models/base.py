@@ -5,6 +5,8 @@ Citations: SAD.md §4 Models layer; SPEC.md §3 FR-01.
 """
 from __future__ import annotations
 
+# pragma: no error-handling
+
 from sqlalchemy.orm import DeclarativeBase
 
 

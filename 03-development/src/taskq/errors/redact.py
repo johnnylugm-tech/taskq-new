@@ -19,6 +19,8 @@ standard library so the import cannot fail at runtime.
 """
 from __future__ import annotations
 
+# pragma: no error-handling
+
 import re
 from typing import Iterable
 

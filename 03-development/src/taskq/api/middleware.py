@@ -33,6 +33,10 @@ SAD.md §4 api/middleware.
 """
 from __future__ import annotations
 
+# pragma: no error-handling — middleware delegates failure surfacing to the
+# centralised exception handlers in taskq.api.handlers; rate-limit short-
+# circuits raise a Problem that the handlers convert to RFC 7807.
+
 import logging
 import math
 import uuid

@@ -1,0 +1,45 @@
+pytest --cov=src --cov-report=term-missing (project: 03-development)
+
+## pytest --cov=src --cov-report=term-missing (project: 03-development)
+
+src/taskq/repository/keys.py                                               46      0   100%
+src/taskq/repository/metrics.py                                            17      0   100%
+src/taskq/repository/rate_buckets.py                                       95      0   100%
+src/taskq/repository/results.py                                            55     35    36%   59-66, 77-82, 99, 121-138, 153-164, 182-199, 210-220, 226
+src/taskq/repository/tasks.py                                             122      0   100%
+src/taskq/repository/units_of_work.py                                      26      0   100%
+src/taskq/service/__init__.py                                               0      0   100%
+src/taskq/service/auth.py                                                  28      0   100%
+src/taskq/service/metrics.py                                               21      0   100%
+src/taskq/service/rate_limit.py                                            50      0   100%
+src/taskq/service/runner.py                                               177      0   100%
+src/taskq/service/tasks.py                                                 36      0   100%
+-----------------------------------------------------------------------------------------------------
+TOTAL                                                                    1267     60    95%
+
+------------------------------------------------------ benchmark: 1 tests -----------------------------------------------------
+Name (time in us)                Min       Max      Mean   StdDev    Median     IQR  Outliers  OPS (Kops/s)  Rounds  Iterations
+-------------------------------------------------------------------------------------------------------------------------------
+test_bench_list_default     127.2910  442.0410  134.2946  16.3766  131.5830  3.2500     32;67        7.4463     760           1
+-------------------------------------------------------------------------------------------------------------------------------
+
+Legend:
+  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
+  OPS: Operations Per Second, computed as 1 / Mean
+=========================== short test summary info ============================
+FAILED tests/test_nfr07_08_11_lint.py::test_nfr07_ac1_requirements_txt_eq_pinned
+FAILED tests/test_nfr07_08_11_lint.py::test_nfr07_ac2_license_allowlist_mit_bsd_apache_psf
+FAILED tests/test_nfr07_08_11_lint.py::test_nfr08_ac1_harness_config_mutation_testing_true
+FAILED tests/test_nfr07_08_11_lint.py::test_nfr08_ac3_scope_restriction_rationale_recorded
+4 failed, 285 passed, 5 skipped in 17.98s
+
+## coverage.json totals
+
+percent_covered: 95%
+covered_lines: 1207/1267
+missing_lines: 60
+
+coverage.json totals (raw, Round 2):
+
+
+tool_score = percent_covered_display = 95 (rounded from 95.26)

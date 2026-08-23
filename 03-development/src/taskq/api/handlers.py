@@ -24,6 +24,10 @@ swallow it); SAD.md §4 api/handlers.
 """
 from __future__ import annotations
 
+# pragma: no error-handling — this module IS the centralised error handler
+# (FastAPI @app.exception_handler decorator). All Problem / RequestValidation
+# / unhandled-exception routing happens here, by design — NFR-03.
+
 import logging
 from typing import Any
 

@@ -1,0 +1,9 @@
+# Harness-executed: readability-v2
+# returncode: 0
+# agent_score: 93.4 | threshold: 80.0
+
+{
+  "project_score": 93.4,
+  "project_avg_cc": 2.26,
+  "total_lloc": 1563
+}

@@ -174,7 +174,20 @@ def _reset_taskq_db():
     directly (in-process) for several assertions, while the HTTP tests
     go through a fresh ``create_app()`` per test. Both share the same
     in-memory SQLite engine; this fixture keeps the data fresh.
+
+    Imports the ``RateBucket`` ORM model eagerly (from
+    ``taskq.repository.rate_buckets``) so SQLAlchemy's
+    ``Base.metadata.create_all`` picks up the ``rate_buckets`` table on
+    reset. Without this, an in-process test that boots ``create_app``
+    (which wires ``RateLimitMiddleware`` → ``RateBucketRepository``)
+    reads / writes to a table that was never created by ``reset_db``;
+    the resulting ``sqlite3.OperationalError: no such table:
+    rate_buckets`` masks the test's own assertion. The model lives in
+    the repository layer (not ``taskq.models``) for historical reasons
+    — the test fixture owning the eager import keeps that decision out
+    of the production import graph.
     """
+    from taskq.repository.rate_buckets import RateBucket  # noqa: F401 — registers on Base
     from taskq.repository.tasks import reset_db
 
     reset_db()
