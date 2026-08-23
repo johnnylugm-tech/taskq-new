@@ -4,7 +4,7 @@
 
 {
   "errors": [],
-  "generated_at": "2026-08-23T15:03:32Z",
+  "generated_at": "2026-08-23T15:49:53Z",
   "metrics": {
     "/Users/johnny/projects/taskq-new/03-development/src/taskq/__init__.py": {
       "CONFIDENCE.HIGH": 0,
@@ -224,19 +224,6 @@
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
       "loc": 8,
-      "nosec": 0,
-      "skipped_tests": 0
-    },
-    "/Users/johnny/projects/taskq-new/03-development/src/taskq/errors/redact.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 39,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -487,6 +474,32 @@
       "nosec": 0,
       "skipped_tests": 0
     },
+    "/Users/johnny/projects/taskq-new/03-development/src/taskq/security/__init__.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 7,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "/Users/johnny/projects/taskq-new/03-development/src/taskq/security/redact.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 43,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
     "/Users/johnny/projects/taskq-new/03-development/src/taskq/service/__init__.py": {
       "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
@@ -587,7 +600,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 3461,
+      "loc": 3472,
       "nosec": 0,
       "skipped_tests": 0
     }
