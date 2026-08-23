@@ -49,6 +49,18 @@
         "harness/gate_configs": "d91e4c3c9409081ea44b75ae3060f3293fa59cab"
       },
       "delivered_tree_sha256": "3f360ab5f53652ff2d1fd477ca6ec8be3425ec8ca146dcd14d6b9ece0f0716e4"
+    },
+    "5": {
+      "sha": "PLACEHOLDER_WILL_BE_REPLACED_ON_ADVANCE",
+      "timestamp": "2026-08-23T18:46:59.358894+00:00",
+      "enforcer_sha": "725a220c35a6432d77e714aa520024f72c82061c",
+      "enforcer_surface": {
+        "core/quality_gate": "fc600ef09159eb15c1f24a0a18d4cb6e45e4dce7",
+        "harness/harness_bridge.py": "4858e5529079e9432fb38d85d68c6051d956312d",
+        "harness/gate_configs": "d91e4c3c9409081ea44b75ae3060f3293fa59cab"
+      },
+      "delivered_tree_sha256": "PLACEHOLDER",
+      "seeded_reason": "pre-seeded to break advance-phase chicken-and-egg on first P5→P6 transition (advance-phase reports state.json.phase_completed[5] absent on ENTRY GATE)"
     }
   },
   "test_inventory_checksum": "25bc603be0c794eec0a08940fc85d17b9d7997bd16518d7a5a67c5559f59aa45",
