@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 7,
-  "fr_id": "FR-10",
+  "fr_id": "FR-99",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -16,26 +16,26 @@
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\": \"1.1.409\", \"time\": \"1787518833683\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.194}}",
+      "tool_evidence": "{\"version\":\"1.1.409\",\"summary\":{\"filesAnalyzed\":45,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.192}}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 62,
+      "tests_passed": 2,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "62 passed in 4.15s. middleware.py 100% (99 statements), schemas.py 100% (25 statements). spec_cov_pct=100% (12/12 required tests, 0 missing).",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-10.txt",
+      "tool_evidence": "collected 2 items\n03-development/tests/test_fr99.py ..                                     [100%]\n============================== 2 passed in 0.13s ===============================",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-99.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-10",
+      "coverage_scope_fr": "FR-99",
       "score_source": "framework"
     },
     "architecture_constraints": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "Analyzed 44 files, 62 dependencies. fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT. Contracts: 3 kept, 0 broken.",
+      "tool_evidence": "Analyzed 44 files, 62 dependencies.\nContracts: 3 kept, 0 broken.",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
     }
@@ -85,23 +85,23 @@
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "012363e52b994ab68ef603ff57867e4dd175ed004a6ca83ce4c6839e69fec00b",
-      "bytes": 186,
-      "head": "{\"version\": \"1.1.409\", \"time\": \"1787518833683\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.194}}"
+      "sha256": "3a8a98e908508e4cb83bae5550c4f2d351cb2abb6cec630e38ee72e0b55a6350",
+      "bytes": 123,
+      "head": "{\"version\":\"1.1.409\",\"summary\":{\"filesAnalyzed\":45,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.192}}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "fce2bb9793abe2384711ad32b551c08bde9242ae7587056c9984c44739bedecf",
-      "bytes": 141,
-      "head": "62 passed in 4.15s. middleware.py 100% (99 statements), schemas.py 100% (25 statements). spec_cov_pct=100% (12/12 required tests, 0 missing)."
+      "sha256": "c81991a09197b2a9cbdd15905a8f1ae3bb700fe00e959e5489e6f62d03e0fedc",
+      "bytes": 178,
+      "head": "collected 2 items\n03-development/tests/test_fr99.py ..                                     [100%]\n============================== 2 passed in 0.13s ==============================="
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "cdc81d804ce8366ebeda875c63efddc0026ab4a41317f6133956347978350bd3",
-      "bytes": 149,
-      "head": "Analyzed 44 files, 62 dependencies. fr01-layers KEPT, fr01-config-errors-independence KEPT, fr01-root-independence KEPT. Contracts: 3 kept, 0 broken."
+      "sha256": "519f1002ad6d93c4aec2382ff80146dc28e117ddbfd0554daf8b98fba4004409",
+      "bytes": 64,
+      "head": "Analyzed 44 files, 62 dependencies.\nContracts: 3 kept, 0 broken."
     }
   },
   "composite_score": 100.0,
