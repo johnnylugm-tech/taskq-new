@@ -1,4 +1,4 @@
-# RELEASE_CHECKLIST
+# RELEASE_CHECKLIST — Phase 8
 
 ## Pre-Release Checks
 - [ ] All P1-P7 phases completed and artifacts generated.
