@@ -37,7 +37,7 @@ Name                                                                            
 03-development/src/taskq/models/__init__.py                                                5      0   100%
 03-development/src/taskq/models/api_key.py                                                19      0   100%
 03-development/src/taskq/models/base.py                                                    4      0   100%
-03-development/src/taskq/models/task.py                                                   22      1    95%   21
+03-development/src/taskq/models/task.py                                                   21      0   100%
 03-development/src/taskq/models/task_result.py                                            24      0   100%
 03-development/src/taskq/repository/__init__.py                                            0      0   100%
 03-development/src/taskq/repository/keys.py                                               46      0   100%
@@ -54,5 +54,5 @@ Name                                                                            
 03-development/src/taskq/service/runner.py                                                87     27    69%   80, 97, 139-140, 143-144, 161, 179, 184-217, 234-241, 253-254
 03-development/src/taskq/service/tasks.py                                                 36      0   100%
 --------------------------------------------------------------------------------------------------------------------
-TOTAL                                                                                   1280    204    84%
-109 passed in 5.07s
+TOTAL                                                                                   1279    203    84%
+109 passed in 5.08s

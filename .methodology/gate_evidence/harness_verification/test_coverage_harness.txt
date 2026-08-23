@@ -46,7 +46,7 @@ Name                                                                            
 03-development/src/taskq/models/__init__.py                                                5      0   100%
 03-development/src/taskq/models/api_key.py                                                19      0   100%
 03-development/src/taskq/models/base.py                                                    4      0   100%
-03-development/src/taskq/models/task.py                                                   22      1    95%   21
+03-development/src/taskq/models/task.py                                                   21      0   100%
 03-development/src/taskq/models/task_result.py                                            24      0   100%
 03-development/src/taskq/repository/__init__.py                                            0      0   100%
 03-development/src/taskq/repository/keys.py                                               46      0   100%
@@ -63,17 +63,17 @@ Name                                                                            
 03-development/src/taskq/service/runner.py                                                87      0   100%
 03-development/src/taskq/service/tasks.py                                                 36      0   100%
 --------------------------------------------------------------------------------------------------------------------
-TOTAL                                                                                   1280      1    99%
+TOTAL                                                                                   1279      0   100%
 
------------------------------------------------------- benchmark: 1 tests -----------------------------------------------------
-Name (time in us)                Min       Max      Mean   StdDev    Median     IQR  Outliers  OPS (Kops/s)  Rounds  Iterations
--------------------------------------------------------------------------------------------------------------------------------
-test_bench_list_default     125.5420  576.0410  132.9784  17.9715  129.7910  3.1670    67;159        7.5200    1418           1
--------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------- benchmark: 1 tests -----------------------------------------------------
+Name (time in us)                Min       Max      Mean  StdDev    Median     IQR  Outliers  OPS (Kops/s)  Rounds  Iterations
+------------------------------------------------------------------------------------------------------------------------------
+test_bench_list_default     125.5840  257.5000  131.2639  8.3991  129.5625  2.7920     47;76        7.6182     882           1
+------------------------------------------------------------------------------------------------------------------------------
 
 Legend:
   Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
   OPS: Operations Per Second, computed as 1 / Mean
 =========================== short test summary info ============================
 FAILED 03-development/tests/test_nfr_spec_coverage.py::test_nfr03_ac4_db_failure_readyz_503
-1 failed, 329 passed, 2 deselected, 1 warning in 25.93s
+1 failed, 329 passed, 2 deselected, 1 warning in 26.41s
