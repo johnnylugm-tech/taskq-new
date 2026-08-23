@@ -81,7 +81,7 @@ def compute_refill(
     if now <= last_refill_at:
         return tokens, now
     refilled = (now - last_refill_at) * float(per_sec)
-    if refilled <= 1.0:
+    if refilled <= 0.0:
         return tokens, last_refill_at
     return min(float(burst), tokens + refilled), now
 
