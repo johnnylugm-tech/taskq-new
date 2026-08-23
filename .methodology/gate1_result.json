@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 8,
-  "fr_id": "FR-03",
+  "fr_id": "FR-04",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -16,7 +16,7 @@
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\":\"1.1.409\",\"time\":\"1787520404289\",\"generalDiagnostics\":[],\"summary\":{\"filesAnalyzed\":45,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.237}}",
+      "tool_evidence": "{\"version\":\"1.1.409\",\"time\":\"1787520615925\",\"generalDiagnostics\":[],\"summary\":{\"filesAnalyzed\":45,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.184}}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
@@ -26,16 +26,16 @@
       "tests_passed": 27,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "Coverage (FR-03 source files, --cov-report=term-missing):\nName                                                            Stmts   Miss  Cover   Missing\n--------------------------------------------------------------------------------------------------------------------\n03-development/src/taskq/cli/key_create.py                          26      0   100%\n03-development/src/taskq/models/api_key.py                          19      0   100%\n03-development/src/taskq/repository/keys.py                         46      0   100%\n03-development/src/taskq/service/auth.py                            28      0   100%\n--------------------------------------------------------------------------------------------------------------------\nTOTAL (FR-03 sources)                                              119      0   100%\nPytest: 27 passed in 0.53s (0 failed, 0 skipped). test_fr03.py 17 tests passed; test_fr04.py 10 tests passed. All 6/6 required FR-03 test functions present and passing (test_fr03_ac1_missing_or_invalid_key_returns_401, test_fr03_ac2_key_hash_sha256_64hex_no_plaintext, test_fr03_ac3_compare_digest_constant_time, test_fr03_ac4_create_prints_plaintext_once, test_fr03_ac5_revoked_key_invalid, test_fr03_ac6_healthz_readyz_no_auth).",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-03.txt",
+      "tool_evidence": "============================= test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2, pluggy-1.6.0\nbenchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=1 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)\nrootdir: /Users/johnny/projects/taskq-new\nconfigfile: pyproject.toml\nplugins: cov-7.1.0, hypothesis-6.124.7, anyio-4.14.2\ncollected 27 items\n\n03-development/tests/test_fr04.py ..........                             [ 37%]\n03-development/tests/test_fr03.py .................                      [100%]\n\n============================== 27 passed in 0.40s ==============================",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-04.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-03",
+      "coverage_scope_fr": "FR-04",
       "score_source": "framework"
     },
     "architecture_constraints": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "Import Linter: Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers, fr01-config-errors-independence, fr01-root-independence all KEPT)",
+      "tool_evidence": "[1m=============[0m\n[1mImport Linter[0m\n[1m=============[0m\n[22m[0m\n[1m---------[0m\n[1mContracts[0m\n[1m---------[0m\n[22m[0m\n[1mAnalyzed 44 files, 62 dependencies. [0m\n[1m-----------------------------------[0m\n[22m[0m\n[22mfr01-layers [0m[32m[22mKEPT[0m[33m[22m[0m[22m[0m\n[22mfr01-config-errors-independence [0m[32m[22mKEPT[0m[33m[22m[0m[22m[0m\n[22mfr01-root-independence [0m[32m[22mKEPT[0m[33m[22m[0m[22m[0m\n[22m[0m\n[22mContracts: 3 kept, 0 broken. [0m",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
     }
@@ -85,23 +85,23 @@
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "9ac970c3ce8be96ac803e5d3742c13b594774032ef547746d69101c1040afa4b",
+      "sha256": "398367f8135ca1bb4cbe7c071e5036291f7e6b57f9802a13404785ee1ce59800",
       "bytes": 170,
-      "head": "{\"version\":\"1.1.409\",\"time\":\"1787520404289\",\"generalDiagnostics\":[],\"summary\":{\"filesAnalyzed\":45,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.237}}"
+      "head": "{\"version\":\"1.1.409\",\"time\":\"1787520615925\",\"generalDiagnostics\":[],\"summary\":{\"filesAnalyzed\":45,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.184}}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "a47017c26cc582b7cdce5625d9f1fa02c3950138111028bff63c7f245a6aa4bd",
-      "bytes": 1241,
-      "head": "Coverage (FR-03 source files, --cov-report=term-missing):\nName                                                            Stmts   Miss  Cover   Missing\n--------------------------------------------------------------------------------------------------------------------\n03-development/src/taskq/cli/key_create.py                          26      0   100%\n03-development/src/taskq/models/api_key.py                          19      0   100%\n03-development/src/taskq/repository/keys.py                         46      0   100%\n03-development/src/taskq/service/auth.py                            28      0   100%\n--------------------------------------------------------------------------------------------------------------------\nTOTAL (FR-03 sources)                                              119      0   100%\nPytest: 27 passed in 0.53s (0 failed, 0 skipped). test_fr03.py 17 tests passed; test_fr04.py 10 tests passed. All 6/6 required FR-03 test functions present and passing (test_fr03_ac1_missing_or_invalid_key_returns_401, test_fr03_ac2_key_hash_sha256_64hex_no_plaintext, test_fr03_ac3_compare_digest_constant_time, test_fr03_ac4_create_prints_plaintext_once, test_fr03_ac5_revoked_key_invalid, test_fr03_ac6_healthz_readyz_no_auth)."
+      "sha256": "3a07aa84f91943fc40b2b8daf93a5c865064157fa232a42bf580bc5172b5a078",
+      "bytes": 703,
+      "head": "============================= test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2, pluggy-1.6.0\nbenchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=1 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)\nrootdir: /Users/johnny/projects/taskq-new\nconfigfile: pyproject.toml\nplugins: cov-7.1.0, hypothesis-6.124.7, anyio-4.14.2\ncollected 27 items\n\n03-development/tests/test_fr04.py ..........                             [ 37%]\n03-development/tests/test_fr03.py .................                      [100%]\n\n============================== 27 passed in 0.40s =============================="
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "3e04eb5da8e2009a56728d80e46e2cb502756bc09c40da5d1abe914fbbb30057",
-      "bytes": 159,
-      "head": "Import Linter: Analyzed 44 files, 62 dependencies. Contracts: 3 kept, 0 broken. (fr01-layers, fr01-config-errors-independence, fr01-root-independence all KEPT)"
+      "sha256": "62231c331ca15b54fddea9164f9642f043b5dfacbcc0e6b4baf8a6826d7e70d8",
+      "bytes": 451,
+      "head": "[1m=============[0m\n[1mImport Linter[0m\n[1m=============[0m\n[22m[0m\n[1m---------[0m\n[1mContracts[0m\n[1m---------[0m\n[22m[0m\n[1mAnalyzed 44 files, 62 dependencies. [0m\n[1m-----------------------------------[0m\n[22m[0m\n[22mfr01-layers [0m[32m[22mKEPT[0m[33m[22m[0m[22m[0m\n[22mfr01-config-errors-independence [0m[32m[22mKEPT[0m[33m[22m[0m[22m[0m\n[22mfr01-root-independence [0m[32m[22mKEPT[0m[33m[22m[0m[22m[0m\n[22m[0m\n[22mContracts: 3 kept, 0 broken. [0m"
     }
   },
   "composite_score": 100.0,
