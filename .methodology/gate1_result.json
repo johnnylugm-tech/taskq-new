@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 8,
-  "fr_id": "FR-04",
+  "fr_id": "FR-05",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -9,33 +9,33 @@
     "linting": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "All checks passed!",
+      "tool_evidence": "All checks passed!\n",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/linting_harness.txt"
     },
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\":\"1.1.409\",\"time\":\"1787520615925\",\"generalDiagnostics\":[],\"summary\":{\"filesAnalyzed\":45,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.184}}",
+      "tool_evidence": "{\"version\": \"1.1.409\", \"time\": \"1787520768264\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.189}}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 27,
+      "tests_passed": 38,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "============================= test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2, pluggy-1.6.0\nbenchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=1 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)\nrootdir: /Users/johnny/projects/taskq-new\nconfigfile: pyproject.toml\nplugins: cov-7.1.0, hypothesis-6.124.7, anyio-4.14.2\ncollected 27 items\n\n03-development/tests/test_fr04.py ..........                             [ 37%]\n03-development/tests/test_fr03.py .................                      [100%]\n\n============================== 27 passed in 0.40s ==============================",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-04.txt",
+      "tool_evidence": "collected 38 items\n\ntests/test_fr05.py ..................                                    [ 47%]\ntests/test_fr10.py ....................                                  [100%]\n\n============================== 38 passed in 4.13s ==============================\n",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-05.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-04",
+      "coverage_scope_fr": "FR-05",
       "score_source": "framework"
     },
     "architecture_constraints": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "[1m=============[0m\n[1mImport Linter[0m\n[1m=============[0m\n[22m[0m\n[1m---------[0m\n[1mContracts[0m\n[1m---------[0m\n[22m[0m\n[1mAnalyzed 44 files, 62 dependencies. [0m\n[1m-----------------------------------[0m\n[22m[0m\n[22mfr01-layers [0m[32m[22mKEPT[0m[33m[22m[0m[22m[0m\n[22mfr01-config-errors-independence [0m[32m[22mKEPT[0m[33m[22m[0m[22m[0m\n[22mfr01-root-independence [0m[32m[22mKEPT[0m[33m[22m[0m[22m[0m\n[22m[0m\n[22mContracts: 3 kept, 0 broken. [0m",
+      "tool_evidence": "fr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\n\nContracts: 3 kept, 0 broken.\n",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
     }
@@ -85,23 +85,23 @@
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "398367f8135ca1bb4cbe7c071e5036291f7e6b57f9802a13404785ee1ce59800",
-      "bytes": 170,
-      "head": "{\"version\":\"1.1.409\",\"time\":\"1787520615925\",\"generalDiagnostics\":[],\"summary\":{\"filesAnalyzed\":45,\"errorCount\":0,\"warningCount\":0,\"informationCount\":0,\"timeInSec\":1.184}}"
+      "sha256": "9d4214fee1c0bd22ae0840e194733fda2b7941406a99b96b55caed57ff70bbef",
+      "bytes": 186,
+      "head": "{\"version\": \"1.1.409\", \"time\": \"1787520768264\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.189}}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "3a07aa84f91943fc40b2b8daf93a5c865064157fa232a42bf580bc5172b5a078",
-      "bytes": 703,
-      "head": "============================= test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2, pluggy-1.6.0\nbenchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=1 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)\nrootdir: /Users/johnny/projects/taskq-new\nconfigfile: pyproject.toml\nplugins: cov-7.1.0, hypothesis-6.124.7, anyio-4.14.2\ncollected 27 items\n\n03-development/tests/test_fr04.py ..........                             [ 37%]\n03-development/tests/test_fr03.py .................                      [100%]\n\n============================== 27 passed in 0.40s =============================="
+      "sha256": "cf5d59ce6966afebd65e811bc8a2f77fc0702d57ef44affcf618043ffb42319a",
+      "bytes": 261,
+      "head": "collected 38 items\n\ntests/test_fr05.py ..................                                    [ 47%]\ntests/test_fr10.py ....................                                  [100%]\n\n============================== 38 passed in 4.13s =============================="
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "62231c331ca15b54fddea9164f9642f043b5dfacbcc0e6b4baf8a6826d7e70d8",
-      "bytes": 451,
-      "head": "[1m=============[0m\n[1mImport Linter[0m\n[1m=============[0m\n[22m[0m\n[1m---------[0m\n[1mContracts[0m\n[1m---------[0m\n[22m[0m\n[1mAnalyzed 44 files, 62 dependencies. [0m\n[1m-----------------------------------[0m\n[22m[0m\n[22mfr01-layers [0m[32m[22mKEPT[0m[33m[22m[0m[22m[0m\n[22mfr01-config-errors-independence [0m[32m[22mKEPT[0m[33m[22m[0m[22m[0m\n[22mfr01-root-independence [0m[32m[22mKEPT[0m[33m[22m[0m[22m[0m\n[22m[0m\n[22mContracts: 3 kept, 0 broken. [0m"
+      "sha256": "067e4f177a275eb6ea771f4774ab146c711f9e64ffe673edffb84b159d3b8e05",
+      "bytes": 111,
+      "head": "fr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\n\nContracts: 3 kept, 0 broken."
     }
   },
   "composite_score": 100.0,
