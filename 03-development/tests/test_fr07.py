@@ -996,7 +996,13 @@ def test_v3_downgrade_updates_existing_tasks_row(tmp_path: Path):
 
     Setup:
       - upgrade head (reaches v3 schema: result_json dropped, task_results present)
-      - INSERT a tasks row AND a task_results row with matching task_id
+      - INSERT a tasks row AND a task_results row with matching id
+
+    The downgrade keys on ``task_results.id`` (unique PK) rather than
+    ``task_id`` (not unique across task_results). To exercise the
+    existing-row UPDATE branch the task_results id must match the
+    tasks id — the natural state after a v2 -> v3 upgrade where
+    ``json_extract(result_json, '$.id') == tasks.id``.
 
     Action:
       - downgrade -1 (v3 -> v2) — must hit the
@@ -1026,6 +1032,7 @@ def test_v3_downgrade_updates_existing_tasks_row(tmp_path: Path):
     buf.getvalue()
 
     # 2. Seed BOTH a tasks row AND a matching task_results row.
+    #    ids match so the UPDATE branch fires (see docstring).
     with engine.begin() as conn:
         conn.execute(
             text(
@@ -1046,7 +1053,7 @@ def test_v3_downgrade_updates_existing_tasks_row(tmp_path: Path):
                 ":command, :exit_code, :stdout_tail)"
             ),
             {
-                "id": "tr-existing-1",
+                "id": "existing-task-1",
                 "task_id": "existing-task-1",
                 "command": "echo existing",
                 "exit_code": 0,

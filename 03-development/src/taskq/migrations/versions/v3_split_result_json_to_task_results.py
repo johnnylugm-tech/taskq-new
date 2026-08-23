@@ -15,12 +15,12 @@ FR-07 v3 row; SPEC §8 #12 round-trip acceptance). It performs:
          - ``task_id``         = ``json_extract(result_json, '$.task_id')``
                                  fallback ``tasks.id``
          - ``command``         = ``json_extract(result_json, '$.command')``
-                                 fallback ``''``
+                                 (NULL preserved — column is nullable)
          - ``exit_code``       = ``json_extract(result_json, '$.exit_code')``
-                                 fallback ``0``
+                                 (NULL preserved — column is nullable)
          - ``stdout_tail``     = ``json_extract(result_json, '$.stdout_tail')``
                                  fallback ``json_extract(result_json, '$.stdout')``
-                                 fallback ``''``
+                                 (NULL preserved — column is nullable)
 
        The data extraction uses ``op.execute`` (raw SQL) rather than
        ``op.get_bind().execute`` so the offline-SQL emission path
@@ -84,12 +84,11 @@ _INSERT_FROM_TASKS_SQL = (
     "SELECT "
     "  COALESCE(json_extract(tasks.result_json, '$.id'), tasks.id || '-result') AS id, "
     "  COALESCE(json_extract(tasks.result_json, '$.task_id'), tasks.id) AS task_id, "
-    "  COALESCE(json_extract(tasks.result_json, '$.command'), '') AS command, "
-    "  COALESCE(json_extract(tasks.result_json, '$.exit_code'), 0) AS exit_code, "
+    "  json_extract(tasks.result_json, '$.command') AS command, "
+    "  json_extract(tasks.result_json, '$.exit_code') AS exit_code, "
     "  COALESCE("
     "    json_extract(tasks.result_json, '$.stdout_tail'), "
-    "    json_extract(tasks.result_json, '$.stdout'), "
-    "    ''"
+    "    json_extract(tasks.result_json, '$.stdout')"
     "  ) AS stdout_tail "
     "FROM tasks "
     "WHERE tasks.result_json IS NOT NULL"
@@ -224,10 +223,14 @@ def downgrade() -> None:
     ).fetchall()
     for row in rows:
         payload = _serialize_task_result_to_json(row)
-        if _task_row_exists(bind, row.task_id):
-            _update_task_result_json(bind, row.task_id, payload)
+        # Key on ``row.id`` (task_results PK, unique) rather than
+        # ``row.task_id`` (not unique — multiple task_results may share
+        # one task_id). Keying on task_id would collapse N rows into
+        # one tasks row, breaking the round-trip bijection.
+        if _task_row_exists(bind, row.id):
+            _update_task_result_json(bind, row.id, payload)
         else:
-            _back_create_task_row(bind, row.task_id, row.command, payload)
+            _back_create_task_row(bind, row.id, row.command, payload)
 
     # 3. Drop task_results.
     op.drop_table("task_results")

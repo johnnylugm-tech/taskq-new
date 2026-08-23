@@ -6,7 +6,6 @@ migrations module is reachable from the integration/ subdirectory.
 """
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 

@@ -67,7 +67,7 @@ def test_env_float_helper():
 
 def test_async_executor_submit_in_process():
     """AsyncExecutor.submit enqueues a task and run_until_drained completes it."""
-    from taskq.service.runner import AsyncExecutor, STATUS_DRAINED
+    from taskq.service.runner import AsyncExecutor
     async def _drive():
         exe = AsyncExecutor(max_concurrent=2, drain_timeout=5.0, task_timeout=5.0)
         # submit() takes task_id + command. It schedules subprocess execution.
