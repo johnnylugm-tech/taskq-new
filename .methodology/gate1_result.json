@@ -1,7 +1,7 @@
 {
   "gate": 1,
   "phase": 5,
-  "fr_id": "FR-10",
+  "fr_id": "FR-99",
   "overall_score": 100.0,
   "quality_complete": true,
   "rounds_used": 1,
@@ -9,33 +9,33 @@
     "linting": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "All checks passed!",
+      "tool_evidence": "All checks passed!\n",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/linting_harness.txt"
     },
     "type_safety": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "{\"version\": \"1.1.409\", \"time\": \"1787510568184\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.187}}",
+      "tool_evidence": "{\n    \"version\": \"1.1.409\",\n    \"time\": \"1787510726009\",\n    \"generalDiagnostics\": [],\n    \"summary\": {\n        \"filesAnalyzed\": 45,\n        \"errorCount\": 0,\n        \"warningCount\": 0,\n        \"informationCount\": 0,\n        \"timeInSec\": 1.191\n    }\n}",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/type_safety_harness.txt"
     },
     "test_coverage": {
       "score": 100.0,
       "threshold": 100,
-      "tests_passed": 62,
+      "tests_passed": 2,
       "tests_failed": 0,
       "tests_skipped": 0,
-      "tool_evidence": "03-development/tests/test_fr10.py ....................                   [ 32%]\n03-development/tests/test_fr01.py ........................               [ 70%]\n03-development/tests/test_fr05.py ..................                     [100%]\n============================== 62 passed in 4.20s ==============================\nCoverage: 100% on taskq/api/middleware.py and taskq/api/schemas.py (124/124 statements). 12/12 FR-10 required test functions present and passing.",
-      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-10.txt",
+      "tool_evidence": "============================= test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2, pluggy-1.6.0\nbenchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_time=1.0 calibration_precision=3 warmup=False warmup_iterations=100000)\nrootdir: /Users/johnny/projects/taskq-new\nconfigfile: pyproject.toml\nplugins: cov-7.1.0, hypothesis-6.124.7\ncollected 2 items\n\n03-development/tests/test_fr99.py ..                                     [100%]\n\n============================== 2 passed in 0.14s ===============================",
+      "tool_output": ".methodology/gate_evidence/harness_verification/test_coverage_harness_per_fr_FR-99.txt",
       "coverage_scope": "per_fr",
-      "coverage_scope_fr": "FR-10",
+      "coverage_scope_fr": "FR-99",
       "score_source": "framework"
     },
     "architecture_constraints": {
       "score": 100.0,
       "threshold": 100,
-      "tool_evidence": "Analyzed 44 files, 62 dependencies.\n\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\n\nContracts: 3 kept, 0 broken.",
+      "tool_evidence": "=============\nImport Linter\n=============\n\n---------\nContracts\n---------\n\nAnalyzed 44 files, 62 dependencies.\n-----------------------------------\n\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\n\nContracts: 3 kept, 0 broken.",
       "score_source": "framework",
       "tool_output": ".methodology/gate_evidence/harness_verification/architecture_constraints_harness.txt"
     }
@@ -85,23 +85,23 @@
     "type_safety": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "ea83960000cddee9a2b6afadbb85e5eb1e33e7dbfafafa7f7bac80cc91eaa777",
-      "bytes": 186,
-      "head": "{\"version\": \"1.1.409\", \"time\": \"1787510568184\", \"generalDiagnostics\": [], \"summary\": {\"filesAnalyzed\": 45, \"errorCount\": 0, \"warningCount\": 0, \"informationCount\": 0, \"timeInSec\": 1.187}}"
+      "sha256": "265d5895d0a8221655842d10a1b84b6e3482de0b8b5ca30634efd6fc37f7574e",
+      "bytes": 250,
+      "head": "{\n    \"version\": \"1.1.409\",\n    \"time\": \"1787510726009\",\n    \"generalDiagnostics\": [],\n    \"summary\": {\n        \"filesAnalyzed\": 45,\n        \"errorCount\": 0,\n        \"warningCount\": 0,\n        \"informationCount\": 0,\n        \"timeInSec\": 1.191\n    }\n}"
     },
     "test_coverage": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "1f3f6c4b1f357746c9a474c7922869057f02811693d4f5886e95539ab2935afa",
-      "bytes": 466,
-      "head": "03-development/tests/test_fr10.py ....................                   [ 32%]\n03-development/tests/test_fr01.py ........................               [ 70%]\n03-development/tests/test_fr05.py ..................                     [100%]\n============================== 62 passed in 4.20s ==============================\nCoverage: 100% on taskq/api/middleware.py and taskq/api/schemas.py (124/124 statements). 12/12 FR-10 required test functions present and passing."
+      "sha256": "2ea123c1f6c5cf1b4e1543d11dd8d84fbe73909d7c3aded21b696fbc2a5d38b4",
+      "bytes": 576,
+      "head": "============================= test session starts ==============================\nplatform darwin -- Python 3.11.15, pytest-8.4.2, pluggy-1.6.0\nbenchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_time=1.0 calibration_precision=3 warmup=False warmup_iterations=100000)\nrootdir: /Users/johnny/projects/taskq-new\nconfigfile: pyproject.toml\nplugins: cov-7.1.0, hypothesis-6.124.7\ncollected 2 items\n\n03-development/tests/test_fr99.py ..                                     [100%]\n\n============================== 2 passed in 0.14s ==============================="
     },
     "architecture_constraints": {
       "source": "tool_evidence (inline)",
       "kind": "inline",
-      "sha256": "2cb49bf037a63b53dec51514b7814c34331a32004c3ba429a901802ada51f64a",
-      "bytes": 148,
-      "head": "Analyzed 44 files, 62 dependencies.\n\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\n\nContracts: 3 kept, 0 broken."
+      "sha256": "330a334bea95645fe0df875a7d0c25d64378b7c4d24887cf2434355c58889334",
+      "bytes": 258,
+      "head": "=============\nImport Linter\n=============\n\n---------\nContracts\n---------\n\nAnalyzed 44 files, 62 dependencies.\n-----------------------------------\n\nfr01-layers KEPT\nfr01-config-errors-independence KEPT\nfr01-root-independence KEPT\n\nContracts: 3 kept, 0 broken."
     }
   },
   "composite_score": 100.0,
